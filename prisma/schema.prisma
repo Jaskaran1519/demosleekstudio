@@ -1,0 +1,268 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  // Setup for Vercel deployments
+  binaryTargets   = ["native", "rhel-openssl-1.0.x"]
+  output          = "../node_modules/.prisma/client"
+  // Remove previewFeatures for MongoDB which doesn't need referential integrity
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  name           String?
+  email          String    @unique
+  emailVerified  DateTime?
+  image          String?
+  hashedPassword String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  role           Role      @default(USER)
+
+  accounts       Account[]
+  addresses      Address[]
+  orders         Order[]
+  reviews        Review[]
+  wishlist       Product[] @relation(fields: [wishlistIds], references: [id])
+  wishlistIds    String[]  @db.ObjectId
+  couponUsages   CouponUsage[]
+}
+
+model Account {
+  id                String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String  @db.ObjectId
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.String
+  access_token      String? @db.String
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.String
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Address {
+  id           String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String  @db.ObjectId
+  name         String
+  addressLine1 String
+  addressLine2 String?
+  city         String
+  state        String
+  postalCode   String
+  country      String
+  isDefault    Boolean @default(false)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum Category {
+  MEN
+  WOMEN
+  KIDS
+}
+
+enum ClothType {
+  BLAZER
+  COAT
+  SHIRT
+  SUIT
+  TUXEDO
+  PANTS
+  JEANS
+  DRESS
+  SKIRT
+  SWEATER
+  JACKET
+  VEST
+  SHORTS
+  HOODIE
+  T_SHIRT
+  POLO
+  TANK_TOP
+  CARDIGAN
+  BLOUSE
+  TOP
+  LEGGINGS
+  JUMPSUIT
+  ROMPER
+  BODYSUIT
+  SWIMWEAR
+  UNDERWEAR
+  SOCKS
+  ACCESSORIES
+}
+
+model Product {
+  id             String     @id @default(auto()) @map("_id") @db.ObjectId
+  name           String
+  description    String
+  slug           String     @unique
+  price          Float
+  salePrice      Float?
+  inventory      Int        @default(0)
+  noBgImage      String
+  modelImage     String
+  images         String[]
+  category       Category   // Changed to enum
+  clothType      ClothType  // New field
+  colors         String[]   @default([]) // Array of hex color codes
+  tags           String[]   @default([])
+  sizes          String[]
+  customisations Json?
+  timesSold      Int        @default(0)
+  isActive       Boolean    @default(true)
+  homePageFeatured Boolean  @default(false)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  orderItems     OrderItem[]
+  reviews        Review[]
+  wishedBy       User[]     @relation(fields: [wishedByIds], references: [id])
+  wishedByIds    String[]   @db.ObjectId
+}
+
+model Order {
+  id                String      @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String      @db.ObjectId
+  status            OrderStatus @default(PENDING)
+  total             Float
+  subtotal          Float
+  tax               Float
+  shipping          Float
+  shippingAddressId String      @db.ObjectId
+  paymentIntent     String?
+  paymentStatus     String?
+  couponId          String?     @db.ObjectId
+  couponCode        String?     // Store the code for reference even if coupon is deleted
+  discountAmount    Float?      // Amount saved by the coupon
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  user              User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items             OrderItem[]
+  coupon            Coupon?     @relation(fields: [couponId], references: [id])
+  couponUsage       CouponUsage?
+}
+
+model OrderItem {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  orderId    String   @db.ObjectId
+  productId  String   @db.ObjectId
+  quantity   Int
+  price      Float
+  size       String?
+  color      String?
+  totalPrice Float
+  createdAt  DateTime @default(now())
+
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model Review {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  productId String   @db.ObjectId
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model PageContent {
+  id          String        @id @default(auto()) @map("_id") @db.ObjectId
+  largePoster String        // URL for large poster image
+  smallPoster String?       // URL for small poster image (optional)
+  link        String        // Link destination when clicked
+  category    ContentType   // Which page this content belongs to (home, men, women, children)
+  title       String?       // Optional title text for the content
+  description String?       // Optional description text
+  isActive    Boolean       @default(true)
+  priority    Int           @default(0) // For ordering content (higher numbers appear first)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model Coupon {
+  id                String          @id @default(auto()) @map("_id") @db.ObjectId
+  code              String          @unique
+  name              String
+  description       String?
+  discountType      DiscountType
+  discountValue     Float           // Percentage or fixed amount
+  minimumPurchase   Float?          // Minimum order value required
+  maximumDiscount   Float?          // Maximum discount amount (for percentage discounts)
+  isActive          Boolean         @default(true)
+  startDate         DateTime        @default(now())
+  endDate           DateTime?       // Optional end date
+  timesUsed         Int             @default(0)
+  maxUsage          Int?            // Total number of times this coupon can be used
+  maxUsagePerUser   Int?            // Max times a single user can use this coupon
+  productCategories String[]        // Categories this coupon applies to
+  applicableUserIds String[]        @db.ObjectId // Specific users who can use this coupon (if empty, all users)
+  excludedUserIds   String[]        @db.ObjectId // Users who cannot use this coupon
+  excludedProducts  String[]        @db.ObjectId // Product IDs that are excluded from the discount
+  isSingleUse       Boolean         @default(false) // If true, a user can only use once
+  isFirstTimeOnly   Boolean         @default(false) // If true, only for a user's first order
+  createdByUserId   String?         @db.ObjectId // Admin who created the coupon
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  
+  orders            Order[]
+  usages            CouponUsage[]
+}
+
+model CouponUsage {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  couponId  String   @db.ObjectId
+  orderId   String   @db.ObjectId @unique
+  usedAt    DateTime @default(now())
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  coupon    Coupon   @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, orderId])
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum ContentType {
+  HOME
+  MEN
+  WOMEN
+  CHILDREN
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED_AMOUNT
+} 
