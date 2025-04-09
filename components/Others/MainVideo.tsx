@@ -12,7 +12,7 @@ export const MainVideo: React.FC<MainVideoProps> = ({
   return (
     <div className={`w-full ${className}`}>
       {/* Container with different aspect ratios for mobile/desktop */}
-      <div className="relative w-full md:aspect-video aspect-9/16 overflow-hidden">
+      <div className="relative w-full aspect-[9/16] sm:aspect-[3/4] md:aspect-video overflow-hidden">
         <video
           className="absolute inset-0 w-full h-full object-cover"
           src={videoUrl}
