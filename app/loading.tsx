@@ -2,13 +2,18 @@ import React from 'react';
 
 const Loader = () => {
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/50">
-      <div className="w-32 aspect-square rounded-full relative flex justify-center items-center animate-[spin_3s_linear_infinite] z-40 bg-[conic-gradient(white_0deg,white_300deg,transparent_270deg,transparent_360deg)] before:animate-[spin_2s_linear_infinite] before:absolute before:w-[60%] before:aspect-square before:rounded-full before:z-[80] before:bg-[conic-gradient(white_0deg,white_270deg,transparent_180deg,transparent_360deg)] after:absolute after:w-3/4 after:aspect-square after:rounded-full after:z-[60] after:animate-[spin_3s_linear_infinite] after:bg-[conic-gradient(#065f46_0deg,#065f46_180deg,transparent_180deg,transparent_360deg)]">
-        <span className="absolute w-[85%] aspect-square rounded-full z-[60] animate-[spin_5s_linear_infinite] bg-[conic-gradient(#34d399_0deg,#34d399_180deg,transparent_180deg,transparent_360deg)]">
-        </span>
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center">
+      {/* Fullscreen white background layer */}
+      <div className="absolute inset-0 bg-white z-[1]" />
+
+      {/* Loader animation wrapper */}
+      <div className="relative z-[2] w-32 aspect-square rounded-full flex justify-center items-center animate-[spin_3s_linear_infinite] bg-[conic-gradient(black_0deg,black_300deg,transparent_270deg,transparent_360deg)]">
+        <div className="absolute w-[60%] aspect-square rounded-full animate-[spin_2s_linear_infinite] z-[3] bg-[conic-gradient(black_0deg,black_270deg,transparent_180deg,transparent_360deg)]" />
+        <div className="absolute w-3/4 aspect-square rounded-full animate-[spin_3s_linear_infinite] z-[2] bg-[conic-gradient(gray_0deg,gray_180deg,transparent_180deg,transparent_360deg)]" />
+        <span className="absolute w-[85%] aspect-square rounded-full animate-[spin_5s_linear_infinite] z-[4] bg-[conic-gradient(black_0deg,black_180deg,transparent_180deg,transparent_360deg)]"></span>
       </div>
     </div>
   );
-}
+};
 
-export default Loader; 
+export default Loader;
