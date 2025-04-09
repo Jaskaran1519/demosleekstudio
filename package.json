@@ -54,13 +54,14 @@
     "zustand": "^5.0.3"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
     "@types/bcrypt": "^5.0.2",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "autoprefixer": "^10.4.17",
+    "postcss": "^8.4.35",
     "prisma": "^6.5.0",
-    "tailwindcss": "^4",
+    "tailwindcss": "^3.4.1",
     "typescript": "^5"
   }
 }
