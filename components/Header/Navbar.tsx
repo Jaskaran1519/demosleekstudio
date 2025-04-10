@@ -71,7 +71,7 @@ const Navbar = () => {
       {/* Center section - takes 1/3 width */}
       <div className='flex w-1/3 justify-center gap-2 items-center'>
         <Image src="/logo.svg" alt="logo" width={40} height={40} className='w-12 h-12 md:w-8 md:h-8' />
-        <h1 className='text-2xl font-bold hidden md:flex'>Sleek Studio</h1>
+        <h1 className='text-2xl  hidden md:flex'>SLEEK STUDIO</h1>
       </div>
       
       {/* Right section - takes 1/3 width */}

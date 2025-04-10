@@ -35,10 +35,17 @@ export default function LightweightMobileMenu({scrolled, shouldBeFixed}: {scroll
       {/* Menu Button */}
       <button 
         onClick={() => setIsOpen(true)} 
-        className="p-2 text-foreground focus:outline-none cursor-pointer" 
+        className="p-2 focus:outline-none cursor-pointer" 
         aria-label="Open menu"
       >
-        <Menu size={24} className='text-black' />
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 18" width="50" height="18" fill="currentColor">
+  <title>Custom Menu Icon (Left-Aligned)</title>
+  
+  <rect x="0" y="0" width="44" height="3" rx="1" ry="1"/> 
+  
+  <rect x="0" y="14" width="30" height="3" rx="1" ry="1"/> 
+
+</svg>
       </button>
       
       {/* Overlay */}
@@ -59,7 +66,7 @@ export default function LightweightMobileMenu({scrolled, shouldBeFixed}: {scroll
       >
         {/* Menu Header */}
         <div className="p-4 border-b flex justify-between items-center bg-white">
-          <h2 className="text-xl font-bold">Sleek Studio</h2>
+          <h2 className="text-xl">SLEEK STUDIO</h2>
           <button 
             onClick={() => setIsOpen(false)} 
             className="p-2 text-foreground focus:outline-none"

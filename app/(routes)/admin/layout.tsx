@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getAuthSession } from "@/lib/auth";
+import { adminFont } from "@/app/fonts";
 
 export default async function AdminLayout({
   children,
@@ -14,7 +15,7 @@ export default async function AdminLayout({
   }
   
   return (
-    <div className="admin-layout">
+    <div className={`${adminFont.className} admin-layout`}>
       {children}
     </div>
   );

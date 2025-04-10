@@ -271,10 +271,10 @@ export default function ProductsPage() {
         {/* Header with search and mobile filters */}
         <div>
           <div className="flex items-center justify-between mb-4">
-            <Heading 
-              title="Our Collection" 
-              description="Explore our collection of premium clothing"
-            />
+          <div>
+            <h2 className="text-3xl md:text-4xl font-bold mb-1">Our Collection</h2>
+            <p className="text-muted-foreground">Explore our collection of premium clothing</p>
+          </div>
             <MobileFilters 
               categories={categories}
               clothTypes={clothTypes}
