@@ -8,7 +8,6 @@ import useWishlist from '@/store/useWishlist';
 import ProductCard from '@/components/Others/ProductCard';
 import { Button } from '@/components/ui/button';
 import { Trash2 } from 'lucide-react';
-import { Category, ClothType } from '@prisma/client';
 
 export default function Page() {
   const { items, removeItem } = useWishlist();
@@ -50,8 +49,8 @@ export default function Page() {
                   noBgImage: item.image,
                   modelImage: item.image,
                   images: [item.image],
-                  category: Category.MEN,
-                  clothType: ClothType.T_SHIRT,
+                  category: item.category,
+                  clothType: item.clothType,
                   description: '',
                   isActive: true,
                   inventory: 0,

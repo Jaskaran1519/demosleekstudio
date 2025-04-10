@@ -6,6 +6,7 @@ import { Product } from "@/types";
 import { X, Heart, Edit } from "lucide-react";
 import useWishlist from "@/store/useWishlist";
 import { toast } from "sonner";
+import { Category as PrismaCategory, ClothType as PrimeClothType } from "@prisma/client";
 
 interface ProductImagesProps {
   product: Product;
@@ -33,8 +34,10 @@ export const ProductImages = ({ product }: ProductImagesProps) => {
         productId: product.id,
         slug: product.slug,
         name: product.name,
-        price: product.salePrice || product.price,
+        price: product.price,
         image: product.noBgImage,
+        category: product.category as PrismaCategory,
+        clothType: product.clothType as PrimeClothType
       });
       toast.success("Added to wishlist");
     }

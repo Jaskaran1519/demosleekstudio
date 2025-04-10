@@ -41,15 +41,12 @@ const productSchema = z.object({
 export async function GET(request: NextRequest) {
   try {
     const url = new URL(request.url);
-    const queryParams = Object.fromEntries(url.searchParams.entries());
-    
-    // Debug: log all query parameters
-    console.log("Query params:", queryParams);
+    const queryParams: any = {};
     
     // Handle multiple cloth types (appears as clothType=SHIRT&clothType=COAT in the URL)
     const clothTypeParams = url.searchParams.getAll("clothType");
     if (clothTypeParams.length > 0) {
-      queryParams.clothType = clothTypeParams.join(',');
+      queryParams.clothType = clothTypeParams;
     }
     
     // Handle multiple categories (appears as category=MEN&category=WOMEN in the URL)
@@ -57,6 +54,25 @@ export async function GET(request: NextRequest) {
     if (categoryParams.length > 0) {
       queryParams.category = categoryParams;
     }
+    
+    // Add other query parameters
+    const search = url.searchParams.get("search");
+    if (search) queryParams.search = search;
+    
+    const sort = url.searchParams.get("sort");
+    if (sort) queryParams.sort = sort;
+    
+    const page = url.searchParams.get("page");
+    if (page) queryParams.page = page;
+    
+    const pageSize = url.searchParams.get("pageSize");
+    if (pageSize) queryParams.pageSize = pageSize;
+    
+    const skip = url.searchParams.get("skip");
+    if (skip) queryParams.skip = skip;
+    
+    // Debug: log all query parameters
+    console.log("Query params:", queryParams);
     
     // Parse and validate query parameters
     const parsed = productsQuerySchema.safeParse(queryParams);
@@ -69,10 +85,10 @@ export async function GET(request: NextRequest) {
       );
     }
     
-    const { search, category, clothType, sort, page, pageSize, skip } = parsed.data;
+    const { search: querySearch, category, clothType, sort: querySort, page: queryPage, pageSize: queryPageSize, skip: querySkip } = parsed.data;
     
     // Debug: log parsed search term
-    console.log("Search term:", search);
+    console.log("Search term:", querySearch);
     
     // Build query filters
     const where: any = { isActive: true };
@@ -85,24 +101,24 @@ export async function GET(request: NextRequest) {
     
     if (clothType) {
       where.clothType = {
-        in: Array.isArray(clothType) ? clothType : [clothType],
+        in: Array.isArray(clothType) ? clothType : [clothType]
       };
     }
     
-    if (search) {
+    if (querySearch) {
       // Simplify the search to focus on the two most important fields
       where.OR = [
         // Search in name with case-insensitive contains
         { 
           name: { 
-            contains: search,
+            contains: querySearch,
             mode: "insensitive"
           } 
         },
         // Search in description with case-insensitive contains
         { 
           description: { 
-            contains: search,
+            contains: querySearch,
             mode: "insensitive"
           } 
         }
@@ -110,7 +126,7 @@ export async function GET(request: NextRequest) {
       ];
       
       // Debug specific search behavior
-      console.log("Using search query:", search);
+      console.log("Using search query:", querySearch);
       console.log("With search filter:", JSON.stringify(where.OR, null, 2));
     }
     
@@ -120,23 +136,23 @@ export async function GET(request: NextRequest) {
     // Determine sort order
     let orderBy: any = { createdAt: "desc" };
     
-    if (sort === "price-asc") {
+    if (querySort === "price-asc") {
       orderBy = { price: "asc" };
-    } else if (sort === "price-desc") {
+    } else if (querySort === "price-desc") {
       orderBy = { price: "desc" };
-    } else if (sort === "popularity") {
+    } else if (querySort === "popularity") {
       orderBy = { timesSold: "desc" };
     }
     
     // For infinite scrolling, use skip if provided
-    const skipAmount = skip !== undefined ? skip : (page - 1) * pageSize;
+    const skipAmount = querySkip !== undefined ? querySkip : (queryPage - 1) * queryPageSize;
     
     // Fetch products with pagination
     const products = await db.product.findMany({
       where,
       orderBy,
       skip: skipAmount,
-      take: pageSize,
+      take: queryPageSize,
     });
     
     // Debug: log products found
@@ -149,9 +165,9 @@ export async function GET(request: NextRequest) {
       products,
       totalCount,
       hasMore: skipAmount + products.length < totalCount,
-      page,
-      pageSize,
-      totalPages: Math.ceil(totalCount / pageSize),
+      page: queryPage,
+      pageSize: queryPageSize,
+      totalPages: Math.ceil(totalCount / queryPageSize),
     });
   } catch (error) {
     console.error("Error fetching products:", error);

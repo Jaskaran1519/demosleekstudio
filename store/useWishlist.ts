@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { Category as PrismaCategory, ClothType as PrimeClothType } from "@prisma/client";
 
 export type WishlistItem = {
   id: string;
@@ -8,6 +9,8 @@ export type WishlistItem = {
   name: string;
   price: number;
   image: string;
+  category: PrismaCategory;
+  clothType: PrimeClothType;
 };
 
 interface WishlistStore {

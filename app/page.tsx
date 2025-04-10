@@ -11,7 +11,7 @@ import FeaturedProductsContent from '@/components/Hero/FeaturedProductsContent'
 import BespokeTailoring from '@/components/Hero/Bespoke'
 const Page = () => {
   return (
-    <div className='w-full max-w-[2400px]'>
+    <div className='w-full max-w-[2000px] mx-auto'>
       <MainVideo videoUrl = "https://res.cloudinary.com/dk6z5ui4f/video/upload/v1743748072/1-Hero-DSK_hua8cn.mp4" />
       {/* <CarouselDemo/> */}
       <VelocityScroll>Sleek Studio</VelocityScroll>
