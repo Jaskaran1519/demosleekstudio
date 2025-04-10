@@ -214,7 +214,7 @@ export function ProductsFilters({
                     />
                     <label 
                       htmlFor={`category-${category}`}
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                      className="text-md lg:text-lg font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                     >
                       {formatDisplayName(category)}
                     </label>

@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
     // Handle multiple categories (appears as category=MEN&category=WOMEN in the URL)
     const categoryParams = url.searchParams.getAll("category");
     if (categoryParams.length > 0) {
-      queryParams.category = categoryParams.join(',');
+      queryParams.category = categoryParams;
     }
     
     // Parse and validate query parameters
@@ -78,9 +78,9 @@ export async function GET(request: NextRequest) {
     const where: any = { isActive: true };
     
     if (category) {
-      where.category = Array.isArray(category) 
-        ? { in: category }
-        : category;
+      where.category = {
+        in: Array.isArray(category) ? category : [category]
+      };
     }
     
     if (clothType) {

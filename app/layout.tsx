@@ -26,7 +26,7 @@ export default function RootLayout({
     <html lang="en">
       <AuthProvider>   
       <body
-        className={`${geistSans.className} antialiased `}
+        className={`${geistSans.className} antialiased mx-auto `}
         >
           <SmoothScroll>
            <ScrollProgress className="top-0" />
