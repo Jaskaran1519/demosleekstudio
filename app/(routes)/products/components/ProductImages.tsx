@@ -87,7 +87,7 @@ export const ProductImages = ({ product }: ProductImagesProps) => {
             <button
               key={index}
               onClick={() => setSelectedImage(image)}
-              className="relative w-64 md:w-80 lg:w-96 xl:w-104 flex-shrink-0 aspect-[4/5] rounded-lg overflow-hidden"
+              className="relative w-64 md:w-80 lg:w-96 xl:w-104 xxl:w-200 flex-shrink-0 aspect-[4/5] rounded-lg overflow-hidden"
             >
               <Image
                 src={image}
