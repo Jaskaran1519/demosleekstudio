@@ -34,6 +34,19 @@ export async function getUserById(userId: string) {
             createdAt: "desc",
           },
           take: 5,
+          include: {
+            items: {
+              include: {
+                product: {
+                  select: {
+                    id: true,
+                    name: true,
+                    images: true,
+                  }
+                }
+              }
+            }
+          }
         },
       },
     });
