@@ -20,6 +20,8 @@ export async function GET(
       return new NextResponse("Order ID is required", { status: 400 });
     }
 
+    console.log(`[ORDER_GET] Fetching order: ${orderId}`);
+
     const order = await db.order.findUnique({
       where: {
         id: orderId,
@@ -35,8 +37,11 @@ export async function GET(
     });
 
     if (!order) {
+      console.log(`[ORDER_GET] Order not found: ${orderId}`);
       return new NextResponse("Order not found", { status: 404 });
     }
+
+    console.log(`[ORDER_GET] Order found with ${order.items.length} items`);
 
     // Get the shipping address
     const address = await db.address.findUnique({

@@ -5,6 +5,10 @@ import crypto from "crypto";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
+    
+    // Log the full webhook payload
+    console.log("[RAZORPAY_WEBHOOK] Received webhook:", JSON.stringify(body, null, 2));
+    
     const { payload } = body;
     const razorpaySignature = req.headers.get("x-razorpay-signature") || "";
     
@@ -44,6 +48,7 @@ export async function POST(req: NextRequest) {
       const amount = payload.payment.entity.amount / 100; // Convert paise to INR
       
       console.log(`[RAZORPAY_WEBHOOK] Payment ${paymentId} for order ${orderId} amount ${amount}`);
+      console.log(`[RAZORPAY_WEBHOOK] Payment details: ${JSON.stringify(payload.payment.entity, null, 2)}`);
       
       // Update the order status
       const order = await db.order.findFirst({
@@ -89,6 +94,8 @@ export async function POST(req: NextRequest) {
           where: { orderId: order.id },
           include: { product: true }
         });
+        
+        console.log(`[RAZORPAY_WEBHOOK] Order items found: ${orderItems.length}`);
         
         for (const item of orderItems) {
           await db.product.update({

@@ -76,6 +76,8 @@ export async function POST(req: NextRequest) {
     });
 
     // Create order in database with PENDING status
+    console.log("[ORDER_CREATE] Cart items:", JSON.stringify(items));
+    
     const order = await db.order.create({
       data: {
         userId: session.user.id,
@@ -90,19 +92,22 @@ export async function POST(req: NextRequest) {
         couponCode: validatedCoupon?.code,
         discountAmount: discountAmount || 0,
         items: {
-          create: items
-            .filter((item: any) => !item.id.includes('-')) // Filter out items with UUID format
-            .map((item: any) => ({
-              productId: item.id,
+          create: items.map((item: any) => {
+            console.log(`[ORDER_CREATE] Processing item: ${item.productId || item.id} (${item.name || 'unnamed'})`);
+            return {
+              productId: item.productId || item.id,
               quantity: item.quantity,
               price: item.price,
               size: item.size,
               color: item.color,
               totalPrice: item.price * item.quantity
-            }))
+            };
+          })
         }
       }
     });
+    
+    console.log(`[ORDER_CREATE] Order created: ${order.id} with items`);
 
     // If coupon was used, increment the timesUsed counter
     if (validatedCoupon) {
