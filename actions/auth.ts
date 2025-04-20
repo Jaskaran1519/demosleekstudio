@@ -16,6 +16,7 @@ export async function currentUser() {
     }
     
     // Get the full user data from the database using email
+    // This is more reliable than using ID, especially with Google auth
     const user = await db.user.findUnique({
       where: { email: session.user.email },
       select: {

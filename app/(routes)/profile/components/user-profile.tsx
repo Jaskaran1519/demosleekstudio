@@ -1,7 +1,9 @@
 'use client'
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { signOut } from "next-auth/react";
 import Image from "next/image";
+import { ProfileSkeleton } from "./skeletons";
 
 interface UserProfileProps {
   user: {
@@ -15,6 +17,21 @@ interface UserProfileProps {
 }
 
 export function UserProfile({ user }: UserProfileProps) {
+  const [isLoading, setIsLoading] = useState(true);
+  
+  useEffect(() => {
+    // Simulate loading to ensure smooth transition
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 300);
+    
+    return () => clearTimeout(timer);
+  }, []);
+  
+  if (isLoading) {
+    return <ProfileSkeleton />;
+  }
+
   const formattedDate = new Date(user.createdAt).toLocaleDateString('en-US', {
     year: 'numeric',
     month: '2-digit',

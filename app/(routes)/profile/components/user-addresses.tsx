@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { AddressCard } from "@/components/address-card";
 import { toast } from "sonner";
+import { AddressesSkeleton } from "./skeletons";
 
 interface Address {
   id: string;
@@ -34,24 +35,44 @@ const defaultAddressForm = {
   isDefault: false,
 };
 
-export function UserAddresses({ userId }: { userId: string }) {
-  const [addresses, setAddresses] = useState<Address[]>([]);
+export function UserAddresses({ userId, addresses: initialAddresses = [] }: { userId: string, addresses?: any }) {
+  const [addresses, setAddresses] = useState<Address[]>(Array.isArray(initialAddresses) ? initialAddresses : []);
+  const [isLoading, setIsLoading] = useState(initialAddresses.length === 0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [addressForm, setAddressForm] = useState(defaultAddressForm);
 
   useEffect(() => {
-    fetchAddresses();
+    let isMounted = true;
+    
+    // Only fetch addresses if there are none initially provided
+    if (addresses.length === 0) {
+      fetchAddresses(isMounted);
+    } else {
+      setIsLoading(false); // Use pre-loaded addresses
+    }
+    
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  const fetchAddresses = async () => {
+  const fetchAddresses = async (isMounted = true) => {
     try {
+      setIsLoading(true);
       const response = await fetch("/api/addresses");
       const data = await response.json();
-      setAddresses(data);
+      if (isMounted) {
+        setAddresses(Array.isArray(data) ? data : []);
+      }
     } catch (error) {
       console.error("Error fetching addresses:", error);
       toast.error("Failed to load addresses");
+    } finally {
+      if (isMounted) {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -81,8 +102,10 @@ export function UserAddresses({ userId }: { userId: string }) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    
     try {
-      const url = isEditMode ? "/api/addresses" : "/api/addresses";
+      const url = "/api/addresses"; // Same endpoint for both
       const method = isEditMode ? "PUT" : "POST";
 
       const response = await fetch(url, {
@@ -95,13 +118,20 @@ export function UserAddresses({ userId }: { userId: string }) {
         throw new Error("Failed to save address");
       }
 
+      // Success notification
       toast.success(isEditMode ? "Address updated" : "Address added");
-      fetchAddresses();
+      
+      // Fetch updated addresses
+      await fetchAddresses();
+      
+      // Reset form state
       setIsOpen(false);
       resetForm();
     } catch (error) {
       console.error("Error saving address:", error);
       toast.error("Failed to save address");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -116,12 +146,18 @@ export function UserAddresses({ userId }: { userId: string }) {
       }
 
       toast.success("Address deleted");
-      fetchAddresses();
+      
+      // Update state directly to improve speed
+      setAddresses(prev => prev.filter(address => address.id !== id));
     } catch (error) {
       console.error("Error deleting address:", error);
       toast.error("Failed to delete address");
     }
   };
+
+  if (isLoading) {
+    return <AddressesSkeleton />;
+  }
 
   return (
     <div className="space-y-6">
@@ -153,6 +189,7 @@ export function UserAddresses({ userId }: { userId: string }) {
                   onChange={handleFormChange}
                   placeholder="Home, Office, etc."
                   required
+                  disabled={isSubmitting}
                 />
               </div>
 
@@ -165,6 +202,7 @@ export function UserAddresses({ userId }: { userId: string }) {
                   onChange={handleFormChange}
                   placeholder="Street address"
                   required
+                  disabled={isSubmitting}
                 />
               </div>
 
@@ -176,6 +214,7 @@ export function UserAddresses({ userId }: { userId: string }) {
                   value={addressForm.addressLine2}
                   onChange={handleFormChange}
                   placeholder="Apartment, suite, unit, etc."
+                  disabled={isSubmitting}
                 />
               </div>
 
@@ -188,6 +227,7 @@ export function UserAddresses({ userId }: { userId: string }) {
                     value={addressForm.city}
                     onChange={handleFormChange}
                     required
+                    disabled={isSubmitting}
                   />
                 </div>
                 <div className="space-y-2">
@@ -198,6 +238,7 @@ export function UserAddresses({ userId }: { userId: string }) {
                     value={addressForm.state}
                     onChange={handleFormChange}
                     required
+                    disabled={isSubmitting}
                   />
                 </div>
               </div>
@@ -211,6 +252,7 @@ export function UserAddresses({ userId }: { userId: string }) {
                     value={addressForm.postalCode}
                     onChange={handleFormChange}
                     required
+                    disabled={isSubmitting}
                   />
                 </div>
                 <div className="space-y-2">
@@ -221,6 +263,7 @@ export function UserAddresses({ userId }: { userId: string }) {
                     value={addressForm.country}
                     onChange={handleFormChange}
                     required
+                    disabled={isSubmitting}
                   />
                 </div>
               </div>
@@ -236,6 +279,7 @@ export function UserAddresses({ userId }: { userId: string }) {
                       isDefault: checked as boolean,
                     })
                   }
+                  disabled={isSubmitting}
                 />
                 <Label htmlFor="isDefault">Set as default address</Label>
               </div>
@@ -248,11 +292,12 @@ export function UserAddresses({ userId }: { userId: string }) {
                     setIsOpen(false);
                     resetForm();
                   }}
+                  disabled={isSubmitting}
                 >
                   Cancel
                 </Button>
-                <Button type="submit">
-                  {isEditMode ? "Update Address" : "Save Address"}
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? (isEditMode ? "Updating..." : "Saving...") : (isEditMode ? "Update Address" : "Save Address")}
                 </Button>
               </div>
             </form>
@@ -260,11 +305,9 @@ export function UserAddresses({ userId }: { userId: string }) {
         </Dialog>
       </div>
 
-      {addresses.length === 0 ? (
-        <p className="text-gray-500">No addresses added yet.</p>
-      ) : (
-        <div className="grid gap-4">
-          {addresses.map((address) => (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {Array.isArray(addresses) && addresses.length > 0 ? (
+          addresses.map((address) => (
             <AddressCard
               key={address.id}
               address={address}
@@ -287,9 +330,13 @@ export function UserAddresses({ userId }: { userId: string }) {
                 </div>
               }
             />
-          ))}
-        </div>
-      )}
+          ))
+        ) : (
+          <div className="col-span-2 p-6 text-center border rounded-lg">
+            <p className="text-gray-500">You don't have any saved addresses yet.</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 } 

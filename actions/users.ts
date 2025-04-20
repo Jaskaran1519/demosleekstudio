@@ -19,6 +19,13 @@ async function getCurrentUser() {
  */
 export async function getUserById(userId: string) {
   try {
+    // Check if userId is a valid MongoDB ObjectId format
+    // MongoDB ObjectIds are 24 character hex strings
+    if (!userId || typeof userId !== 'string' || userId.length !== 24) {
+      console.warn(`Invalid user ID format: ${userId}`);
+      return null;
+    }
+    
     const user = await db.user.findUnique({
       where: { id: userId },
       select: {
@@ -69,20 +76,43 @@ export async function getCurrentUserProfile() {
       return null;
     }
 
-    const userProfile = await db.user.findUnique({
-      where: { id: user.id },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        image: true,
-        role: true,
-        createdAt: true,
-        addresses: true,
-      },
-    });
-
-    return userProfile;
+    // First try to get user by ID, and fallback to email if ID causes issues
+    try {
+      const userProfile = await db.user.findUnique({
+        where: { id: user.id },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          image: true,
+          role: true,
+          createdAt: true,
+          addresses: true,
+        },
+      });
+      
+      return userProfile;
+    } catch (error) {
+      // If ID lookup fails (e.g., malformed ObjectID), try by email instead
+      if (user.email) {
+        const userProfileByEmail = await db.user.findUnique({
+          where: { email: user.email },
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true,
+            role: true,
+            createdAt: true,
+            addresses: true,
+          },
+        });
+        
+        return userProfileByEmail;
+      }
+      
+      throw error; // Re-throw if we can't find the user by email either
+    }
   } catch (error) {
     console.error("Error fetching current user profile:", error);
     throw new Error("Failed to fetch profile");

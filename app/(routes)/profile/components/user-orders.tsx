@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { formatPrice } from "@/lib/utils";
-import { Skeleton } from "@/components/ui/skeleton";
+import { OrdersSkeleton } from "./skeletons";
 
 interface OrderItem {
   id: string;
@@ -33,6 +33,8 @@ export function UserOrders({ userId }: UserOrdersProps) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
+    
     async function fetchOrders() {
       setIsLoading(true);
       setError(null);
@@ -42,27 +44,32 @@ export function UserOrders({ userId }: UserOrdersProps) {
           throw new Error("Failed to fetch orders");
         }
         const data = await response.json();
-        setOrders(data);
+        if (isMounted) {
+          setOrders(data);
+        }
       } catch (err) {
         console.error("Error fetching orders:", err);
-        setError("There was a problem loading your orders");
+        if (isMounted) {
+          setError("There was a problem loading your orders");
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     }
 
     if (userId) {
       fetchOrders();
     }
+    
+    return () => {
+      isMounted = false;
+    };
   }, [userId]);
 
   if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <h2 className="text-2xl font-semibold">Order History</h2>
-        <OrderSkeletons />
-      </div>
-    );
+    return <OrdersSkeleton />;
   }
 
   if (error) {
@@ -138,39 +145,6 @@ export function UserOrders({ userId }: UserOrdersProps) {
           </div>
         ))}
       </div>
-    </div>
-  );
-}
-
-function OrderSkeletons() {
-  return (
-    <div className="space-y-4">
-      {[1, 2].map((i) => (
-        <div key={i} className="border rounded-lg p-4 space-y-4">
-          <div className="flex justify-between items-start">
-            <div>
-              <Skeleton className="h-5 w-40" />
-              <Skeleton className="h-4 w-24 mt-2" />
-            </div>
-            <div className="text-right">
-              <Skeleton className="h-5 w-20" />
-              <Skeleton className="h-4 w-16 mt-2" />
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {[1, 2].map((j) => (
-              <div key={j} className="flex space-x-4">
-                <Skeleton className="w-16 h-16 rounded" />
-                <div className="space-y-2 flex-1">
-                  <Skeleton className="h-4 w-full max-w-[180px]" />
-                  <Skeleton className="h-3 w-20" />
-                  <Skeleton className="h-3 w-16" />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
     </div>
   );
 } 

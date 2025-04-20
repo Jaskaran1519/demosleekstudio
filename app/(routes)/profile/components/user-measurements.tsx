@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Plus, Trash2 } from "lucide-react";
+import { MeasurementsSkeleton } from "./skeletons";
+import { toast } from "sonner";
 
 interface Measurement {
   id: string;
@@ -36,35 +38,64 @@ type MeasurementKey = keyof typeof defaultMeasurements;
 
 export function UserMeasurements({ userId }: { userId: string }) {
   const [measurements, setMeasurements] = useState<Measurement[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [newMeasurement, setNewMeasurement] = useState({
     name: "",
     measurements: { ...defaultMeasurements },
   });
 
   useEffect(() => {
-    fetchMeasurements();
-  }, []);
-
-  const fetchMeasurements = async () => {
-    try {
-      const response = await fetch("/api/measurements");
-      const data = await response.json();
-      setMeasurements(data);
-    } catch (error) {
-      console.error("Error fetching measurements:", error);
+    let isMounted = true;
+    
+    async function fetchMeasurements() {
+      setIsLoading(true);
+      try {
+        const response = await fetch("/api/measurements");
+        const data = await response.json();
+        if (isMounted) {
+          setMeasurements(data);
+        }
+      } catch (error) {
+        console.error("Error fetching measurements:", error);
+        toast.error("Failed to load measurements");
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
     }
-  };
+
+    fetchMeasurements();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
-      await fetch("/api/measurements", {
+      const response = await fetch("/api/measurements", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newMeasurement),
       });
-      fetchMeasurements();
+      
+      if (!response.ok) {
+        throw new Error("Failed to add measurement");
+      }
+      
+      toast.success("Measurement added successfully");
+      
+      // Refetch measurements
+      const updatedResponse = await fetch("/api/measurements");
+      const updatedData = await updatedResponse.json();
+      setMeasurements(updatedData);
+      
+      // Reset form and close dialog
       setIsOpen(false);
       setNewMeasurement({
         name: "",
@@ -72,19 +103,35 @@ export function UserMeasurements({ userId }: { userId: string }) {
       });
     } catch (error) {
       console.error("Error adding measurement:", error);
+      toast.error("Failed to add measurement");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleDelete = async (id: string) => {
     try {
-      await fetch(`/api/measurements?id=${id}`, {
+      const response = await fetch(`/api/measurements?id=${id}`, {
         method: "DELETE",
       });
-      fetchMeasurements();
+      
+      if (!response.ok) {
+        throw new Error("Failed to delete measurement");
+      }
+      
+      toast.success("Measurement deleted");
+      
+      // Update local state
+      setMeasurements(measurements.filter(m => m.id !== id));
     } catch (error) {
       console.error("Error deleting measurement:", error);
+      toast.error("Failed to delete measurement");
     }
   };
+
+  if (isLoading) {
+    return <MeasurementsSkeleton />;
+  }
 
   return (
     <div className="space-y-6">
@@ -114,6 +161,7 @@ export function UserMeasurements({ userId }: { userId: string }) {
                   }
                   placeholder="e.g., My Measurements"
                   required
+                  disabled={isSubmitting}
                 />
               </div>
               
@@ -138,6 +186,7 @@ export function UserMeasurements({ userId }: { userId: string }) {
                           })
                         }
                         required
+                        disabled={isSubmitting}
                       />
                     </div>
                   );
@@ -149,11 +198,12 @@ export function UserMeasurements({ userId }: { userId: string }) {
                   type="button"
                   variant="outline"
                   onClick={() => setIsOpen(false)}
+                  disabled={isSubmitting}
                 >
                   Cancel
                 </Button>
-                <Button type="submit">
-                  Save Measurement
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? "Saving..." : "Save Measurement"}
                 </Button>
               </div>
             </form>
@@ -162,7 +212,9 @@ export function UserMeasurements({ userId }: { userId: string }) {
       </div>
 
       {measurements.length === 0 ? (
-        <p className="text-gray-500">No measurements added yet.</p>
+        <div className="p-6 text-center border rounded-lg">
+          <p className="text-gray-500">No measurements added yet.</p>
+        </div>
       ) : (
         <div className="grid gap-4">
           {measurements.map((measurement) => (

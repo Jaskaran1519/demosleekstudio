@@ -1,13 +1,21 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Container } from '@/components/ui/container';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { UserProfile } from './user-profile';
-import { UserOrders } from './user-orders';
-import { UserMeasurements } from './user-measurements';
-import { UserAddresses } from './user-addresses';
+import { 
+  ProfileSkeleton, 
+  AddressesSkeleton, 
+  OrdersSkeleton, 
+  MeasurementsSkeleton 
+} from './skeletons';
+
+// Lazy load tab components
+const UserProfile = lazy(() => import('./user-profile').then(mod => ({ default: mod.UserProfile })));
+const UserOrders = lazy(() => import('./user-orders').then(mod => ({ default: mod.UserOrders })));
+const UserMeasurements = lazy(() => import('./user-measurements').then(mod => ({ default: mod.UserMeasurements })));
+const UserAddresses = lazy(() => import('./user-addresses').then(mod => ({ default: mod.UserAddresses })));
 
 interface ProfileTabsProps {
   userProfile: {
@@ -27,13 +35,17 @@ export function ProfileTabs({ userProfile }: ProfileTabsProps) {
   const tab = searchParams.get('tab') || 'profile';
   
   const [currentTab, setCurrentTab] = useState(tab);
+  const [isChangingTab, setIsChangingTab] = useState(false);
 
   // Update URL when tab changes
   const handleTabChange = (value: string) => {
+    setIsChangingTab(true);
     setCurrentTab(value);
     const params = new URLSearchParams(searchParams);
     params.set('tab', value);
     router.push(`/profile?${params.toString()}`, { scroll: false });
+    // Reset the changing state after a short delay for transition effect
+    setTimeout(() => setIsChangingTab(false), 300);
   };
 
   // Update tab if URL changes externally
@@ -50,7 +62,11 @@ export function ProfileTabs({ userProfile }: ProfileTabsProps) {
       <div className="py-8">
         <h1 className="text-3xl font-bold mb-8">My Profile</h1>
         
-        <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full">
+        <Tabs 
+          value={currentTab} 
+          onValueChange={handleTabChange} 
+          className="w-full"
+        >
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="addresses">Addresses</TabsTrigger>
@@ -58,20 +74,28 @@ export function ProfileTabs({ userProfile }: ProfileTabsProps) {
             <TabsTrigger value="measurements">Measurements</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="profile">
-            <UserProfile user={userProfile} />
+          <TabsContent value="profile" className="pt-6">
+            <Suspense fallback={<ProfileSkeleton />}>
+              <UserProfile user={userProfile} />
+            </Suspense>
           </TabsContent>
           
-          <TabsContent value="addresses">
-            <UserAddresses userId={userProfile.id} />
+          <TabsContent value="addresses" className="pt-6">
+            <Suspense fallback={<AddressesSkeleton />}>
+              <UserAddresses userId={userProfile.id} addresses={userProfile.addresses} />
+            </Suspense>
           </TabsContent>
           
-          <TabsContent value="orders">
-            <UserOrders userId={userProfile.id} />
+          <TabsContent value="orders" className="pt-6">
+            <Suspense fallback={<OrdersSkeleton />}>
+              <UserOrders userId={userProfile.id} />
+            </Suspense>
           </TabsContent>
           
-          <TabsContent value="measurements">
-            <UserMeasurements userId={userProfile.id} />
+          <TabsContent value="measurements" className="pt-6">
+            <Suspense fallback={<MeasurementsSkeleton />}>
+              <UserMeasurements userId={userProfile.id} />
+            </Suspense>
           </TabsContent>
         </Tabs>
       </div>
