@@ -37,7 +37,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
       />
     ) : null;
   }
-
+  
   // Resolve params
   const resolvedParams = await params;
   

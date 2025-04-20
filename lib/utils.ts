@@ -20,14 +20,15 @@ export function slugify(text: string): string {
 }
 
 /**
- * Format a date to a human-readable string
+ * Format a date string or Date object to a friendly format
  */
-export function formatDate(date: Date | string): string {
-  const d = new Date(date);
-  return d.toLocaleDateString('en-US', {
-    month: 'short',
+export function formatDate(date: Date | string) {
+  return new Date(date).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
     day: 'numeric',
-    year: 'numeric'
+    hour: '2-digit',
+    minute: '2-digit'
   });
 }
 

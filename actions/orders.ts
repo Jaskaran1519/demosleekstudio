@@ -65,11 +65,14 @@ export async function getOrderById(orderId: string) {
       throw new Error("Not authenticated");
     }
 
+    // Build the query based on user role
+    const isAdmin = user.role === "ADMIN";
+    const where = isAdmin
+      ? { id: orderId } // Admin can view any order
+      : { id: orderId, userId: user.id }; // Regular users can only view their own orders
+
     const order = await db.order.findUnique({
-      where: {
-        id: orderId,
-        userId: user.id, // Ensure the order belongs to current user
-      },
+      where,
       include: {
         items: {
           include: {
@@ -83,6 +86,16 @@ export async function getOrderById(orderId: string) {
             },
           },
         },
+        // Include user information for admin view
+        ...(isAdmin && {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        }),
       },
     });
 
@@ -98,9 +111,14 @@ export async function getOrderById(orderId: string) {
 }
 
 /**
- * Admin: Get all orders with pagination
+ * Admin: Get all orders with pagination, search, and filtering
  */
-export async function getAllOrders(page = 1, limit = 10) {
+export async function getAllOrders(
+  page = 1, 
+  limit = 10, 
+  query?: string,
+  status?: string
+) {
   try {
     const user = await currentUser();
     
@@ -110,8 +128,26 @@ export async function getAllOrders(page = 1, limit = 10) {
 
     const skip = (page - 1) * limit;
 
+    // Build the where clause based on search and filter criteria
+    const where: any = {};
+
+    // Add status filter if provided and not empty
+    if (status && status !== 'all') {
+      where.status = status;
+    }
+
+    // Add search criteria if provided
+    if (query) {
+      where.OR = [
+        // Search by customer name or email
+        { user: { name: { contains: query, mode: 'insensitive' } } },
+        { user: { email: { contains: query, mode: 'insensitive' } } },
+      ];
+    }
+
     const [orders, totalCount] = await Promise.all([
       db.order.findMany({
+        where,
         skip,
         take: limit,
         orderBy: {
@@ -139,7 +175,7 @@ export async function getAllOrders(page = 1, limit = 10) {
           },
         },
       }),
-      db.order.count(),
+      db.order.count({ where }),
     ]);
 
     return {
