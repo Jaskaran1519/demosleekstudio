@@ -5,13 +5,15 @@ import { db } from '@/lib/db';
 import { ProductClient } from './components/client';
 import { Suspense } from 'react';
 import { Metadata } from 'next';
+import { ProductsTableSkeleton } from '@/components/dashboard/skeletons';
 
 export const metadata: Metadata = {
   title: "Products | Admin Dashboard",
   description: "Manage your store products",
 };
 
-export default async function ProductsPage({
+// Separate component for data fetching
+async function ProductsContent({
   searchParams,
 }: {
   searchParams: Promise<{
@@ -21,20 +23,6 @@ export default async function ProductsPage({
     status?: string;
   }>;
 }) {
-  const { isAuthorized, user, errorMessage } = await requireAdmin();
-  
-  // If not authorized, show the OopsMessage
-  if (!isAuthorized) {
-    return errorMessage ? (
-      <OopsMessage
-        message={errorMessage.message}
-        title={errorMessage.title}
-        backUrl={errorMessage.backUrl}
-        backText={errorMessage.backText}
-      />
-    ) : null;
-  }
-
   // Resolve search params
   const resolvedSearchParams = await searchParams;
 
@@ -63,15 +51,47 @@ export default async function ProductsPage({
   const uniqueCategories = categories.map(c => c.category);
 
   return (
+    <ProductClient 
+      products={products} 
+      categories={uniqueCategories}
+      totalPages={totalPages}
+      currentPage={currentPage}
+    />
+  );
+}
+
+export default async function ProductsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    page?: string;
+    search?: string;
+    category?: string;
+    status?: string;
+  }>;
+}) {
+  const { isAuthorized, user, errorMessage } = await requireAdmin();
+  
+  // If not authorized, show the OopsMessage
+  if (!isAuthorized) {
+    return errorMessage ? (
+      <OopsMessage
+        message={errorMessage.message}
+        title={errorMessage.title}
+        backUrl={errorMessage.backUrl}
+        backText={errorMessage.backText}
+      />
+    ) : null;
+  }
+
+  return (
     <div className="flex-col">
       <div className="flex-1 space-y-4 p-8 pt-6">
-        <Suspense fallback={<div>Loading products...</div>}>
-          <ProductClient 
-            products={products} 
-            categories={uniqueCategories}
-            totalPages={totalPages}
-            currentPage={currentPage}
-          />
+        <h1 className="text-3xl font-bold">Products Management</h1>
+        <p className="text-muted-foreground">View and manage your store products</p>
+        
+        <Suspense fallback={<ProductsTableSkeleton />}>
+          <ProductsContent searchParams={searchParams} />
         </Suspense>
       </div>
     </div>

@@ -1,9 +1,10 @@
 import OopsMessage from '@/components/Others/OopsMessage';
 import { requireAdmin } from '@/lib/auth-utils';
-import React from 'react'
+import React, { Suspense } from 'react'
 import { columns } from './columns';
 import { UserDataTable } from './components/user-table';
 import { fetchUsers } from '@/actions/users';
+import { UsersTableSkeleton } from '@/components/dashboard/skeletons';
 
 interface UsersPageProps {
   searchParams: Promise<{
@@ -15,21 +16,8 @@ interface UsersPageProps {
   }>;
 }
 
-export default async function UsersPage({ searchParams }: UsersPageProps) {
-  const { isAuthorized, errorMessage } = await requireAdmin();
-  
-  // If not authorized, show the OopsMessage
-  if (!isAuthorized) {
-    return errorMessage ? (
-      <OopsMessage 
-        message={errorMessage.message}
-        title={errorMessage.title}
-        backUrl={errorMessage.backUrl}
-        backText={errorMessage.backText}
-      />
-    ) : null;
-  }
-
+// Separate component for data fetching
+async function UsersContent({ searchParams }: UsersPageProps) {
   // Await searchParams before using its properties
   const params = await searchParams;
 
@@ -50,6 +38,34 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
   });
   
   return (
+    <div className="bg-white rounded-lg shadow">
+      <UserDataTable
+        columns={columns}
+        data={users}
+        currentPage={pagination.page}
+        pageSize={pagination.pageSize}
+        totalPages={pagination.totalPages}
+      />
+    </div>
+  );
+}
+
+export default async function UsersPage({ searchParams }: UsersPageProps) {
+  const { isAuthorized, errorMessage } = await requireAdmin();
+  
+  // If not authorized, show the OopsMessage
+  if (!isAuthorized) {
+    return errorMessage ? (
+      <OopsMessage 
+        message={errorMessage.message}
+        title={errorMessage.title}
+        backUrl={errorMessage.backUrl}
+        backText={errorMessage.backText}
+      />
+    ) : null;
+  }
+  
+  return (
     <div className="p-6">
       <div className="mb-8">
         <h1 className="text-2xl font-bold mb-2">Users Management</h1>
@@ -58,15 +74,9 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
         </p>
       </div>
       
-      <div className="bg-white rounded-lg shadow">
-        <UserDataTable
-          columns={columns}
-          data={users}
-          currentPage={pagination.page}
-          pageSize={pagination.pageSize}
-          totalPages={pagination.totalPages}
-        />
-      </div>
+      <Suspense fallback={<UsersTableSkeleton />}>
+        <UsersContent searchParams={searchParams} />
+      </Suspense>
     </div>
   )
 }

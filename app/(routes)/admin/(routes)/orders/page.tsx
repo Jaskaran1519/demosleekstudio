@@ -6,6 +6,8 @@ import { OrdersTableColumns, OrderColumn } from './columns';
 import { OrdersTableFilters } from './filters';
 import { Container } from '@/components/ui/container';
 import { Heading } from '@/components/ui/heading';
+import { Suspense } from 'react';
+import { OrdersTableSkeleton } from '@/components/dashboard/skeletons';
 
 interface OrdersPageProps {
   searchParams: Promise<{
@@ -15,21 +17,8 @@ interface OrdersPageProps {
   }>;
 }
 
-const OrdersPage = async({ searchParams }: OrdersPageProps) => {
-  const { isAuthorized, user, errorMessage } = await requireAdmin();
-  
-  // If not authorized, show the OopsMessage
-  if (!isAuthorized) {
-    return errorMessage ? (
-      <OopsMessage
-        message={errorMessage.message}
-        title={errorMessage.title}
-        backUrl={errorMessage.backUrl}
-        backText={errorMessage.backText}
-      />
-    ) : null;
-  }
-
+// Separate component for data fetching
+async function OrdersContent({ searchParams }: OrdersPageProps) {
   // Resolve searchParams
   const resolvedParams = await searchParams;
   
@@ -55,12 +44,7 @@ const OrdersPage = async({ searchParams }: OrdersPageProps) => {
   })) as OrderColumn[];
 
   return (
-    <Container className="py-8">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold">Orders Management</h1>
-        <p className="text-muted-foreground">View and manage all customer orders</p>
-      </div>
-      
+    <>
       <div className="mb-8">
         <OrdersTableFilters />
       </div>
@@ -72,6 +56,35 @@ const OrdersPage = async({ searchParams }: OrdersPageProps) => {
         totalPages={totalPages}
         currentPage={currentPage}
       />
+    </>
+  );
+}
+
+const OrdersPage = async({ searchParams }: OrdersPageProps) => {
+  const { isAuthorized, user, errorMessage } = await requireAdmin();
+  
+  // If not authorized, show the OopsMessage
+  if (!isAuthorized) {
+    return errorMessage ? (
+      <OopsMessage
+        message={errorMessage.message}
+        title={errorMessage.title}
+        backUrl={errorMessage.backUrl}
+        backText={errorMessage.backText}
+      />
+    ) : null;
+  }
+
+  return (
+    <Container className="py-8">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold">Orders Management</h1>
+        <p className="text-muted-foreground">View and manage all customer orders</p>
+      </div>
+      
+      <Suspense fallback={<OrdersTableSkeleton />}>
+        <OrdersContent searchParams={searchParams} />
+      </Suspense>
     </Container>
   );
 };

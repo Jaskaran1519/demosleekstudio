@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { formatPrice } from "@/lib/utils";
 import { OrdersSkeleton } from "./skeletons";
+import Link from "next/link";
 
 interface OrderItem {
   id: string;
@@ -34,7 +35,7 @@ export function UserOrders({ userId }: UserOrdersProps) {
 
   useEffect(() => {
     let isMounted = true;
-    
+
     async function fetchOrders() {
       setIsLoading(true);
       setError(null);
@@ -62,7 +63,7 @@ export function UserOrders({ userId }: UserOrdersProps) {
     if (userId) {
       fetchOrders();
     }
-    
+
     return () => {
       isMounted = false;
     };
@@ -92,11 +93,12 @@ export function UserOrders({ userId }: UserOrdersProps) {
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-semibold">Order History</h2>
-      <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4">
         {orders.map((order) => (
-          <div
+          <Link
             key={order.id}
-            className="border rounded-lg p-4 space-y-2"
+            href={`/profile/orders/${order.id}`}
+            className="block border rounded-lg p-4 space-y-2 hover:bg-gray-50 transition-colors"
           >
             <div className="flex justify-between items-start">
               <div>
@@ -123,12 +125,16 @@ export function UserOrders({ userId }: UserOrdersProps) {
                         />
                       ) : (
                         <div className="bg-gray-200 w-16 h-16 rounded flex items-center justify-center">
-                          <span className="text-gray-500 text-xs">No image</span>
+                          <span className="text-gray-500 text-xs">
+                            No image
+                          </span>
                         </div>
                       )}
                     </div>
                     <div>
-                      <p className="font-medium">{item.product?.name || "Product"}</p>
+                      <p className="font-medium">
+                        {item.product?.name || "Product"}
+                      </p>
                       <p className="text-sm text-gray-500">
                         Quantity: {item.quantity}
                       </p>
@@ -142,9 +148,9 @@ export function UserOrders({ userId }: UserOrdersProps) {
             ) : (
               <p className="text-sm text-gray-500">No items in this order</p>
             )}
-          </div>
+          </Link>
         ))}
       </div>
     </div>
   );
-} 
+}

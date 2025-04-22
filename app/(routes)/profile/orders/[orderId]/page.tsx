@@ -1,25 +1,21 @@
 import { notFound } from "next/navigation";
-import { getOrderById } from "@/actions/orders";
-import { requireAdmin } from "@/lib/auth-utils";
-import OopsMessage from "@/components/Others/OopsMessage";
+import { getAuthSession } from "@/lib/auth";
 import { Container } from "@/components/ui/container";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import {
   ArrowLeft,
   PackageCheck,
-  User,
   Calendar,
   DollarSign,
   Tag,
 } from "lucide-react";
 import Link from "next/link";
-import { OrderStatusBadge } from "../components/order-status-badge";
-import { OrderStatusUpdate } from "../components/order-status-update";
 import { formatPrice, formatDate } from "@/lib/utils";
-import { getUserById } from "@/actions";
+import { getOrderById, getUserById } from "@/actions";
 import { Suspense } from "react";
 import { OrdersTableSkeleton } from "@/components/dashboard/skeletons";
+import { db } from "@/lib/db";
 
 // Using any type to bypass the type check
 export default async function OrderDetailPage({
@@ -27,19 +23,6 @@ export default async function OrderDetailPage({
 }: {
   params: any
 }) {
-  const { isAuthorized, errorMessage } = await requireAdmin();
-
-  if (!isAuthorized) {
-    return errorMessage ? (
-      <OopsMessage
-        message={errorMessage.message}
-        title={errorMessage.title}
-        backUrl={errorMessage.backUrl}
-        backText={errorMessage.backText}
-      />
-    ) : null;
-  }
-
   return (
     <Container className="py-8">
       <Suspense fallback={<OrdersTableSkeleton />}>
@@ -51,14 +34,38 @@ export default async function OrderDetailPage({
 
 // Separate component for data fetching
 async function OrderContent({ orderId }: { orderId: string }) {
-  let order;
-  try {
-    order = await getOrderById(orderId);
-  } catch (error) {
-    return notFound();
+  const session = await getAuthSession();
+
+  if (!session?.user) {
+    return (
+      <div className="flex items-center justify-center h-[60vh]">
+        <p className="text-lg">Please sign in to view your order</p>
+      </div>
+    );
   }
 
-  if (!order) {
+  let order;
+  let shippingAddress;
+  
+  try {
+    order = await getOrderById(orderId);
+    
+    if (!order) {
+      return notFound();
+    }
+    
+    // Fetch the shipping address using the shippingAddressId
+    shippingAddress = await db.address.findUnique({
+      where: { 
+        id: order.shippingAddressId 
+      }
+    });
+    
+    if (!shippingAddress) {
+      console.error(`Shipping address not found for order ${orderId}`);
+    }
+  } catch (error) {
+    console.error("Error fetching order details:", error);
     return notFound();
   }
 
@@ -66,7 +73,7 @@ async function OrderContent({ orderId }: { orderId: string }) {
     <>
       <div className="mb-6">
         <Button asChild variant="outline" size="sm">
-          <Link href="/admin/orders">
+          <Link href="/profile?tab=orders">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Orders
           </Link>
@@ -79,30 +86,19 @@ async function OrderContent({ orderId }: { orderId: string }) {
           <p className="text-muted-foreground">Order ID: {order.id}</p>
         </div>
 
-        <OrderStatusUpdate orderId={order.id} initialStatus={order.status} />
+        <div className="px-4 py-2 rounded-full bg-gray-100 text-gray-800 font-medium">
+          {order.status}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="rounded-lg border p-4">
-          <div className="flex items-center gap-2 mb-3">
-            <User className="h-5 w-5 text-muted-foreground" />
-            <h2 className="font-semibold">Customer</h2>
-          </div>
-          <p>{order.user?.name || "Unknown"}</p>
-          <p className="text-muted-foreground">
-            {order.user?.email || "No email"}
-          </p>
-        </div>
-
         <div className="rounded-lg border p-4">
           <div className="flex items-center gap-2 mb-3">
             <Calendar className="h-5 w-5 text-muted-foreground" />
             <h2 className="font-semibold">Order Date</h2>
           </div>
           <p>{formatDate(order.createdAt)}</p>
-          <p className="text-muted-foreground">
-            Status: <OrderStatusBadge status={order.status} />
-          </p>
+          <p className="text-muted-foreground">Status: {order.status}</p>
         </div>
 
         <div className="rounded-lg border p-4">
@@ -122,17 +118,17 @@ async function OrderContent({ orderId }: { orderId: string }) {
         <div className="md:col-span-8 rounded-lg border p-6">
           <h2 className="text-xl font-semibold mb-4">Order Items</h2>
           <div className="space-y-4">
-            {order.items.map((item) => (
+            {order.items.map((item:any) => (
               <div
                 key={item.id}
                 className="flex border-b pb-4 last:pb-0 last:border-0"
               >
                 <div className="flex-shrink-0 mr-4">
-                  {item.product?.images?.[0] ? (
+                  {item.images?.[0] ? (
                     <div className="h-20 w-20 relative rounded overflow-hidden">
                       <img
-                        src={item.product.images[0]}
-                        alt={item.product.name}
+                        src={item.images[0]}
+                        alt={item.name}
                         className="object-cover h-full w-full"
                       />
                     </div>
@@ -145,9 +141,7 @@ async function OrderContent({ orderId }: { orderId: string }) {
                 <div className="flex-1">
                   <div className="flex flex-col md:flex-row md:justify-between">
                     <div>
-                      <h3 className="font-medium">
-                        {item.product?.name || "Product"}
-                      </h3>
+                      <h3 className="font-medium">{item.name || "Product"}</h3>
                       <div className="text-sm text-muted-foreground mt-1">
                         {item.size && (
                           <span className="mr-3">Size: {item.size}</span>
@@ -215,6 +209,24 @@ async function OrderContent({ orderId }: { orderId: string }) {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Shipping Address */}
+      <div className="mt-8 rounded-lg border p-6">
+        <h2 className="text-xl font-semibold mb-4">Shipping Address</h2>
+        {shippingAddress ? (
+          <>
+            <p className="font-medium">{shippingAddress.name}</p>
+            <p>{shippingAddress.addressLine1}</p>
+            {shippingAddress.addressLine2 && <p>{shippingAddress.addressLine2}</p>}
+            <p>
+              {shippingAddress.city}, {shippingAddress.state} {shippingAddress.postalCode}
+            </p>
+            <p>{shippingAddress.country}</p>
+          </>
+        ) : (
+          <p className="text-muted-foreground">Shipping address information not available</p>
+        )}
       </div>
     </>
   );

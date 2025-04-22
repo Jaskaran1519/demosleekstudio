@@ -4,6 +4,8 @@ import { db } from "@/lib/db";
 import { format } from "date-fns";
 import { Metadata } from "next";
 import { DiscountType, Prisma } from "@prisma/client";
+import { Suspense } from "react";
+import { CouponsTableSkeleton } from "@/components/dashboard/skeletons";
 
 export const metadata: Metadata = {
   title: "Coupons | Admin Dashboard",
@@ -36,7 +38,8 @@ interface CouponData {
   updatedAt: Date;
 }
 
-const CouponsPage = async ({ searchParams }: CouponsPageProps) => {
+// Separate component for data fetching
+async function CouponsContent({ searchParams }: CouponsPageProps) {
   // Await searchParams before using its properties
   const params = await searchParams;
   
@@ -93,22 +96,30 @@ const CouponsPage = async ({ searchParams }: CouponsPageProps) => {
   }));
 
   return (
+    <CouponClient 
+      data={formattedCoupons} 
+      pagination={{
+        page,
+        pageSize,
+        totalCoupons,
+        totalPages
+      }}
+    />
+  );
+}
+
+const CouponsPage = async ({ searchParams }: CouponsPageProps) => {
+  return (
     <div className="flex-col">
       <div className="flex-1 space-y-4 p-8 pt-6">
         <Heading
-          title={`Coupons (${totalCoupons})`}
+          title={`Coupons`}
           description="Manage discount coupons for your store"
         />
         
-        <CouponClient 
-          data={formattedCoupons} 
-          pagination={{
-            page,
-            pageSize,
-            totalCoupons,
-            totalPages
-          }}
-        />
+        <Suspense fallback={<CouponsTableSkeleton />}>
+          <CouponsContent searchParams={searchParams} />
+        </Suspense>
       </div>
     </div>
   );
