@@ -1,19 +1,19 @@
-"use client"
+"use client";
 
-import { useEffect } from "react"
+import { useEffect } from "react";
 // Assuming motion/react is correctly aliased or installed
-import { motion, stagger, useAnimate } from "framer-motion" // Correct import for motion
+import { motion, stagger, useAnimate } from "framer-motion"; // Correct import for motion
 
 import Floating, {
   FloatingElement,
-} from "@/fancy/components/image/parallax-floating"
+} from "@/fancy/components/image/parallax-floating";
 
 // Assuming this path is correct
-import { exampleImages } from "../../utils/demo-images"
-import Link from "next/link"
+import { exampleImages } from "../../utils/demo-images";
+import Link from "next/link";
 
 const AnimatedContact = () => {
-  const [scope, animate] = useAnimate()
+  const [scope, animate] = useAnimate();
 
   useEffect(() => {
     // Ensure animate function is called correctly
@@ -25,12 +25,12 @@ const AnimatedContact = () => {
       "img",
       { opacity: [0, 1] },
       { duration: 0.5, delay: stagger(0.15) }
-    )
-  }, [animate]) // Add animate to dependency array
+    );
+  }, [animate]); // Add animate to dependency array
 
   return (
     <div
-      className="flex w-dvw h-dvh justify-center items-center bg-black overflow-hidden"
+      className="flex w-dvw h-dvh justify-center items-center  overflow-hidden"
       ref={scope}
     >
       <motion.div
@@ -39,20 +39,24 @@ const AnimatedContact = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.88, delay: 1.5 }}
       >
-        <p className="text-5xl md:text-7xl z-50 text-white font-calendas italic">
-          Sleek Studio
+        <p className="text-5xl md:text-7xl z-50  font-calendas italic">
+          Want to Connect ?
         </p>
-        <Link  href="/contact">
-        <button className="text-s z-50 py-2 px-4 hover:scale-110 transition-transform bg-white text-black rounded-full  cursor-pointer text-center"> {/* Added text-center */}
-          Get in Touch
-        </button>
+        <Link href="/contact">
+          <button className="text-s mt-5 z-50 py-2 px-4 hover:scale-110 transition-transform bg-black text-white rounded-full  cursor-pointer text-center">
+            {" "}
+            {/* Added text-center */}
+            Get in Touch
+          </button>
         </Link>
       </motion.div>
 
       <Floating sensitivity={-1} className="overflow-hidden">
         {/* ----- Image Positions Adjusted +5% to the left ----- */}
 
-        <FloatingElement depth={0.5} className="top-[8%] left-[16%]"> {/* Was left-[11%] */}
+        <FloatingElement depth={0.5} className="top-[8%] left-[16%]">
+          {" "}
+          {/* Was left-[11%] */}
           <motion.img
             initial={{ opacity: 0 }}
             src={exampleImages[0].url}
@@ -60,7 +64,9 @@ const AnimatedContact = () => {
             className="w-16 h-16 md:w-24 md:h-24 object-cover hover:scale-105 duration-200 cursor-pointer transition-transform"
           />
         </FloatingElement>
-        <FloatingElement depth={1} className="top-[10%] left-[37%]"> {/* Was left-[32%] */}
+        <FloatingElement depth={1} className="top-[10%] left-[37%]">
+          {" "}
+          {/* Was left-[32%] */}
           <motion.img
             initial={{ opacity: 0 }}
             src={exampleImages[1].url}
@@ -68,7 +74,9 @@ const AnimatedContact = () => {
             className="w-20 h-20 md:w-28 md:h-28 object-cover hover:scale-105 duration-200 cursor-pointer transition-transform"
           />
         </FloatingElement>
-        <FloatingElement depth={2} className="top-[2%] left-[58%]"> {/* Was left-[53%] */}
+        <FloatingElement depth={2} className="top-[2%] left-[58%]">
+          {" "}
+          {/* Was left-[53%] */}
           <motion.img
             initial={{ opacity: 0 }}
             src={exampleImages[2].url}
@@ -76,7 +84,9 @@ const AnimatedContact = () => {
             className="w-28 h-40 md:w-40 md:h-52 object-cover hover:scale-105 duration-200 cursor-pointer transition-transform"
           />
         </FloatingElement>
-        <FloatingElement depth={1} className="top-[0%] left-[88%]"> {/* Was left-[83%] */}
+        <FloatingElement depth={1} className="top-[0%] left-[88%]">
+          {" "}
+          {/* Was left-[83%] */}
           <motion.img
             initial={{ opacity: 0 }}
             src={exampleImages[3].url}
@@ -85,7 +95,9 @@ const AnimatedContact = () => {
           />
         </FloatingElement>
 
-        <FloatingElement depth={1} className="top-[40%] left-[7%]"> {/* Was left-[2%] */}
+        <FloatingElement depth={1} className="top-[40%] left-[7%]">
+          {" "}
+          {/* Was left-[2%] */}
           <motion.img
             initial={{ opacity: 0 }}
             src={exampleImages[4].url}
@@ -93,7 +105,9 @@ const AnimatedContact = () => {
             className="w-28 h-28 md:w-36 md:h-36 object-cover hover:scale-105 duration-200 cursor-pointer transition-transform"
           />
         </FloatingElement>
-        <FloatingElement depth={2} className="top-[70%] left-[82%]"> {/* Was left-[77%] */}
+        <FloatingElement depth={2} className="top-[70%] left-[82%]">
+          {" "}
+          {/* Was left-[77%] */}
           <motion.img
             initial={{ opacity: 0 }}
             src={exampleImages[7].url}
@@ -102,7 +116,9 @@ const AnimatedContact = () => {
           />
         </FloatingElement>
 
-        <FloatingElement depth={4} className="top-[73%] left-[20%]"> {/* Was left-[15%] */}
+        <FloatingElement depth={4} className="top-[73%] left-[20%]">
+          {" "}
+          {/* Was left-[15%] */}
           <motion.img
             initial={{ opacity: 0 }}
             src={exampleImages[5].url}
@@ -110,7 +126,9 @@ const AnimatedContact = () => {
             className="w-40 md:w-52 h-full object-cover hover:scale-105 duration-200 cursor-pointer transition-transform"
           />
         </FloatingElement>
-        <FloatingElement depth={1} className="top-[80%] left-[55%]"> {/* Was left-[50%] */}
+        <FloatingElement depth={1} className="top-[80%] left-[55%]">
+          {" "}
+          {/* Was left-[50%] */}
           <motion.img
             initial={{ opacity: 0 }}
             src={exampleImages[6].url}
@@ -120,7 +138,7 @@ const AnimatedContact = () => {
         </FloatingElement>
       </Floating>
     </div>
-  )
-}
+  );
+};
 
-export default AnimatedContact
+export default AnimatedContact;

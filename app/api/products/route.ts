@@ -183,74 +183,95 @@ export async function POST(request: NextRequest) {
   try {
     // Check authentication
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user || session.user.role !== "ADMIN") {
+      console.warn("Unauthorized attempt to create product by:", session?.user?.email);
       return NextResponse.json(
         { error: "Unauthorized. Admin access required." },
         { status: 403 }
       );
     }
-    
+
     // Parse request body
     const body = await request.json();
+    console.log("Received body:", body); // Log received data for debugging
+
     const parsed = productSchema.safeParse(body);
-    
+
     if (!parsed.success) {
+      console.error("Product data validation failed:", parsed.error.format());
       return NextResponse.json(
         { error: "Invalid product data", details: parsed.error.format() },
         { status: 400 }
       );
     }
-    
+
     const data = parsed.data;
-    
-    // Handle images - ensure no undefined values
-    const images = [
-      data.noBgImage,
-      data.modelImage,
-      ...(data.images || [])
-    ].filter((img): img is string => typeof img === 'string' && img.length > 0);
-    
-    // Handle tags - ensure no undefined values
-    const tags = Array.isArray(data.tags) 
-      ? data.tags.filter((tag): tag is string => typeof tag === 'string' && tag.length > 0)
-      : data.tags?.split(',').map((tag: string) => tag.trim()).filter(Boolean) || [];
-    
-    // Handle sizes - ensure no undefined values
-    const sizes = Array.isArray(data.sizes) 
-      ? data.sizes.filter((size): size is string => typeof size === 'string' && size.length > 0)
-      : data.sizes?.split(',').map((size: string) => size.trim()).filter(Boolean) || [];
-    
-    // Handle colors - ensure no undefined values
-    const colors = typeof data.colors === 'string' 
-      ? data.colors.split(',').map((color: string) => color.trim()).filter(Boolean)
-      : Array.isArray(data.colors) 
-        ? data.colors.filter((color): color is string => typeof color === 'string' && color.length > 0)
+    console.log("Validated data:", data); // Log validated data
+
+    // --- CORRECTED IMAGE HANDLING ---
+    // Use the 'images' array directly from the frontend payload.
+    // Filter out any potential empty strings or non-string values just in case.
+    const images = (data.images || []).filter(
+      (img): img is string => typeof img === 'string' && img.trim().length > 0
+    );
+    console.log("Final images array for DB:", images); // Log the final images array
+    // --- END CORRECTION ---
+
+
+    // Handle tags - ensure array format and filter empty strings
+    const tags = Array.isArray(data.tags)
+      ? data.tags.filter((tag): tag is string => typeof tag === 'string' && tag.trim().length > 0)
+      : typeof data.tags === 'string'
+        ? data.tags.split(',').map((tag: string) => tag.trim()).filter(Boolean)
         : [];
-    
+    console.log("Final tags:", tags);
+
+    // Handle sizes - ensure array format and filter empty strings
+    const sizes = Array.isArray(data.sizes)
+      ? data.sizes.filter((size): size is string => typeof size === 'string' && size.trim().length > 0)
+      : typeof data.sizes === 'string'
+        ? data.sizes.split(',').map((size: string) => size.trim()).filter(Boolean)
+        : [];
+    console.log("Final sizes:", sizes);
+
+    // Handle colors - ensure array format and filter empty strings/invalid hex codes
+    const colors = (
+      Array.isArray(data.colors)
+        ? data.colors
+        : typeof data.colors === 'string'
+          ? data.colors.split(',').map(c => c.trim())
+          : []
+    ).filter(color => typeof color === 'string' && /^#([0-9A-Fa-f]{3}){1,2}$/.test(color)); // Basic hex validation
+    console.log("Final colors:", colors);
+
+
     // Generate slug
     let slug = slugify(data.name);
-    
-    // Check if slug already exists
+
+    // Check if slug already exists and append random number if needed
     const existingProduct = await db.product.findUnique({
       where: { slug },
     });
-    
-    // If slug exists, append a random number
+
     if (existingProduct) {
-      slug = `${slug}-${Math.floor(Math.random() * 1000)}`;
+      const randomSuffix = Math.floor(Math.random() * 1000);
+      slug = `${slug}-${randomSuffix}`;
+      console.log(`Slug collision detected. Generated new slug: ${slug}`);
     }
-    
-    // Create the product
-    const product = await db.product.create({
-      data: {
+
+    // Create the product in the database
+    console.log("Creating product with data:", {
         name: data.name,
+        slug: slug, // Use the potentially modified slug
         description: data.description,
         price: data.price,
-        salePrice: data.salePrice || null,
+        salePrice: data.salePrice || null, // Use null if undefined/zero
         inventory: data.inventory,
+        // Store individual main images if your schema requires them
         noBgImage: data.noBgImage || "",
         modelImage: data.modelImage || "",
+        // Use the correctly processed 'images' array
         images: images,
         category: data.category,
         clothType: data.clothType,
@@ -259,16 +280,42 @@ export async function POST(request: NextRequest) {
         sizes: sizes,
         isActive: data.isActive,
         homePageFeatured: data.homePageFeatured,
-        slug: slug,
+      });
+
+    const product = await db.product.create({
+      data: {
+        name: data.name,
+        slug: slug, // Use the potentially modified slug
+        description: data.description,
+        price: data.price,
+        salePrice: data.salePrice && data.salePrice > 0 ? data.salePrice : null, // Store null if 0 or undefined
+        inventory: data.inventory,
+        // Store individual main images if your schema/frontend needs them separately
+        noBgImage: data.noBgImage || "",
+        modelImage: data.modelImage || "",
+        // Use the correctly processed 'images' array from the payload
+        images: images,
+        category: data.category,
+        clothType: data.clothType,
+        colors: colors,
+        tags: tags,
+        sizes: sizes,
+        isActive: data.isActive,
+        homePageFeatured: data.homePageFeatured,
+        // Add any other fields your Product model requires
       },
     });
-    
+
+    console.log("Product created successfully:", product.id);
     return NextResponse.json(product, { status: 201 });
+
   } catch (error) {
     console.error("Error creating product:", error);
+    // Provide more context in the error response if possible without leaking sensitive info
+    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
     return NextResponse.json(
-      { error: "Failed to create product" },
+      { error: "Failed to create product", details: errorMessage },
       { status: 500 }
     );
   }
-} 
+}

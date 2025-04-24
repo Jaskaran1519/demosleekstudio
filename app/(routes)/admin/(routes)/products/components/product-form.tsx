@@ -114,10 +114,10 @@ export const ProductForm = ({ initialData }: ProductFormProps) => {
 
       // Create images array with main images first, then additional images
       const images = [
-        data.noBgImage,
+        data.noBgImage, 
         data.modelImage,
-        ...(data.additionalImages || []).slice(0, 3) // Limit additional images to 3
-      ].filter(Boolean); // Remove any empty/undefined values
+        ...(data.additionalImages || [])
+      ].filter(Boolean);  // Remove any empty/undefined values
 
       const formData = {
         ...data,

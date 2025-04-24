@@ -18,7 +18,7 @@ async function currentUser() {
 export async function getUserOrders(limit?: number) {
   try {
     const user = await currentUser();
-    
+
     if (!user) {
       throw new Error("Not authenticated");
     }
@@ -60,7 +60,7 @@ export async function getUserOrders(limit?: number) {
 export async function getOrderById(orderId: string) {
   try {
     const user = await currentUser();
-    
+
     if (!user) {
       throw new Error("Not authenticated");
     }
@@ -114,14 +114,14 @@ export async function getOrderById(orderId: string) {
  * Admin: Get all orders with pagination, search, and filtering
  */
 export async function getAllOrders(
-  page = 1, 
-  limit = 10, 
+  page = 1,
+  limit = 10,
   query?: string,
   status?: string
 ) {
   try {
     const user = await currentUser();
-    
+
     if (!user || user.role !== "ADMIN") {
       throw new Error("Not authorized");
     }
@@ -131,8 +131,8 @@ export async function getAllOrders(
     // Build the where clause based on search and filter criteria
     const where: any = {};
 
-    // Add status filter if provided and not empty
-    if (status && status !== 'all') {
+    // Add status filter if provided and valid
+    if (status && status !== "all" && status !== "ALL") {
       where.status = status;
     }
 
@@ -140,8 +140,8 @@ export async function getAllOrders(
     if (query) {
       where.OR = [
         // Search by customer name or email
-        { user: { name: { contains: query, mode: 'insensitive' } } },
-        { user: { email: { contains: query, mode: 'insensitive' } } },
+        { user: { name: { contains: query, mode: "insensitive" } } },
+        { user: { email: { contains: query, mode: "insensitive" } } },
       ];
     }
 
@@ -196,7 +196,7 @@ export async function getAllOrders(
 export async function updateOrderStatus(orderId: string, status: string) {
   try {
     const user = await currentUser();
-    
+
     if (!user || user.role !== "ADMIN") {
       throw new Error("Not authorized");
     }
@@ -208,10 +208,10 @@ export async function updateOrderStatus(orderId: string, status: string) {
 
     revalidatePath(`/admin/orders/${orderId}`);
     revalidatePath(`/admin/orders`);
-    
+
     return updatedOrder;
   } catch (error) {
     console.error("Error updating order status:", error);
     throw new Error("Failed to update order status");
   }
-} 
+}

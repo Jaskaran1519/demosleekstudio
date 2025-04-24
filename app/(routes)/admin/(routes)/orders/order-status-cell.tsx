@@ -51,7 +51,7 @@ const statusConfig = {
 };
 
 export function OrderStatusCell({ orderId, initialStatus }: OrderStatusCellProps) {
-  const [status, setStatus] = useState<OrderStatus>(initialStatus);
+  const [status, setStatus] = useState<OrderStatus>(initialStatus as OrderStatus);
   const [isLoading, setIsLoading] = useState(false);
 
   const StatusIcon = statusConfig[status].icon;
@@ -116,4 +116,4 @@ export function OrderStatusCell({ orderId, initialStatus }: OrderStatusCellProps
       </DropdownMenuContent>
     </DropdownMenu>
   );
-} 
+}

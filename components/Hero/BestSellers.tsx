@@ -10,7 +10,6 @@ export const BestSellers = async () => {
 
   return (
     <div className="w-[90%] mx-auto mt-6 md:mt-10">
-      <h1 className="text-4xl my-3">Our BestSellers</h1>
       <Suspense fallback={<div>Loading...</div>}>
         <Carousel
           opts={{

@@ -20,11 +20,7 @@ export const ProductImages = ({ product }: ProductImagesProps) => {
   useEffect(() => {
     setIsWishlisted(isInWishlist(product.id));
   }, [product.id, isInWishlist]);
-  
-  // Get all images
-  const allImages = [product.modelImage, product.noBgImage, ...product.images];
-  console.log("All images:", allImages);
-  console.log("Product images:", product.images);
+
 
   const toggleWishlist = () => {
     if (isWishlisted) {
@@ -86,7 +82,7 @@ export const ProductImages = ({ product }: ProductImagesProps) => {
       <div className="relative mt-5">
         {/* Image slider with custom scrollbar */}
         <div className="image-slider flex overflow-x-auto gap-4 pb-4">
-          {allImages.map((image, index) => (
+          {product.images.map((image, index) => (
             <div
               key={index}
               className="relative w-64 md:w-80 lg:w-96 xl:w-104 xxl:w-200 flex-shrink-0 aspect-[4/5] rounded-lg overflow-hidden group"

@@ -57,7 +57,7 @@ export default function CheckoutPage() {
   // Calculate cart summary
   const subtotal = getTotalPrice();
   const shipping = 0; // Free shipping
-  const tax = subtotal * 0.05; // 5% tax
+  const tax = 0; // 5% tax
   const discount = appliedCoupon?.discountAmount || 0;
   const total = subtotal + shipping + tax - discount;
 

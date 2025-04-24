@@ -176,9 +176,9 @@ export function UserAddresses({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-semibold">My Addresses</h2>
+        <h2 className="text-xl font-semibold">My Addresses</h2>
         <Dialog
           open={isOpen}
           onOpenChange={(open) => {
@@ -187,14 +187,14 @@ export function UserAddresses({
           }}
         >
           <DialogTrigger asChild>
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
+            <Button size="sm">
+              <Plus className="w-3.5 h-3.5 mr-2" />
               Add Address
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-lg">
             <DialogHeader>
-              <DialogTitle>
+              <DialogTitle className="text-lg">
                 {isEditMode ? "Edit Address" : "Add New Address"}
               </DialogTitle>
             </DialogHeader>

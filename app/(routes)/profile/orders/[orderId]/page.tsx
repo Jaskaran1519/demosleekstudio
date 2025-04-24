@@ -16,13 +16,10 @@ import { getOrderById, getUserById } from "@/actions";
 import { Suspense } from "react";
 import { OrdersTableSkeleton } from "@/components/dashboard/skeletons";
 import { db } from "@/lib/db";
+import { OrderStatusBadge } from "@/app/(routes)/admin/(routes)/orders/components/order-status-badge";
 
 // Using any type to bypass the type check
-export default async function OrderDetailPage({
-  params,
-}: {
-  params: any
-}) {
+export default async function OrderDetailPage({ params }: { params: any }) {
   return (
     <Container className="py-8">
       <Suspense fallback={<OrdersTableSkeleton />}>
@@ -46,21 +43,21 @@ async function OrderContent({ orderId }: { orderId: string }) {
 
   let order;
   let shippingAddress;
-  
+
   try {
     order = await getOrderById(orderId);
-    
+
     if (!order) {
       return notFound();
     }
-    
+
     // Fetch the shipping address using the shippingAddressId
     shippingAddress = await db.address.findUnique({
-      where: { 
-        id: order.shippingAddressId 
-      }
+      where: {
+        id: order.shippingAddressId,
+      },
     });
-    
+
     if (!shippingAddress) {
       console.error(`Shipping address not found for order ${orderId}`);
     }
@@ -86,8 +83,8 @@ async function OrderContent({ orderId }: { orderId: string }) {
           <p className="text-muted-foreground">Order ID: {order.id}</p>
         </div>
 
-        <div className="px-4 py-2 rounded-full bg-gray-100 text-gray-800 font-medium">
-          {order.status}
+        <div>
+          <OrderStatusBadge status={order.status} />
         </div>
       </div>
 
@@ -98,7 +95,7 @@ async function OrderContent({ orderId }: { orderId: string }) {
             <h2 className="font-semibold">Order Date</h2>
           </div>
           <p>{formatDate(order.createdAt)}</p>
-          <p className="text-muted-foreground">Status: {order.status}</p>
+          <OrderStatusBadge status={order.status} />
         </div>
 
         <div className="rounded-lg border p-4">
@@ -118,7 +115,7 @@ async function OrderContent({ orderId }: { orderId: string }) {
         <div className="md:col-span-8 rounded-lg border p-6">
           <h2 className="text-xl font-semibold mb-4">Order Items</h2>
           <div className="space-y-4">
-            {order.items.map((item:any) => (
+            {order.items.map((item: any) => (
               <div
                 key={item.id}
                 className="flex border-b pb-4 last:pb-0 last:border-0"
@@ -218,14 +215,19 @@ async function OrderContent({ orderId }: { orderId: string }) {
           <>
             <p className="font-medium">{shippingAddress.name}</p>
             <p>{shippingAddress.addressLine1}</p>
-            {shippingAddress.addressLine2 && <p>{shippingAddress.addressLine2}</p>}
+            {shippingAddress.addressLine2 && (
+              <p>{shippingAddress.addressLine2}</p>
+            )}
             <p>
-              {shippingAddress.city}, {shippingAddress.state} {shippingAddress.postalCode}
+              {shippingAddress.city}, {shippingAddress.state}{" "}
+              {shippingAddress.postalCode}
             </p>
             <p>{shippingAddress.country}</p>
           </>
         ) : (
-          <p className="text-muted-foreground">Shipping address information not available</p>
+          <p className="text-muted-foreground">
+            Shipping address information not available
+          </p>
         )}
       </div>
     </>

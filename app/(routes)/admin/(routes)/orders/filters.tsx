@@ -17,15 +17,22 @@ import { OrderStatus } from "@prisma/client";
 export function OrdersTableFilters() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+
   const [query, setQuery] = useState(searchParams.get("query") || "");
   const [status, setStatus] = useState(searchParams.get("status") || "all");
   const [mounted, setMounted] = useState(false);
 
-  // Avoid hydration mismatch
+  // Avoid hydration mismatch and sync with URL params
   useEffect(() => {
     setMounted(true);
-  }, []);
+    // Sync status with URL params
+    const urlStatus = searchParams.get("status");
+    if (urlStatus) {
+      setStatus(urlStatus);
+    } else {
+      setStatus("all");
+    }
+  }, [searchParams]);
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -34,7 +41,7 @@ export function OrdersTableFilters() {
 
   function handleStatusChange(value: string) {
     setStatus(value);
-    updateFilters({ status: value === "all" ? "" : value });
+    updateFilters({ status: value });
   }
 
   function handleResetSearch() {
@@ -44,7 +51,7 @@ export function OrdersTableFilters() {
 
   function updateFilters(updates: { query?: string; status?: string }) {
     const params = new URLSearchParams(searchParams);
-    
+
     if (updates.query !== undefined) {
       if (updates.query) {
         params.set("query", updates.query);
@@ -52,7 +59,7 @@ export function OrdersTableFilters() {
         params.delete("query");
       }
     }
-    
+
     if (updates.status !== undefined) {
       if (updates.status) {
         params.set("status", updates.status);
@@ -60,10 +67,10 @@ export function OrdersTableFilters() {
         params.delete("status");
       }
     }
-    
+
     // Reset to page 1 when filters change
     params.delete("page");
-    
+
     router.push(`?${params.toString()}`);
   }
 
@@ -109,4 +116,4 @@ export function OrdersTableFilters() {
       </Select>
     </div>
   );
-} 
+}

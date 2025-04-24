@@ -1,22 +1,16 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow, 
-  Table 
+import {
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+  Table,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { 
-  Eye, 
-  Edit, 
-  Power, 
-  Star,
-  ExternalLink,
-} from "lucide-react";
+import { Eye, Edit, Power, Star, ExternalLink } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
@@ -35,8 +29,12 @@ export const ProductTable = ({ products }: ProductTableProps) => {
       <div className="flex flex-col items-center justify-center space-y-3 bg-white p-8 rounded-md shadow">
         <div className="relative w-60 h-60 flex items-center justify-center rounded-md bg-gray-100">
           <div className="text-center p-5">
-            <h3 className="mt-5 text-xl font-medium text-gray-900">No products found</h3>
-            <p className="mt-2 text-sm text-gray-500">Create your first product to get started.</p>
+            <h3 className="mt-5 text-xl font-medium text-gray-900">
+              No products found
+            </h3>
+            <p className="mt-2 text-sm text-gray-500">
+              Create your first product to get started.
+            </p>
           </div>
         </div>
         <Button onClick={() => router.push("/admin/products/new")}>
@@ -83,12 +81,14 @@ export const ProductTable = ({ products }: ProductTableProps) => {
               <TableCell className="font-medium">
                 <div className="flex flex-col">
                   <span className="text-sm font-medium">{product.name}</span>
-                  <Link 
-                    href={`/products/${product.slug}`} 
+                  <Link
+                    href={`/products/${product.slug}`}
                     target="_blank"
                     className="flex items-center text-xs text-blue-600 hover:underline"
                   >
-                    <span className="truncate max-w-[150px]">{product.slug}</span>
+                    <span className="truncate max-w-[150px]">
+                      {product.slug}
+                    </span>
                     <ExternalLink className="h-3 w-3 ml-1" />
                   </Link>
                 </div>
@@ -97,8 +97,12 @@ export const ProductTable = ({ products }: ProductTableProps) => {
                 <div className="flex flex-col">
                   {product.salePrice ? (
                     <>
-                      <span className="text-sm font-medium">{formatPrice(product.salePrice)}</span>
-                      <span className="text-xs text-gray-500 line-through">{formatPrice(product.price)}</span>
+                      <span className="text-sm font-medium">
+                        {formatPrice(product.price)}
+                      </span>
+                      <span className="text-xs text-gray-500 line-through">
+                        {formatPrice(product.salePrice)}
+                      </span>
                     </>
                   ) : (
                     <span>{formatPrice(product.price)}</span>
@@ -110,7 +114,11 @@ export const ProductTable = ({ products }: ProductTableProps) => {
               </TableCell>
               <TableCell>
                 <div className="flex items-center">
-                  <span className={product.inventory <= 5 ? "text-red-500 font-medium" : ""}>
+                  <span
+                    className={
+                      product.inventory <= 5 ? "text-red-500 font-medium" : ""
+                    }
+                  >
                     {product.inventory}
                   </span>
                   {product.inventory <= 5 && (
@@ -121,16 +129,21 @@ export const ProductTable = ({ products }: ProductTableProps) => {
                 </div>
               </TableCell>
               <TableCell>
-                <Badge 
+                <Badge
                   variant={product.isActive ? "default" : "secondary"}
-                  className={product.isActive ? "bg-green-500 hover:bg-green-600" : ""}
+                  className={
+                    product.isActive ? "bg-green-500 hover:bg-green-600" : ""
+                  }
                 >
                   {product.isActive ? "Active" : "Inactive"}
                 </Badge>
               </TableCell>
               <TableCell>
                 {product.homePageFeatured ? (
-                  <Badge variant="default" className="bg-amber-500 hover:bg-amber-600">
+                  <Badge
+                    variant="default"
+                    className="bg-amber-500 hover:bg-amber-600"
+                  >
                     Featured
                   </Badge>
                 ) : (
@@ -146,4 +159,4 @@ export const ProductTable = ({ products }: ProductTableProps) => {
       </Table>
     </div>
   );
-}; 
+};

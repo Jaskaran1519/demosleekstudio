@@ -82,6 +82,7 @@ enum ClothType {
   SUIT
   TUXEDO
   PANTS
+  SHOES
   JEANS
   DRESS
   SKIRT
@@ -95,6 +96,8 @@ enum ClothType {
   TANK_TOP
   CARDIGAN
   BLOUSE
+  LEHNGA
+  KURTI
   TOP
   LEGGINGS
   JUMPSUIT

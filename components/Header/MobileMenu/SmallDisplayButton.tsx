@@ -66,7 +66,7 @@ export default function LightweightMobileMenu({scrolled, shouldBeFixed}: {scroll
       >
         {/* Menu Header */}
         <div className="p-4 border-b flex justify-between items-center bg-white">
-          <h2 className="text-xl">SLEEK STUDIO</h2>
+          <h2 className="text-xl text-black z-99">SLEEK STUDIO</h2>
           <button 
             onClick={() => setIsOpen(false)} 
             className="p-2 text-foreground focus:outline-none"
