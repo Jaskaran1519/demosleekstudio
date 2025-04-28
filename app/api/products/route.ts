@@ -16,6 +16,8 @@ const productsQuerySchema = z.object({
   page: z.coerce.number().positive().default(1),
   pageSize: z.coerce.number().positive().default(12),
   skip: z.coerce.number().nonnegative().optional(),
+  featured: z.coerce.boolean().optional(),
+  limit: z.coerce.number().positive().optional(),
 });
 
 // Product schema for POST/PATCH (creation and update)
@@ -56,23 +58,26 @@ export async function GET(request: NextRequest) {
     }
     
     // Add other query parameters
-    const search = url.searchParams.get("search");
-    if (search) queryParams.search = search;
+    const searchParam = url.searchParams.get("search");
+    if (searchParam) queryParams.search = searchParam;
     
-    const sort = url.searchParams.get("sort");
-    if (sort) queryParams.sort = sort;
+    const sortParam = url.searchParams.get("sort");
+    if (sortParam) queryParams.sort = sortParam;
     
-    const page = url.searchParams.get("page");
-    if (page) queryParams.page = page;
+    const pageParam = url.searchParams.get("page");
+    if (pageParam) queryParams.page = parseInt(pageParam);
     
-    const pageSize = url.searchParams.get("pageSize");
-    if (pageSize) queryParams.pageSize = pageSize;
+    const pageSizeParam = url.searchParams.get("pageSize");
+    if (pageSizeParam) queryParams.pageSize = parseInt(pageSizeParam);
     
-    const skip = url.searchParams.get("skip");
-    if (skip) queryParams.skip = skip;
+    const skipParam = url.searchParams.get("skip");
+    if (skipParam) queryParams.skip = parseInt(skipParam);
     
-    // Debug: log all query parameters
-    console.log("Query params:", queryParams);
+    const featuredParam = url.searchParams.get("featured");
+    if (featuredParam) queryParams.featured = featuredParam === "true";
+    
+    const limitParam = url.searchParams.get("limit");
+    if (limitParam) queryParams.limit = parseInt(limitParam);
     
     // Parse and validate query parameters
     const parsed = productsQuerySchema.safeParse(queryParams);
@@ -85,18 +90,29 @@ export async function GET(request: NextRequest) {
       );
     }
     
-    const { search: querySearch, category, clothType, sort: querySort, page: queryPage, pageSize: queryPageSize, skip: querySkip } = parsed.data;
-    
-    // Debug: log parsed search term
-    console.log("Search term:", querySearch);
+    const { 
+      search, 
+      category, 
+      clothType, 
+      sort, 
+      page, 
+      pageSize, 
+      skip,
+      featured,
+      limit
+    } = parsed.data;
     
     // Build query filters
     const where: any = { isActive: true };
     
     if (category) {
-      where.category = {
-        in: Array.isArray(category) ? category : [category]
-      };
+      if (Array.isArray(category)) {
+        where.category = {
+          in: category
+        };
+      } else {
+        where.category = category.toUpperCase();
+      }
     }
     
     if (clothType) {
@@ -105,58 +121,61 @@ export async function GET(request: NextRequest) {
       };
     }
     
-    if (querySearch) {
-      // Simplify the search to focus on the two most important fields
-      where.OR = [
-        // Search in name with case-insensitive contains
-        { 
-          name: { 
-            contains: querySearch,
-            mode: "insensitive"
-          } 
-        },
-        // Search in description with case-insensitive contains
-        { 
-          description: { 
-            contains: querySearch,
-            mode: "insensitive"
-          } 
-        }
-        // Note: We're removing the tags search which might be causing issues
-      ];
-      
-      // Debug specific search behavior
-      console.log("Using search query:", querySearch);
-      console.log("With search filter:", JSON.stringify(where.OR, null, 2));
+    if (featured !== undefined) {
+      where.homePageFeatured = featured;
     }
     
-    // Debug: log final where clause
-    console.log("Final where clause:", JSON.stringify(where, null, 2));
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
+        { tags: { has: search } },
+      ];
+    }
     
     // Determine sort order
-    let orderBy: any = { createdAt: "desc" };
+    let orderBy: any = { createdAt: 'desc' }; // Default sort: newest first
     
-    if (querySort === "price-asc") {
-      orderBy = { price: "asc" };
-    } else if (querySort === "price-desc") {
-      orderBy = { price: "desc" };
-    } else if (querySort === "popularity") {
-      orderBy = { timesSold: "desc" };
+    if (sort === 'price-asc') {
+      orderBy = { price: 'asc' };
+    } else if (sort === 'price-desc') {
+      orderBy = { price: 'desc' };
+    } else if (sort === 'popularity') {
+      orderBy = { timesSold: 'desc' };
     }
     
-    // For infinite scrolling, use skip if provided
-    const skipAmount = querySkip !== undefined ? querySkip : (queryPage - 1) * queryPageSize;
+    // Calculate pagination
+    const take = limit || pageSize || 12;
+    const skipAmount = skip !== undefined ? skip : (page - 1) * take;
     
-    // Fetch products with pagination
+    // Fetch products
     const products = await db.product.findMany({
       where,
       orderBy,
       skip: skipAmount,
-      take: queryPageSize,
+      take,
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        slug: true,
+        price: true,
+        salePrice: true,
+        inventory: true,
+        noBgImage: true,
+        modelImage: true,
+        images: true,
+        category: true,
+        clothType: true,
+        tags: true,
+        sizes: true,
+        isActive: true,
+        homePageFeatured: true,
+        createdAt: true,
+        updatedAt: true,
+        wishedByIds: true,
+      },
     });
-    
-    // Debug: log products found
-    console.log(`Found ${products.length} products out of ${await db.product.count({ where })}`);
     
     // Get total count for pagination
     const totalCount = await db.product.count({ where });
@@ -165,10 +184,10 @@ export async function GET(request: NextRequest) {
       products,
       totalCount,
       hasMore: skipAmount + products.length < totalCount,
-      page: queryPage,
-      pageSize: queryPageSize,
-      totalPages: Math.ceil(totalCount / queryPageSize),
+      totalPages: Math.ceil(totalCount / Number(take)),
+      currentPage: page,
     });
+    
   } catch (error) {
     console.error("Error fetching products:", error);
     return NextResponse.json(
@@ -178,7 +197,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/products - Create a new product
+// POST /api/products - Create a new product (Admin only)
 export async function POST(request: NextRequest) {
   try {
     // Check authentication
@@ -209,15 +228,56 @@ export async function POST(request: NextRequest) {
     const data = parsed.data;
     console.log("Validated data:", data); // Log validated data
 
-    // --- CORRECTED IMAGE HANDLING ---
-    // Use the 'images' array directly from the frontend payload.
-    // Filter out any potential empty strings or non-string values just in case.
-    const images = (data.images || []).filter(
-      (img): img is string => typeof img === 'string' && img.trim().length > 0
-    );
-    console.log("Final images array for DB:", images); // Log the final images array
-    // --- END CORRECTION ---
+    // Process noBgImage if it's a base64 string
+    let noBgImageUrl = "";
+    if (data.noBgImage) {
+      if (data.noBgImage.startsWith('data:')) {
+        const uploadResult = await uploadImage(data.noBgImage);
+        noBgImageUrl = uploadResult.url;
+      } else {
+        noBgImageUrl = data.noBgImage;
+      }
+    }
 
+    // Process modelImage if it's a base64 string
+    let modelImageUrl = "";
+    if (data.modelImage) {
+      if (data.modelImage.startsWith('data:')) {
+        const uploadResult = await uploadImage(data.modelImage);
+        modelImageUrl = uploadResult.url;
+      } else {
+        modelImageUrl = data.modelImage;
+      }
+    }
+
+    // Process additional images
+    const additionalImages = [];
+    if (data.images && Array.isArray(data.images)) {
+      for (const image of data.images) {
+        // Skip the main images that might be duplicated in the images array
+        if (image === data.noBgImage || image === data.modelImage) {
+          continue;
+        }
+        
+        if (typeof image === 'string' && image.trim().length > 0) {
+          if (image.startsWith('data:')) {
+            const uploadResult = await uploadImage(image);
+            additionalImages.push(uploadResult.url);
+          } else {
+            additionalImages.push(image);
+          }
+        }
+      }
+    }
+
+    // Create the final images array with only Cloudinary URLs
+    const images = [
+      noBgImageUrl,
+      modelImageUrl,
+      ...additionalImages
+    ].filter(img => typeof img === 'string' && img.trim().length > 0);
+    
+    console.log("Final images array for DB:", images); // Log the final images array
 
     // Handle tags - ensure array format and filter empty strings
     const tags = Array.isArray(data.tags)
@@ -245,7 +305,6 @@ export async function POST(request: NextRequest) {
     ).filter(color => typeof color === 'string' && /^#([0-9A-Fa-f]{3}){1,2}$/.test(color)); // Basic hex validation
     console.log("Final colors:", colors);
 
-
     // Generate slug
     let slug = slugify(data.name);
 
@@ -269,8 +328,8 @@ export async function POST(request: NextRequest) {
         salePrice: data.salePrice || null, // Use null if undefined/zero
         inventory: data.inventory,
         // Store individual main images if your schema requires them
-        noBgImage: data.noBgImage || "",
-        modelImage: data.modelImage || "",
+        noBgImage: noBgImageUrl,
+        modelImage: modelImageUrl,
         // Use the correctly processed 'images' array
         images: images,
         category: data.category,
@@ -291,8 +350,8 @@ export async function POST(request: NextRequest) {
         salePrice: data.salePrice && data.salePrice > 0 ? data.salePrice : null, // Store null if 0 or undefined
         inventory: data.inventory,
         // Store individual main images if your schema/frontend needs them separately
-        noBgImage: data.noBgImage || "",
-        modelImage: data.modelImage || "",
+        noBgImage: noBgImageUrl,
+        modelImage: modelImageUrl,
         // Use the correctly processed 'images' array from the payload
         images: images,
         category: data.category,

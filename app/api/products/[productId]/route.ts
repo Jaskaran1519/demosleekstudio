@@ -129,23 +129,12 @@ export async function PATCH(
     const data = validationResult.data;
     const updateData: any = { ...data };
     
-    // Process images if new ones are provided
-    const images = [...(existingProduct.images || [])];
-    let shouldReplaceImages = false;
-    
-    // Process no background image
+    // Process noBgImage if it's a base64 string
     if (data.noBgImage && data.noBgImage !== existingProduct.noBgImage) {
       if (data.noBgImage.startsWith('data:')) {
         // Upload new image
         const uploadResult = await uploadImage(data.noBgImage);
         updateData.noBgImage = uploadResult.url;
-        
-        // Mark the first image for replacement
-        if (images.length > 0 && images[0] === existingProduct.noBgImage) {
-          images[0] = uploadResult.url;
-        } else {
-          shouldReplaceImages = true; // Need to rebuild the images array
-        }
         
         // Try to delete old image if it exists
         if (existingProduct.noBgImage) {
@@ -161,19 +150,12 @@ export async function PATCH(
       }
     }
     
-    // Process model image
+    // Process modelImage if it's a base64 string
     if (data.modelImage && data.modelImage !== existingProduct.modelImage) {
       if (data.modelImage.startsWith('data:')) {
         // Upload new image
         const uploadResult = await uploadImage(data.modelImage);
         updateData.modelImage = uploadResult.url;
-        
-        // Mark the second image for replacement
-        if (images.length > 1 && images[1] === existingProduct.modelImage) {
-          images[1] = uploadResult.url;
-        } else {
-          shouldReplaceImages = true; // Need to rebuild the images array
-        }
         
         // Try to delete old image
         if (existingProduct.modelImage) {
@@ -189,54 +171,69 @@ export async function PATCH(
       }
     }
     
-    // Handle additional images if provided
+    // Handle images array - rebuild it completely to avoid duplicates
     if (data.images && Array.isArray(data.images)) {
-      shouldReplaceImages = true;
       const newImages = [];
       
-      // Keep the first two images (noBgImage and modelImage) if not modified
-      if (!data.noBgImage && existingProduct.noBgImage) {
-        newImages.push(existingProduct.noBgImage);
-      } else if (data.noBgImage && !data.noBgImage.startsWith('data:')) {
-        newImages.push(data.noBgImage);
-      } else if (updateData.noBgImage) {
-        newImages.push(updateData.noBgImage);
+      // Add noBgImage (either updated or existing)
+      const noBgImage = updateData.noBgImage || existingProduct.noBgImage;
+      if (noBgImage) {
+        newImages.push(noBgImage);
       }
       
-      if (!data.modelImage && existingProduct.modelImage) {
-        newImages.push(existingProduct.modelImage);
-      } else if (data.modelImage && !data.modelImage.startsWith('data:')) {
-        newImages.push(data.modelImage);
-      } else if (updateData.modelImage) {
-        newImages.push(updateData.modelImage);
+      // Add modelImage (either updated or existing)
+      const modelImage = updateData.modelImage || existingProduct.modelImage;
+      if (modelImage) {
+        newImages.push(modelImage);
       }
       
-      // Process additional images
+      // Process additional images from the data.images array
       for (const image of data.images) {
+        // Skip if it's one of the main images to avoid duplicates
+        if (image === data.noBgImage || image === data.modelImage || 
+            image === existingProduct.noBgImage || image === existingProduct.modelImage) {
+          continue;
+        }
+        
+        // Process base64 images
         if (image.startsWith('data:')) {
           const uploadResult = await uploadImage(image);
           newImages.push(uploadResult.url);
         } else {
+          // It's already a URL, add it directly
           newImages.push(image);
         }
       }
       
+      // Update the images array
       updateData.images = newImages;
-    } else if (shouldReplaceImages) {
-      // If we need to rebuild the images array but no new additional images were provided
+    } else {
+      // If no new images provided, rebuild the array with main images to avoid duplicates
       updateData.images = [];
       
+      // Add noBgImage
       if (updateData.noBgImage || existingProduct.noBgImage) {
         updateData.images.push(updateData.noBgImage || existingProduct.noBgImage);
       }
       
+      // Add modelImage
       if (updateData.modelImage || existingProduct.modelImage) {
         updateData.images.push(updateData.modelImage || existingProduct.modelImage);
       }
       
       // Add any remaining images from the existing product
       if (existingProduct.images && existingProduct.images.length > 2) {
-        updateData.images.push(...existingProduct.images.slice(2));
+        // Filter out any images that might be duplicates of the main images
+        const mainImages = [
+          updateData.noBgImage || existingProduct.noBgImage,
+          updateData.modelImage || existingProduct.modelImage
+        ].filter(Boolean);
+        
+        const additionalImages = existingProduct.images.filter(img => 
+          !mainImages.includes(img)
+        );
+        
+        updateData.images.push(...additionalImages);
       }
     }
     

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import {  EB_Garamond } from "next/font/google";
+import {  Arimo, Crimson_Text, Dosis, EB_Garamond } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/components/auth/auth-provider";
 import Navbar from "@/components/Header/Navbar";
@@ -7,7 +7,7 @@ import { ScrollProgress } from "@/components/magicui/scroll-progress";
 import SmoothScroll from "@/lib/SmoothScroll";
 import Footer from "@/components/Others/Fotoer";
 
-const geistSans = EB_Garamond({
+const geistSans = Crimson_Text({
   weight: "400",
   subsets: ["latin"]
 });

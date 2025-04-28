@@ -41,6 +41,7 @@ export const ProductImages = ({ product }: ProductImagesProps) => {
     }
     setIsWishlisted(!isWishlisted);
   };
+  console.log(product.images)
 
   return (
     <div>

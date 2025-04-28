@@ -48,6 +48,23 @@ const config: Config = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      keyframes: {
+        shimmer: {
+          // Define the movement of the background gradient
+          // We move it from far left (-100%) to far right (100%)
+          // The gradient itself will be wider than the element (e.g., 200%)
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
+        }
+      },
+      animation: {
+        // Create a utility class 'animate-shimmer'
+        // Uses the 'shimmer' keyframes
+        // Duration: 1s
+        // Timing function: linear (smooth, constant speed)
+        // Iteration count: infinite (repeats forever)
+        shimmer: 'shimmer 1s linear infinite'
+      }
     },
   },
   plugins: [],

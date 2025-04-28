@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ImageIcon, Loader2 } from "lucide-react";
+import { ImageIcon, Loader2, AlertCircle } from "lucide-react";
 import Image from "next/image";
+import { toast } from "sonner";
 
 interface FileUploadProps {
   endpoint: string;
@@ -11,19 +12,32 @@ interface FileUploadProps {
   onChange: (url: { url: string }) => void;
 }
 
+// Maximum file size: 700KB
+const MAX_FILE_SIZE = 700 * 1024; // 700KB in bytes
+
 export const FileUpload = ({
   endpoint,
   value = "",
   onChange,
 }: FileUploadProps) => {
   const [isUploading, setIsUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Check file size
+    if (file.size > MAX_FILE_SIZE) {
+      setError(`File size exceeds 700KB limit (${(file.size / 1024).toFixed(2)}KB)`);
+      toast.error(`File size exceeds 700KB limit (${(file.size / 1024).toFixed(2)}KB)`);
+      e.target.value = ''; // Clear the input
+      return;
+    }
+
     try {
       setIsUploading(true);
+      setError(null);
       
       // Convert file to base64
       const reader = new FileReader();
@@ -34,6 +48,7 @@ export const FileUpload = ({
       };
     } catch (error) {
       console.error("Error uploading file:", error);
+      setError("An error occurred while uploading the file");
     } finally {
       setIsUploading(false);
     }
@@ -70,8 +85,14 @@ export const FileUpload = ({
                   <span className="font-semibold">Click to upload</span> or drag and drop
                 </p>
                 <p className="text-xs text-gray-500">
-                  PNG, JPG or WebP (Max: 10MB)
+                  PNG, JPG or WebP (Max: 700KB)
                 </p>
+                {error && (
+                  <div className="flex items-center mt-2 text-red-500 text-xs">
+                    <AlertCircle className="h-3 w-3 mr-1" />
+                    {error}
+                  </div>
+                )}
               </>
             )}
           </div>
@@ -86,4 +107,4 @@ export const FileUpload = ({
       )}
     </div>
   );
-}; 
+};

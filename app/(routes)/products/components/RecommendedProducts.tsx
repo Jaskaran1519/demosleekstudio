@@ -1,4 +1,3 @@
-import { db } from "@/lib/db";
 import { Product } from "@/types";
 import ProductCard from "@/components/Others/ProductCard";
 import {
@@ -8,29 +7,17 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { getSimilarProducts } from "@/actions/products";
 
 interface RecommendedProductsProps {
   currentProduct: Product;
 }
 
 export const RecommendedProducts = async ({ currentProduct }: RecommendedProductsProps) => {
-  const recommendedProducts = await db.product.findMany({
-    where: {
-      AND: [
-        { id: { not: currentProduct.id } },
-        {
-          OR: [
-            { tags: { hasSome: currentProduct.tags } },
-            { category: currentProduct.category },
-            { clothType: currentProduct.clothType },
-          ],
-        },
-      ],
-    },
-    take: 5,
-  });
+  // Use server action instead of direct database access
+  const recommendedProducts = await getSimilarProducts(currentProduct.id, 5);
 
-  if (recommendedProducts.length === 0) return null;
+  if (!recommendedProducts || recommendedProducts.length === 0) return null;
 
   return (
     <div className="space-y-4 my-10">
@@ -54,4 +41,4 @@ export const RecommendedProducts = async ({ currentProduct }: RecommendedProduct
       </Carousel>
     </div>
   );
-}; 
+};

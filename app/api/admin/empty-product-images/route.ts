@@ -33,5 +33,6 @@ export async function POST(request: NextRequest) {
       { error: "Failed to empty product images" },
       { status: 500 }
     );
+    
   }
 } 

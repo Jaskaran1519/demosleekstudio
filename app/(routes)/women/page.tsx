@@ -1,11 +1,15 @@
 import MainVideo from '@/components/Others/MainVideo';
 import CategoryContent from '@/components/Category/CategoryContent';
 import React from 'react';
-import { getCategoryProducts } from '@/actions/products';
 import CategoryProducts from '@/components/Category/CategoryProducts';
 
 export default async function Page() {
-  const { products } = await getCategoryProducts('WOMEN');
+  // Fetch products from the API endpoint instead of server action
+  const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/products/category/WOMEN`, {
+    cache: 'no-store'
+  });
+  const data = await response.json();
+  const products = data.products;
   
   return (
     <div className="w-full max-w-[2400px] min-h-screen">
