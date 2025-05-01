@@ -27,17 +27,17 @@ const AccordionItem = ({
   if (!children) {
     // Leaf node (no children) - Top Level
     return (
-      <div className="px-5 py-4"> {/* Increased padding */}
+      <div className="px-5 py-4"> {/* Maintained padding */}
         {link ? (
           <Link
             href={link}
-            className="block text-gray-800 text-2xl uppercase" // Increased font size, capitalized
+            className="block text-gray-800 text-xl uppercase" // Reduced from 2xl to xl
             onClick={onClose}
           >
             {title}
           </Link>
         ) : (
-          <span className="text-2xl uppercase">{title}</span> // Increased font size, capitalized
+          <span className="text-xl uppercase">{title}</span> // Reduced from 2xl to xl
         )}
       </div>
     );
@@ -47,13 +47,13 @@ const AccordionItem = ({
   return (
     <div className="border-b border-gray-100 last:border-b-0">
       <button
-        className="flex justify-between items-center w-full px-5 py-4 text-left text-2xl font-normal uppercase" // Increased padding & font size, capitalized
+        className="flex justify-between items-center w-full px-5 py-4 text-left text-xl font-normal uppercase" // Reduced from 2xl to xl
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
       >
         <span>{title}</span>
         <span className="transition-transform duration-200" style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>
-          <ChevronDown size={24} /> {/* Increased icon size */}
+          <ChevronDown size={20} /> {/* Reduced from 24 to 20 */}
         </span>
       </button>
 
@@ -62,7 +62,7 @@ const AccordionItem = ({
           isOpen ? 'max-h-96' : 'max-h-0' // max-h might need adjustment if content is very long
         }`}
       >
-        <div className="px-5 pb-3"> {/* Increased padding */}
+        <div className="px-5 pb-3"> {/* Maintained padding */}
           {children}
         </div>
       </div>
@@ -90,17 +90,17 @@ const NestedAccordionItem = ({
   if (!children) {
     // Leaf node (no children) - Nested
     return (
-      <div className={`py-3 ${paddingLeftClass}`}> {/* Increased padding */}
+      <div className={`py-3 ${paddingLeftClass}`}> {/* Maintained padding */}
         {link ? (
           <Link
             href={link}
-            className="block text-gray-600 hover:text-blue-600 text-xl uppercase" // Increased font size, capitalized
+            className="block text-gray-600 hover:text-blue-600 text-lg uppercase" // Reduced from xl to lg
             onClick={onClose}
           >
             {title}
           </Link>
         ) : (
-          <span className="text-xl uppercase">{title}</span> // Increased font size, capitalized
+          <span className="text-lg uppercase">{title}</span> // Reduced from xl to lg
         )}
       </div>
     );
@@ -110,13 +110,13 @@ const NestedAccordionItem = ({
   return (
     <div className="mt-1">
       <button
-        className={`flex justify-between items-center w-full py-3 ${paddingLeftClass} pr-2 text-left text-xl font-normal uppercase`} // Increased padding & font size, capitalized
+        className={`flex justify-between items-center w-full py-3 ${paddingLeftClass} pr-2 text-left text-lg font-normal uppercase`} // Reduced from xl to lg
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
       >
         <span>{title}</span>
         <span className="transition-transform duration-200" style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>
-          <ChevronDown size={24} /> {/* Increased icon size */}
+          <ChevronDown size={20} /> {/* Reduced from 24 to 20 */}
         </span>
       </button>
 
@@ -127,7 +127,7 @@ const NestedAccordionItem = ({
       >
         <div className={`pl-${(depth + 1) * 2}`}> {/* Indentation for children */}
           {children.map((item, index) => (
-            <div key={index} className="py-2"> {/* Increased padding */}
+            <div key={index} className="py-2"> {/* Maintained padding */}
               {item.children ? (
                 <NestedAccordionItem
                   title={item.title}
@@ -141,13 +141,13 @@ const NestedAccordionItem = ({
                   {item.link ? (
                     <Link
                       href={item.link}
-                      className="block text-gray-600 hover:text-blue-600 text-xl uppercase" // Increased font size, capitalized
+                      className="block text-gray-600 hover:text-blue-600 text-lg uppercase" // Reduced from xl to lg
                       onClick={onClose}
                     >
                       {item.title}
                     </Link>
                   ) : (
-                    <span className="text-xl uppercase">{item.title}</span> // Increased font size, capitalized
+                    <span className="text-lg uppercase">{item.title}</span> // Reduced from xl to lg
                   )}
                 </div>
               )}
@@ -184,17 +184,17 @@ export default function MobileMenu({ items, onClose }: CustomMobileMenuProps) {
                     />
                   ) : (
                     // Second-level item without children (simple link/span)
-                    <div className="py-3 pl-5 bg-white"> {/* Increased padding */}
+                    <div className="py-3 pl-5 bg-white"> {/* Maintained padding */}
                       {child.link ? (
                         <Link
                           href={child.link}
-                          className="block text-gray-600 cursor-pointer text-xl uppercase" // Increased font size, capitalized
+                          className="block text-gray-600 cursor-pointer text-lg uppercase" // Reduced from xl to lg
                           onClick={onClose}
                         >
                           {child.title}
                         </Link>
                       ) : (
-                        <span className="text-xl uppercase">{child.title}</span> // Increased font size, capitalized
+                        <span className="text-lg uppercase">{child.title}</span> // Reduced from xl to lg
                       )}
                     </div>
                   )}

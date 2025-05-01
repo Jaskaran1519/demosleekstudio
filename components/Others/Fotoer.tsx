@@ -1,186 +1,165 @@
-"use client"
-
-import type React from "react"
-
-import Link from "next/link"
-import { useState } from "react"
+// components/Footer.tsx
+import Link from 'next/link';
+import { Instagram, Facebook, Phone, ArrowRight, Heart } from 'lucide-react'; // Using Phone icon for WhatsApp
 
 export default function Footer() {
-  const [formData, setFormData] = useState({
-    firstName: "",
-    phoneNumber: "",
-  })
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Handle form submission logic here
-    console.log("Form submitted:", formData)
-    // Reset form
-    setFormData({ firstName: "", phoneNumber: "" })
-  }
+  const currentYear = 2025; // As requested
 
   return (
-    <footer className="bg-black text-white pt-16 pb-10 px-6 md:px-12 lg:px-24">
-      <div className="container mx-auto max-w-7xl">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16">
-          {/* Brand Section */}
-          <div className="space-y-4">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Sleek Studio</h2>
-            <p className="text-base text-gray-300 font-light max-w-xs leading-relaxed">Best in what we do</p>
-            <div className="pt-12">
-              <ul className="space-y-3 text-xs uppercase tracking-wide">
-                <li>
-                  <Link href="/terms" className="hover:opacity-80 transition-opacity">
-                    Terms of service
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/privacy" className="hover:opacity-80 transition-opacity">
-                    Privacy policy
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/privacy" className="hover:opacity-80 transition-opacity">
-                    Cancel & Refund Policy
-                  </Link>
-                </li>
-              </ul>
-            </div>
+    // Changed background to off-black (gray-900), base text to light gray (gray-300)
+    <footer className="bg-black text-gray-300 pt-16 pb-8 font-sans relative overflow-hidden">
+      <div className="container mx-auto px-6 relative z-10"> {/* Ensure content is above the shape */}
+
+        {/* Top Section: Columns */}
+        <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-12">
+
+          {/* Column 1: Company Name & CTA */}
+          <div className="md:col-span-1 flex flex-col items-start md:items-center space-y-4">
+            <Link href="/" className="text-2xl text-white"> {/* Heading text white */}
+              Sleek Studio
+            </Link>
+            <Link
+              href="/contact"
+              className="inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium text-white bg-transparent border-[1px] border-white rounded-full transition-colors duration-200"
+            >
+              Let's Talk
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
           </div>
 
-          {/* Get In Touch Section */}
-          <div className="space-y-8">
-            <h3 className="text-sm uppercase tracking-wider font-semibold">Timings</h3>
-            <div className="space-y-2">
-              <p className="text-sm uppercase text-gray-300">Mon-Saturday</p>
-              <p className="text-sm uppercase text-gray-300">10am-4pm EST</p>
-            </div>
-            <div className="space-y-4 pt-6">
-              <h4 className="text-sm uppercase font-medium">Contact</h4>
-              <ul className="space-y-3 text-sm uppercase">
-                <li>
-                  <Link href="https://instagram.com" className="hover:text-gray-300 transition-colors">
-                    Instagram
-                  </Link>
-                </li>
-                <li>
-                  <Link href="https://pinterest.com" className="hover:text-gray-300 transition-colors">
-                    Whatsapp
-                  </Link>
-                </li>
-              </ul>
-            </div>
+          {/* Column 2: Products */}
+          <div className="md:col-span-1">
+            <h3 className="font-semibold text-white mb-4">Products</h3> {/* Heading text white */}
+            <ul className="space-y-2">
+              <li>
+                {/* Lighter gray links, white on hover */}
+                <Link href="/products?category=MEN" className="text-sm text-gray-400 hover:text-white hover:underline">
+                  Men Collection
+                </Link>
+              </li>
+              <li>
+                <Link href="/products?category=WOMEN" className="text-sm text-gray-400 hover:text-white hover:underline">
+                  Women Collection
+                </Link>
+              </li>
+            </ul>
           </div>
 
-          {/* Mailing List Section */}
-          <div className="space-y-8">
-            <h3 className="text-sm uppercase tracking-wider font-semibold">Get In Touch</h3>
-            <form onSubmit={handleSubmit} className="space-y-8">
-              <div className="space-y-2">
-                <label htmlFor="firstName" className="text-xs uppercase block text-gray-300">
-                  First Name
-                </label>
-                <input
-                  type="text"
-                  id="firstName"
-                  name="firstName"
-                  value={formData.firstName}
-                  onChange={handleChange}
-                  className="w-full bg-transparent border-b border-white/30 pb-2 pt-1 focus:outline-none focus:border-white text-white text-base"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="phoneNumber" className="text-xs uppercase block text-gray-300">
-                  Phone Number
-                </label>
-                <input
-                  type="tel"
-                  id="phoneNumber"
-                  name="phoneNumber"
-                  value={formData.phoneNumber}
-                  onChange={handleChange}
-                  className="w-full bg-transparent border-b border-white/30 pb-2 pt-1 focus:outline-none focus:border-white text-white text-base"
-                  required
-                />
-              </div>
-              <div className="pt-6">
-                <button
-                  type="submit"
-                  className="border border-white rounded-full px-8 py-3 text-sm uppercase font-medium hover:bg-white hover:text-black transition-all duration-300"
-                >
-                  Subscribe
-                </button>
-              </div>
-            </form>
-          </div>
-
-          {/* Explore Section */}
-          <div className="space-y-8">
-            <h3 className="text-sm uppercase tracking-wider font-semibold">Explore</h3>
-            <ul className="space-y-3 text-sm uppercase">
+          {/* Column 3: Support */}
+          <div className="md:col-span-1">
+            <h3 className="font-semibold text-white mb-4">Support</h3> {/* Heading text white */}
+            <ul className="space-y-2">
               <li>
-                <Link href="/" className="hover:text-gray-300 transition-colors">
-                  Home
+                <Link href="/term-conditions" className="text-sm text-gray-400 hover:text-white hover:underline">
+                  Term & Conditions
                 </Link>
               </li>
               <li>
-                <Link href="/services" className="hover:text-gray-300 transition-colors">
-                  Services
-                </Link>
-              </li>
-              <li>
-                <Link href="/our-story" className="hover:text-gray-300 transition-colors">
-                  Our Story
-                </Link>
-              </li>
-              <li>
-                <Link href="/works" className="hover:text-gray-300 transition-colors">
-                  Works
-                </Link>
-              </li>
-              <li>
-                <Link href="/glossary" className="hover:text-gray-300 transition-colors">
-                  Glossary
-                </Link>
-              </li>
-              <li>
-                <Link href="/contact" className="hover:text-gray-300 transition-colors">
+                <Link href="/contact" className="text-sm text-gray-400 hover:text-white hover:underline">
                   Contact
                 </Link>
               </li>
             </ul>
-            <div className="pt-12">
-              <ul className="space-y-3 text-sm uppercase">
-                <li>
-                  <Link href="/contact" className="text-blue-400 hover:text-blue-300 transition-colors">
-                    Contact
-                  </Link>
-                </li>
-                <li>
-                  <Link href="https://instagram.com" className="text-blue-400 hover:text-blue-300 transition-colors">
-                    Instagram
-                  </Link>
-                </li>
-                <li>
-                  <Link href="https://pinterest.com" className="text-blue-400 hover:text-blue-300 transition-colors">
-                    Pinterest
-                  </Link>
-                </li>
-              </ul>
+          </div>
+
+          {/* Column 4: Company */}
+          <div className="md:col-span-1">
+            <h3 className="font-semibold text-white mb-4">Company</h3> {/* Heading text white */}
+            <ul className="space-y-2">
+              <li>
+                <Link href="/about-us" className="text-sm text-gray-400 hover:text-white hover:underline">
+                  About Us
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Column 5: Social & Copyright - Only visible on lg screens in its original position */}
+          <div className="hidden lg:flex lg:col-span-1 flex-col items-center">
+            {/* Increased spacing between icons to space-x-6 */}
+            <div className="flex space-x-6 mb-4">
+              <Link href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                {/* Slightly darker icon color, white on hover */}
+                <Instagram className="h-5 w-5 text-gray-500 hover:text-white transition-colors" />
+              </Link>
+              <Link href="https://wa.me/yourphonenumber" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+                <Phone className="h-5 w-5 text-gray-500 hover:text-white transition-colors" />
+              </Link>
+              <Link href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                <Facebook className="h-5 w-5 text-gray-500 hover:text-white transition-colors" />
+              </Link>
             </div>
+            {/* Slightly darker copyright text */}
+            <p className="text-xs text-gray-500">Sleek Studio © {currentYear}</p>
           </div>
         </div>
-        
-        <div className="mt-10 pt-8 border-t border-white/10 text-center text-xs text-gray-500">
-          <p>© {new Date().getFullYear()} Sleek Studio. All rights reserved.</p>
+
+        {/* Social Icons Row - Only visible on md screens, centered on a new line */}
+        <div className="hidden md:flex lg:hidden justify-center mb-8">
+          <div className="flex flex-col items-center">
+            {/* Increased spacing between icons to space-x-6 */}
+            <div className="flex space-x-6 mb-4">
+              <Link href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                {/* Slightly darker icon color, white on hover */}
+                <Instagram className="h-5 w-5 text-gray-500 hover:text-white transition-colors" />
+              </Link>
+              <Link href="https://wa.me/yourphonenumber" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+                <Phone className="h-5 w-5 text-gray-500 hover:text-white transition-colors" />
+              </Link>
+              <Link href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                <Facebook className="h-5 w-5 text-gray-500 hover:text-white transition-colors" />
+              </Link>
+            </div>
+            {/* Slightly darker copyright text */}
+            <p className="text-xs text-gray-500">Sleek Studio © {currentYear}</p>
+          </div>
         </div>
+
+        {/* Social Icons for mobile */}
+        <div className="flex md:hidden justify-center mb-8">
+          <div className="flex flex-col items-center">
+            <div className="flex space-x-6 mb-4">
+              <Link href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                <Instagram className="h-5 w-5 text-gray-500 hover:text-white transition-colors" />
+              </Link>
+              <Link href="https://wa.me/yourphonenumber" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+                <Phone className="h-5 w-5 text-gray-500 hover:text-white transition-colors" />
+              </Link>
+              <Link href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                <Facebook className="h-5 w-5 text-gray-500 hover:text-white transition-colors" />
+              </Link>
+            </div>
+            <p className="text-xs text-gray-500">Sleek Studio © {currentYear}</p>
+          </div>
+        </div>
+
+        {/* Center Section: Rights Reserved & Credit */}
+        {/* Adjusted border color for dark mode */}
+        <div className="text-center border-t border-gray-700 pt-8 mt-8 mb-20"> {/* Increased margin-bottom to avoid overlap with shape */}
+          <p className="text-sm text-gray-400">Sleek Studio all rights reserved</p>
+          <p className="text-xs text-gray-500 mt-1">
+            made with <Heart className="inline h-3 w-3 text-red-500 fill-current" /> by{' '}
+            <a
+              href="https://eazweb.in"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:underline hover:text-gray-300" // Adjusted hover color
+            >
+              Eazweb
+            </a>
+          </p>
+        </div>
+
+      </div>
+
+      {/* Bottom Decorative Shape - Now positioned absolutely at the bottom */}
+      <div className="absolute bottom-0 left-0 w-full h-20 overflow-hidden z-0">
+        {/* The dark background for the shape area is now the footer's bg */}
+        {/* Cutout shapes with lighter gray (gray-800) */}
+        <div className="absolute bottom-0 left-[10%] h-10 w-[15%] bg-gray-800 rounded-t-full"></div>
+        <div className="absolute bottom-0 left-[42.5%] h-10 w-[15%] bg-gray-800 rounded-t-full"></div>
+        <div className="absolute bottom-0 left-[75%] h-10 w-[15%] bg-gray-800 rounded-t-full"></div>
       </div>
     </footer>
-  )
+  );
 }

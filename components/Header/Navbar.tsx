@@ -5,6 +5,7 @@ import RightSideNavbar from './RightSideNavbar';
 import { NavigationMenuDemo } from './NavigationMenuDemo';
 import { usePathname } from "next/navigation";
 import Image from 'next/image';
+import Link from 'next/link';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -69,10 +70,10 @@ const Navbar = () => {
       </div>
       
       {/* Center section - takes 1/3 width */}
-      <div className='flex w-1/3 justify-center gap-2 items-center'>
+      <Link href='/' className='flex w-1/3 justify-center gap-2 items-center'>
         <Image src="/logo.svg" alt="logo" width={40} height={40} className='w-12 h-12 md:w-8 md:h-8' />
         <h1 className='text-2xl  hidden md:flex'>SLEEK STUDIO</h1>
-      </div>
+      </Link>
       
       {/* Right section - takes 1/3 width */}
       <div className='flex w-1/3 justify-end'>

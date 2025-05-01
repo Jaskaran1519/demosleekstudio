@@ -34,7 +34,9 @@ export default function RootLayout({
           <SmoothScroll>
            <ScrollProgress className="top-0" />
            <Navbar/>
+           <div className="min-h-screen">
            {children}
+           </div>
            <Footer/>
           </SmoothScroll>
       </body>
