@@ -51,28 +51,28 @@ export function ProductsFilters({
   // Initialize state from URL on mount
   useEffect(() => {
     // Set category filters
-    if (params.get("category")) {
+    if (params?.get("category")) {
       setSelectedCategories(params.getAll("category"));
     } else {
       setSelectedCategories([]);
     }
 
     // Set cloth type filters
-    if (params.get("clothType")) {
+    if (params?.get("clothType")) {
       setSelectedClothTypes(params.getAll("clothType"));
     } else {
       setSelectedClothTypes([]);
     }
 
     // Set search term
-    if (params.get("search")) {
+    if (params?.get("search")) {
       setSearchValue(params.get("search") || "");
     } else {
       setSearchValue("");
     }
 
     // Set sort option
-    if (params.get("sort")) {
+    if (params?.get("sort")) {
       setSortOption(params.get("sort") || "");
     } else {
       setSortOption("");

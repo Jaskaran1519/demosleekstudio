@@ -32,7 +32,7 @@ interface ProfileTabsProps {
 export function ProfileTabs({ userProfile }: ProfileTabsProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const tab = searchParams.get('tab') || 'profile';
+  const tab = searchParams?.get('tab') || 'profile';
   
   const [currentTab, setCurrentTab] = useState(tab);
   const [isChangingTab, setIsChangingTab] = useState(false);
@@ -41,7 +41,7 @@ export function ProfileTabs({ userProfile }: ProfileTabsProps) {
   const handleTabChange = (value: string) => {
     setIsChangingTab(true);
     setCurrentTab(value);
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams?.toString() || "");
     params.set('tab', value);
     router.push(`/profile?${params.toString()}`, { scroll: false });
     // Reset the changing state after a short delay for transition effect

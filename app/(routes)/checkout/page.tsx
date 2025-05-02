@@ -37,7 +37,7 @@ export default function CheckoutPage() {
   const { items, getTotalPrice, getTotalItems, clearCart } = useCart();
   const [addresses, setAddresses] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState(
-    searchParams.get("addressId") || ""
+    searchParams?.get("addressId") || ""
   );
   const [mounted, setMounted] = useState(false);
 
@@ -109,7 +109,7 @@ export default function CheckoutPage() {
   // Update the URL when address changes
   const handleAddressChange = (addressId: string) => {
     setSelectedAddressId(addressId);
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams?.toString() || "");
     params.set("addressId", addressId);
     router.push(`/checkout?${params.toString()}`, { scroll: false });
   };

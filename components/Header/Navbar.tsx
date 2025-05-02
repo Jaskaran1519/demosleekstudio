@@ -16,7 +16,7 @@ const Navbar = () => {
   
   // Check if current route is one where navbar should be fixed (not taking space)
   const fixedPositionRoutes = ['/', '/men', '/women', '/kidswear'];
-  const shouldBeFixed = fixedPositionRoutes.includes(pathname);
+  const shouldBeFixed = fixedPositionRoutes.includes(pathname || '');
   
   // Check if it's an admin route
   const isAdminRoute = pathname?.startsWith('/admin');

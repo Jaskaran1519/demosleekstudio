@@ -19,21 +19,21 @@ const PAGE_SIZE = 12;
 export default function ProductsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const pageParam = searchParams.get("page");
-  const categoryParams = searchParams.getAll("category");
-  const clothTypeParams = searchParams.getAll("clothType");
-  const sortParam = searchParams.get("sort");
+  const pageParam = searchParams?.get("page");
+  const categoryParams = searchParams?.getAll("category") || [];
+  const clothTypeParams = searchParams?.getAll("clothType") || [];
+  const sortParam = searchParams?.get("sort");
 
   // Search term state (local)
   const [searchTerm, setSearchTerm] = useState(() => {
     // Correctly initialize from URL
-    return searchParams.get("search") || "";
+    return searchParams?.get("search") || "";
   });
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
   // Add an effect to sync the search term from URL parameter
   useEffect(() => {
-    const searchFromUrl = searchParams.get("search") || "";
+    const searchFromUrl = searchParams?.get("search") || "";
     if (searchTerm !== searchFromUrl) {
       console.log("Syncing search term from URL:", searchFromUrl);
       setSearchTerm(searchFromUrl);
@@ -91,10 +91,10 @@ export default function ProductsPage() {
     // Debug: log search term changes
     console.log("Search term changed:", {
       current: debouncedSearchTerm,
-      previous: searchParams.get("search"),
+      previous: searchParams?.get("search"),
     });
 
-    if (debouncedSearchTerm === searchParams.get("search")) return;
+    if (debouncedSearchTerm === searchParams?.get("search")) return;
 
     // Debug: log update action
     console.log("Updating URL with search:", debouncedSearchTerm);
@@ -118,7 +118,7 @@ export default function ProductsPage() {
       categories: categoryParams.join(","),
       clothTypes: clothTypeParams.join(","),
       sort: sortParam,
-      search: searchParams.get("search"),
+      search: searchParams?.get("search"),
     });
 
     setIsLoading(true);
@@ -129,7 +129,7 @@ export default function ProductsPage() {
     categoryParams.join(","),
     clothTypeParams.join(","),
     sortParam,
-    searchParams.get("search"),
+    searchParams?.get("search"),
   ]);
 
   // Effect to fetch initial products on mount or if page param changes
@@ -239,7 +239,7 @@ export default function ProductsPage() {
   const updateUrlWithFilters = (
     updatedParams: Record<string, string | null>
   ) => {
-    const newParams = new URLSearchParams(searchParams.toString());
+    const newParams = new URLSearchParams(searchParams?.toString() || "");
 
     // Update or remove each param based on the provided values
     Object.entries(updatedParams).forEach(([key, value]) => {
@@ -257,7 +257,7 @@ export default function ProductsPage() {
   const clearSearch = () => {
     console.log("Clearing search");
     setSearchTerm("");
-    const newParams = new URLSearchParams(searchParams.toString());
+    const newParams = new URLSearchParams(searchParams?.toString() || "");
     newParams.delete("search");
     newParams.set("page", "1");
     router.push(`/products?${newParams.toString()}`, { scroll: false });
@@ -294,7 +294,7 @@ export default function ProductsPage() {
             <MobileFilters
               categories={categories}
               clothTypes={clothTypes}
-              searchParams={Object.fromEntries(searchParams)}
+              searchParams={Object.fromEntries(searchParams?.entries() || [])}
             />
           </div>
 
@@ -384,7 +384,7 @@ export default function ProductsPage() {
             <ProductsFilters
               categories={categories}
               clothTypes={clothTypes}
-              searchParams={Object.fromEntries(searchParams)}
+              searchParams={Object.fromEntries(searchParams?.entries() || [])}
             />
           </div>
 

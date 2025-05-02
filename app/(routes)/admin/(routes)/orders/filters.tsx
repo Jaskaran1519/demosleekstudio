@@ -18,15 +18,15 @@ export function OrdersTableFilters() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [query, setQuery] = useState(searchParams.get("query") || "");
-  const [status, setStatus] = useState(searchParams.get("status") || "all");
+  const [query, setQuery] = useState(searchParams?.get("query") || "");
+  const [status, setStatus] = useState(searchParams?.get("status") || "all");
   const [mounted, setMounted] = useState(false);
 
   // Avoid hydration mismatch and sync with URL params
   useEffect(() => {
     setMounted(true);
     // Sync status with URL params
-    const urlStatus = searchParams.get("status");
+    const urlStatus = searchParams?.get("status");
     if (urlStatus) {
       setStatus(urlStatus);
     } else {
@@ -50,6 +50,8 @@ export function OrdersTableFilters() {
   }
 
   function updateFilters(updates: { query?: string; status?: string }) {
+    if (!searchParams) return;
+    
     const params = new URLSearchParams(searchParams);
 
     if (updates.query !== undefined) {
@@ -61,7 +63,7 @@ export function OrdersTableFilters() {
     }
 
     if (updates.status !== undefined) {
-      if (updates.status) {
+      if (updates.status && updates.status !== "all") {
         params.set("status", updates.status);
       } else {
         params.delete("status");

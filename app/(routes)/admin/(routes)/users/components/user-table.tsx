@@ -66,7 +66,7 @@ export function UserDataTable<TData, TValue>({
   });
   
   const handleSearch = () => {
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams?.toString() || "");
     params.set("page", "1");
     if (search) {
       params.set("search", search);
@@ -77,7 +77,7 @@ export function UserDataTable<TData, TValue>({
   };
   
   const handlePageChange = (newPage: number) => {
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams?.toString() || "");
     params.set("page", newPage.toString());
     router.push(`/admin/users?${params.toString()}`);
   };
@@ -180,4 +180,4 @@ export function UserDataTable<TData, TValue>({
       </div>
     </div>
   );
-} 
+}
