@@ -2,7 +2,7 @@ import React from 'react'
 import { Container } from "@/components/ui/container"
 import { Separator } from "@/components/ui/separator"
 
-export const page = () => {
+export default function Page() {
   return (
     <Container>
       <div className="py-12 max-w-4xl mx-auto">
@@ -78,5 +78,3 @@ export const page = () => {
     </Container>
   )
 }
-
-export default page
