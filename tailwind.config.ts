@@ -63,7 +63,7 @@ const config: Config = {
         // Duration: 1s
         // Timing function: linear (smooth, constant speed)
         // Iteration count: infinite (repeats forever)
-        shimmer: 'shimmer 1s linear infinite'
+        shimmer: 'shimmer 3s linear infinite'
       }
     },
   },

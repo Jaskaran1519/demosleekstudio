@@ -72,9 +72,6 @@ export function UserProfile({ user }: UserProfileProps) {
           <h3 className="text-lg font-medium">Account Details</h3>
           <div className="mt-2 space-y-2">
             <p>
-              <span className="font-medium">Role:</span> {user.role}
-            </p>
-            <p>
               <span className="font-medium">Email:</span> {user.email}
             </p>
           </div>

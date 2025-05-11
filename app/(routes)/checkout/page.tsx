@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle2, Tag, X, Loader2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
+import Image from "next/image";
 import { AddressCard } from "@/components/address-card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
@@ -15,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useSession } from "next-auth/react";
+import { AddressForm } from "./components/address-form";
 
 interface CouponData {
   id: string;
@@ -35,7 +37,14 @@ export default function CheckoutPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { items, getTotalPrice, getTotalItems, clearCart } = useCart();
-  const [addresses, setAddresses] = useState([]);
+  // Define Address interface to properly type the addresses array
+  interface Address {
+    id: string;
+    isDefault?: boolean;
+    [key: string]: any; // Allow for other properties
+  }
+
+  const [addresses, setAddresses] = useState<Address[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState(
     searchParams?.get("addressId") || ""
   );
@@ -336,225 +345,257 @@ export default function CheckoutPage() {
   }
 
   return (
-    <Container>
-      <div className="py-10">
-        <h1 className="text-3xl font-bold mb-4">Checkout</h1>
-        <p className="text-muted-foreground mb-8">Complete your order</p>
+    <Container className="py-10">
+      <h1 className="text-3xl font-bold mb-4">Checkout</h1>
+      <p className="text-muted-foreground mb-8">Complete your order</p>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Main checkout area */}
-          <div className="lg:col-span-8 space-y-8">
-            {/* Shipping address section */}
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold">Shipping Address</h2>
-                <Button variant="outline" asChild>
-                  <Link href="/profile?tab=addresses">Manage Addresses</Link>
-                </Button>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Main checkout area */}
+        <div className="lg:col-span-8 space-y-8">
+          {/* Shipping address section */}
+          <div className="bg-white p-6 rounded-lg shadow-sm">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold">Shipping Address</h2>
+              <Button variant="outline" asChild>
+                <Link href="/profile?tab=addresses">Manage Addresses</Link>
+              </Button>
+            </div>
+
+            {addresses.length === 0 ? (
+              <div className="text-center py-4">
+                <p className="mb-4">You don't have any saved addresses.</p>
+                <AddressForm
+                  onAddressCreated={(newAddress) => {
+                    setAddresses([newAddress, ...addresses]);
+                    handleAddressChange(newAddress.id);
+                  }}
+                />
               </div>
-
-              {addresses.length === 0 ? (
-                <div className="text-center py-4">
-                  <p className="mb-4">You don't have any saved addresses.</p>
-                  <Button asChild>
-                    <Link href="/profile?tab=addresses">Add an Address</Link>
-                  </Button>
-                </div>
-              ) : (
+            ) : (
+              <div className="space-y-4">
                 <RadioGroup
                   value={selectedAddressId}
                   onValueChange={handleAddressChange}
                   className="space-y-4"
                 >
-                  {addresses.map((address: any) => (
-                    <div
-                      key={address.id}
-                      className="flex items-start space-x-2"
-                    >
-                      <RadioGroupItem
-                        value={address.id}
-                        id={address.id}
-                        className="mt-1"
-                      />
-                      <div className="flex-1">
-                        <AddressCard address={address} />
+                    {addresses.map((address: any) => (
+                      <div
+                        key={address.id}
+                        className={`border rounded-lg p-4 ${
+                          selectedAddressId === address.id
+                            ? "border-black"
+                            : "border-gray-200"
+                        }`}
+                      >
+                        <div className="flex items-start">
+                          <RadioGroupItem
+                            value={address.id}
+                            id={address.id}
+                            className="mt-1"
+                          />
+                          <Label
+                            htmlFor={address.id}
+                            className="flex-1 pl-2 cursor-pointer"
+                          >
+                            <AddressCard address={address} />
+                          </Label>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </RadioGroup>
-              )}
-            </div>
-
-            {/* Payment method */}
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <h2 className="text-xl font-semibold mb-6">Payment Method</h2>
-              <div className="p-4 border rounded-md bg-gray-50">
-                <div className="flex items-center space-x-3">
-                  <img
-                    src="/razorpay-logo.png"
-                    alt="Razorpay"
-                    className="h-8"
-                  />
-                  <div>
-                    <p className="font-medium">Razorpay (Secure Payment)</p>
-                    <p className="text-sm text-gray-500">
-                      Credit/Debit Card, UPI, NetBanking, Wallet
-                    </p>
+                    ))}
+                  </RadioGroup>
+                  
+                  <div className="pt-2">
+                    <AddressForm
+                      onAddressCreated={(newAddress) => {
+                        setAddresses([newAddress, ...addresses]);
+                        handleAddressChange(newAddress.id);
+                      }}
+                    />
                   </div>
                 </div>
-              </div>
-              <p className="text-sm text-gray-500 mt-4">
-                Your payment information is processed securely. We do not store
-                your payment details.
-              </p>
-            </div>
+              )}
+          </div>
 
-            {/* Coupon code section */}
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <h2 className="text-xl font-semibold mb-4">Have a Coupon?</h2>
-
-              {appliedCoupon ? (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between bg-green-50 p-3 rounded-md border border-green-200">
-                    <div className="flex items-center">
-                      <Tag className="h-5 w-5 text-green-600 mr-2" />
-                      <div>
-                        <p className="font-medium">{appliedCoupon.name}</p>
-                        <p className="text-sm text-green-700">
-                          {appliedCoupon.discountType === "PERCENTAGE"
-                            ? `${appliedCoupon.discountValue}% off`
-                            : `₹${appliedCoupon.discountValue} off`}
-                        </p>
-                      </div>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={removeCoupon}
-                      className="text-gray-500 hover:text-red-500"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <p className="text-sm text-green-600">
-                    You saved ₹{appliedCoupon.discountAmount.toFixed(2)} with
-                    this coupon!
+          {/* Payment method */}
+          <div className="bg-white p-6 rounded-lg shadow-sm">
+            <h2 className="text-xl font-semibold mb-6">Payment Method</h2>
+            <div className="p-4 border rounded-md bg-gray-50">
+              <div className="flex items-center space-x-3">
+                <img
+                  src="/razorpay-logo.png"
+                  alt="Razorpay"
+                  className="h-8"
+                />
+                <div>
+                  <p className="font-medium">Razorpay (Secure Payment)</p>
+                  <p className="text-sm text-gray-500">
+                    Credit/Debit Card, UPI, NetBanking, Wallet
                   </p>
                 </div>
-              ) : (
-                <div className="space-y-4">
-                  <div className="flex space-x-2">
-                    <div className="flex-1">
-                      <Input
-                        placeholder="Enter coupon code"
-                        value={couponCode}
-                        onChange={(e) => setCouponCode(e.target.value)}
-                      />
-                    </div>
-                    <Button
-                      onClick={handleApplyCoupon}
-                      disabled={isApplyingCoupon || !couponCode.trim()}
-                    >
-                      {isApplyingCoupon ? "Applying..." : "Apply"}
-                    </Button>
-                  </div>
+              </div>
+            </div>
+            <p className="text-sm text-gray-500 mt-4">
+              Your payment information is processed securely. We do not store
+              your payment details.
+            </p>
+          </div>
 
-                  {couponError && (
-                    <Alert variant="destructive" className="py-2">
-                      <AlertDescription>{couponError}</AlertDescription>
-                    </Alert>
-                  )}
+          {/* Coupon code section */}
+          <div className="bg-white p-6 rounded-lg shadow-sm">
+            <h2 className="text-xl font-semibold mb-4">Have a Coupon?</h2>
+
+            {appliedCoupon ? (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between bg-green-50 p-3 rounded-md border border-green-200">
+                  <div className="flex items-center">
+                    <Tag className="h-5 w-5 text-green-600 mr-2" />
+                    <div>
+                      <p className="font-medium">{appliedCoupon.name}</p>
+                      <p className="text-sm text-green-700">
+                        {appliedCoupon.discountType === "PERCENTAGE"
+                          ? `${appliedCoupon.discountValue}% off`
+                          : `₹${appliedCoupon.discountValue} off`}
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={removeCoupon}
+                    className="text-gray-500 hover:text-red-500"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+                <p className="text-sm text-green-600">
+                  You saved ₹{appliedCoupon.discountAmount.toFixed(2)} with
+                  this coupon!
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex space-x-2">
+                  <div className="flex-1">
+                    <Input
+                      placeholder="Enter coupon code"
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value)}
+                    />
+                  </div>
+                  <Button
+                    onClick={handleApplyCoupon}
+                    disabled={isApplyingCoupon || !couponCode.trim()}
+                  >
+                    {isApplyingCoupon ? "Applying..." : "Apply"}
+                  </Button>
+                </div>
+
+                {couponError && (
+                  <Alert variant="destructive" className="py-2">
+                    <AlertDescription>{couponError}</AlertDescription>
+                  </Alert>
+                )}
+              </div>
+            )}
+          </div>
+        </div> {/* End of lg:col-span-8 (Main checkout area) */}
+
+        {/* Order summary (Moved here to be in its own column on large screens) */}
+        <div className="lg:col-span-4">
+          <div className="bg-white p-6 rounded-lg shadow-sm sticky top-4"> {/* Added sticky and top-4 for good UX on scroll */}
+            <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
+
+            <div className="space-y-2 mb-4">
+              {items.map((item) => (
+                <div key={item.id} className="flex justify-between text-sm">
+                  <span>
+                    {item.name} {item.size && `(${item.size})`} x{" "}
+                    {item.quantity}
+                  </span>
+                  <span>₹{(item.price * item.quantity).toFixed(2)}</span>
+                </div>
+              ))}
+            </div>
+
+            <Separator className="my-4" />
+
+            <div className="space-y-2 mb-4">
+              <div className="flex justify-between">
+                <span>Subtotal</span>
+                <span>₹{subtotal.toFixed(2)}</span>
+              </div>
+
+              <div className="flex justify-between">
+                <span>Tax (5%)</span>
+                <span>₹{tax.toFixed(2)}</span>
+              </div>
+
+              {appliedCoupon && (
+                <div className="flex justify-between text-green-600">
+                  <span>Discount</span>
+                  <span>-₹{discount.toFixed(2)}</span>
                 </div>
               )}
+
+              <div className="flex justify-between">
+                <span>Shipping</span>
+                <span>
+                  {shipping > 0 ? `₹${shipping.toFixed(2)}` : "Free"}
+                </span>
+              </div>
+
+              <div className="flex justify-between text-sm">
+                <span>Items</span>
+                <span>{getTotalItems()}</span>
+              </div>
             </div>
-          </div>
 
-          {/* Order summary */}
-          <div className="lg:col-span-4">
-            <div className="bg-white p-6 rounded-lg shadow-sm sticky top-4">
-              <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
+            <Separator className="my-4" />
 
-              <div className="space-y-2 mb-4">
-                {items.map((item) => (
-                  <div key={item.id} className="flex justify-between text-sm">
-                    <span>
-                      {item.name} {item.size && `(${item.size})`} x{" "}
-                      {item.quantity}
-                    </span>
-                    <span>₹{(item.price * item.quantity).toFixed(2)}</span>
-                  </div>
-                ))}
-              </div>
+            <div className="flex justify-between font-semibold text-lg mb-6">
+              <span>Total</span>
+              <span>₹{total.toFixed(2)}</span>
+            </div>
 
-              <Separator className="my-4" />
+            <Button
+              className="w-full"
+              size="lg"
+              disabled={
+                isCreatingOrder ||
+                isProcessingPayment ||
+                !selectedAddressId ||
+                addresses.length === 0 
+              }
+              onClick={handlePlaceOrder}
+            >
+              {isCreatingOrder ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                "Place Order"
+              )}
+            </Button>
 
-              <div className="space-y-2 mb-4">
-                <div className="flex justify-between">
-                  <span>Subtotal</span>
-                  <span>₹{subtotal.toFixed(2)}</span>
-                </div>
-
-                <div className="flex justify-between">
-                  <span>Tax (5%)</span>
-                  <span>₹{tax.toFixed(2)}</span>
-                </div>
-
-                {appliedCoupon && (
-                  <div className="flex justify-between text-green-600">
-                    <span>Discount</span>
-                    <span>-₹{discount.toFixed(2)}</span>
-                  </div>
-                )}
-
-                <div className="flex justify-between">
-                  <span>Shipping</span>
-                  <span>
-                    {shipping > 0 ? `₹${shipping.toFixed(2)}` : "Free"}
-                  </span>
-                </div>
-
-                <div className="flex justify-between text-sm">
-                  <span>Items</span>
-                  <span>{getTotalItems()}</span>
-                </div>
-              </div>
-
-              <Separator className="my-4" />
-
-              <div className="flex justify-between font-semibold text-lg mb-6">
-                <span>Total</span>
-                <span>₹{total.toFixed(2)}</span>
-              </div>
-
-              <Button
-                className="w-full"
-                size="lg"
-                disabled={
-                  isCreatingOrder ||
-                  isProcessingPayment ||
-                  !selectedAddressId ||
-                  addresses.length === 0
-                }
-                onClick={handlePlaceOrder}
-              >
-                {isCreatingOrder ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  "Place Order"
-                )}
-              </Button>
-
-              <div className="flex items-center justify-center text-sm text-muted-foreground mt-4">
+            <div className="flex flex-col items-center justify-center mt-4 space-y-2">
+              <div className="flex items-center text-sm text-muted-foreground">
                 <CheckCircle2 className="h-4 w-4 mr-2" />
-                <span>Secure checkout with Razorpay</span>
+                <span>Secure checkout with</span>
+              </div>
+              <div className="flex items-center justify-center">
+                <Image 
+                  src="/razorpay.svg" 
+                  alt="Razorpay" 
+                  width={120} 
+                  height={30} 
+                  className="h-8 object-contain" 
+                />
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        </div> {/* End of lg:col-span-4 (Order summary) */}
+      </div> {/* End of grid */}
     </Container>
   );
 }

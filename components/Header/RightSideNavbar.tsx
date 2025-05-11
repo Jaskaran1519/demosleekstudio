@@ -1,12 +1,12 @@
 'use client';
 
-import { HeartIcon, ShoppingCartIcon } from 'lucide-react'
+import { Bookmark, HeartIcon, ShoppingBagIcon } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import UserMenu from './UserMenu'
 import SearchButton from './Search/Searchbutton'
 import useCart from '@/store/useCart';
 import { Badge } from '@/components/ui/badge';
+
 
 export const RightSideNavbar = () => {
   const [mounted, setMounted] = useState(false);
@@ -22,7 +22,7 @@ export const RightSideNavbar = () => {
     <div className='flex items-center gap-4 md:gap-6'>
         <SearchButton/>
         <Link href='/cart' className="relative">
-            <ShoppingCartIcon/>
+            <ShoppingBagIcon/>
             {mounted && uniqueItemCount > 0 && (
               <Badge 
                 className="absolute -top-2 -right-2 bg-black text-white h-5 w-5 flex items-center justify-center p-0 rounded-full"
@@ -32,9 +32,8 @@ export const RightSideNavbar = () => {
             )}
         </Link>
         <Link href='/wishlist' className='hidden md:flex'>
-            <HeartIcon/>
+            <Bookmark/>
         </Link>
-        <UserMenu/>
     </div>
   )
 }

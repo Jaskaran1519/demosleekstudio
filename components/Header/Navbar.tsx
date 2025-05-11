@@ -6,6 +6,7 @@ import { NavigationMenuDemo } from './NavigationMenuDemo';
 import { usePathname } from "next/navigation";
 import Image from 'next/image';
 import Link from 'next/link';
+import { logoFont } from '@/app/fonts';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -65,14 +66,24 @@ const Navbar = () => {
       } ${!visible ? '-translate-y-full' : 'translate-y-0'}`}
     >
       {/* Left section - takes 1/3 width */}
-      <div className='flex w-1/3 justify-start'>
-        <SmallDisplayButton scrolled={scrolled} shouldBeFixed={shouldBeFixed} />
+      <div className='flex w-1/4 sm:w-1/3 justify-start gap-8'>
+        {/* <Link href='/products' className='font-medium text-md hidden md:flex'>
+         Collection
+        </Link> 
+        <Link href='/men' className='font-medium text-md hidden md:flex'>
+         Men
+        </Link>
+        <Link href='/women' className='font-medium text-md hidden md:flex'>
+         Women
+        </Link> */}
+
+          <SmallDisplayButton scrolled={scrolled} shouldBeFixed={shouldBeFixed}/>
+
       </div>
       
       {/* Center section - takes 1/3 width */}
-      <Link href='/' className='flex w-1/3 justify-center gap-2 items-center'>
-        <Image src="/logo.svg" alt="logo" width={40} height={40} className='w-12 h-12 md:w-8 md:h-8' />
-        <h1 className='text-2xl  hidden md:flex'>SLEEK STUDIO</h1>
+      <Link href='/' className='flex md:w-1/3 justify-center gap-2 items-center'>
+        <h1 className={`text-lg md:text-2xl flex font-bold ${logoFont.className} `}>SLEEK STUDIO</h1>
       </Link>
       
       {/* Right section - takes 1/3 width */}

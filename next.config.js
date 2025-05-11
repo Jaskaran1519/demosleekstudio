@@ -7,7 +7,10 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['www.vistaprint.com', 'res.cloudinary.com','lh3.googleusercontent.com']
+    domains: ['www.vistaprint.com', 'res.cloudinary.com','lh3.googleusercontent.com','plus.unsplash.com']
+  },
+  experimental: {
+    viewTransition: true,
   },
   webpack: (config) => {
     // Ensure proper resolution for path aliases

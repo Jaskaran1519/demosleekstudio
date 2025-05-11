@@ -78,9 +78,18 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
       <div className="lg:flex lg:gap-8">
         <div className="space-y-8 lg:w-1/2">
         <div className="flex items-center justify-between gap-5">
-            <div className="text-2xl md:text-3xl lg:text-4xl  flex items-center gap-4">
-            ₹ {product.price} {product.salePrice && <h1 className="line-through font-extralight">₹ {product.salePrice}</h1>}
+        <div className="flex items-center gap-4">
+          <div className="flex items-start">
+            <span className="text-lg md:text-xl lg:text-2xl mt-1">₹</span>
+            <span className="text-2xl md:text-3xl lg:text-4xl">{product.price}</span>
+          </div>
+          {product.salePrice && (
+            <div className="flex items-start line-through font-extralight">
+              <span className="text-sm md:text-base lg:text-lg mt-1">₹</span>
+              <span className="text-xl md:text-2xl lg:text-3xl">{product.salePrice}</span>
             </div>
+          )}
+        </div>
             <a href="#" target="_blank" className="w-fit">
             <button 
               className="md:hidden text-md w-fit flex items-center px-4 py-2 border border-black rounded-full hover:bg-gray-50 transition-colors w-full"
