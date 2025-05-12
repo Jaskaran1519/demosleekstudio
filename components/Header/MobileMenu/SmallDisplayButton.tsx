@@ -123,7 +123,7 @@ const links = [
   },
   {
     title: "Wishlist",
-    href: "/whislist"
+    href: "/wishlist"
   },
   {
     title: "About",
