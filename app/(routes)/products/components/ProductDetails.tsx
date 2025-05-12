@@ -90,7 +90,11 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
             </div>
           )}
         </div>
-            <a href="#" target="_blank" className="w-fit">
+            <a href="#" target="_blank" onClick={(e) => {
+                    e.preventDefault();
+                    const currentUrl = window.location.href;
+                    window.open(`https://wa.me/917014342043?text=Hey,%0AI%20would%20like%20to%20talk%20about%20this%20product%20${encodeURIComponent(currentUrl)}`, '_blank', 'noopener,noreferrer');
+                  }} className="w-fit">
             <button 
               className="md:hidden text-md w-fit flex items-center px-4 py-2 border border-black rounded-full hover:bg-gray-50 transition-colors w-full"
             >

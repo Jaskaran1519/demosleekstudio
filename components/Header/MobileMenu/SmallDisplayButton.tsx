@@ -122,8 +122,8 @@ const links = [
     href: "/women"
   },
   {
-    title: "Shoes",
-    href: "/products?page=1&clothType=SHOES"
+    title: "Wishlist",
+    href: "/whislist"
   },
   {
     title: "About",
