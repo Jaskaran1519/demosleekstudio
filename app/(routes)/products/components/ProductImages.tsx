@@ -59,7 +59,15 @@ export const ProductImages = ({ product }: ProductImagesProps) => {
             <div className="flex flex-row justify-between items-center flex-grow">
               <h1 className="text-2xl md:text-3xl lg:text-4xl text-bold pr-2 break-words">{product.name.toUpperCase()}</h1>
               <div className="flex items-center gap-2">
-                <a href="#" target="_blank" className="w-fit">
+                <a 
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    const currentUrl = window.location.href;
+                    window.open(`https://wa.me/917014342043?text=Hey,%0AI%20would%20like%20to%20talk%20about%20this%20product%20${encodeURIComponent(currentUrl)}`, '_blank', 'noopener,noreferrer');
+                  }}
+                  className="w-fit"
+                >
                   <button 
                     className="hidden text-lg cursor-pointer md:flex items-center px-4 py-2 border border-black rounded-full hover:bg-gray-50 transition-colors"
                   >

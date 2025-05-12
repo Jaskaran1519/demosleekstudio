@@ -7,7 +7,7 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['www.vistaprint.com', 'res.cloudinary.com','lh3.googleusercontent.com','plus.unsplash.com']
+    domains: ['www.vistaprint.com', 'res.cloudinary.com','lh3.googleusercontent.com','plus.unsplash.com','thesleekstudio.com']
   },
   experimental: {
     viewTransition: true,

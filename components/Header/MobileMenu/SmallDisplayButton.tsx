@@ -72,6 +72,28 @@ const blur = {
   }
 };
 
+// Responsive blur effect - only applies on large screens
+const responsiveBlur = {
+  initial: {
+    filter: "blur(0px)",
+    opacity: 1
+  },
+  open: {
+    filter: "blur(0px)", // No blur on small/medium screens
+    opacity: 1,
+    transition: {duration: 0.3},
+    '@media (min-width: 1024px)': { // lg breakpoint
+      filter: "blur(4px)",
+      opacity: 0.6,
+    }
+  },
+  closed: {
+    filter: "blur(0px)",
+    opacity: 1,
+    transition: {duration: 0.3}
+  }
+};
+
 const translate = {
   initial: {
     y: "100%",
@@ -261,7 +283,7 @@ export default function SmallDisplayButton({scrolled, shouldBeFixed}: {scrolled:
                           <motion.p 
                             onMouseOver={() => {setSelectedLink({isActive: true, index})}} 
                             onMouseLeave={() => {setSelectedLink({isActive: false, index})}} 
-                            variants={blur} 
+                            variants={responsiveBlur} 
                             animate={selectedLink.isActive && selectedLink.index != index ? "open" : "closed"}
                           >
                             {getChars(title)}

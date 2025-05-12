@@ -3,8 +3,8 @@ import React from 'react';
 const ContactPage: React.FC = () => {
     // --- Form state and handlers removed ---
 
-    const businessPhoneNumber = '+15559876543'; // Replace with your actual phone number (include country code)
-    const whatsappNumber = '15559876543'; // Replace with your WhatsApp number (usually without '+', check WhatsApp docs)
+    const businessPhoneNumber = '+917014342043'; // Replace with your actual phone number (include country code)
+    const whatsappNumber = '+917014342043'; // Replace with your WhatsApp number (usually without '+', check WhatsApp docs)
     const defaultWhatsappMessage = encodeURIComponent("Hello Sleek Studio, I'm contacting you from your website."); // Optional pre-filled message
 
     return (

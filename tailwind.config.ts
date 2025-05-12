@@ -55,7 +55,15 @@ const config: Config = {
           // The gradient itself will be wider than the element (e.g., 200%)
           '0%': { backgroundPosition: '-200% 0' },
           '100%': { backgroundPosition: '200% 0' },
-        }
+        },
+        aurora: {
+          from: {
+            backgroundPosition: "50% 50%, 50% 50%",
+          },
+          to: {
+            backgroundPosition: "350% 50%, 350% 50%",
+          },
+        },
       },
       animation: {
         // Create a utility class 'animate-shimmer'
@@ -63,7 +71,8 @@ const config: Config = {
         // Duration: 1s
         // Timing function: linear (smooth, constant speed)
         // Iteration count: infinite (repeats forever)
-        shimmer: 'shimmer 3s linear infinite'
+        shimmer: 'shimmer 3s linear infinite',
+        aurora: "aurora 60s linear infinite"
       }
     },
   },
