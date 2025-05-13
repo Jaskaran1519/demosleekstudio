@@ -2,16 +2,11 @@ import MainVideo from '@/components/Others/MainVideo';
 import CategoryContent from '@/components/Category/CategoryContent';
 import React from 'react';
 import CategoryProducts from '@/components/Category/CategoryProducts';
+import { getProductsByCategory } from '@/actions/products';
 
 export default async function Page() {
-  // Fetch products from the API endpoint using absolute URL with origin
-  const origin = typeof window === 'undefined' ? process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000' : window.location.origin;
-  const response = await fetch(`${origin}/api/products/category/MEN?limit=5`, {
-    cache: 'no-store',
-    next: { revalidate: 60 } // Revalidate every minute as a fallback
-  });
-  const data = await response.json();
-  const products = data.products || [];
+  // Use server action to fetch products by category
+  const { products } = await getProductsByCategory('MEN', 5);
 
   return (
     <div className="w-full max-w-[2000px] min-h-screen">

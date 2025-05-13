@@ -52,7 +52,7 @@ export const ProductImages = ({ product }: ProductImagesProps) => {
 
   return (
     <div>
-      <h1 className="text-lg font-light mb-4">Sleek Studio {product.category}'s Collection</h1>
+      <h1 className="text-sm md:text-lg font-light mb-1 md:mb-4">Sleek Studio {product.category}'s Collection</h1>
       <div className="flex flex-col space-y-5">
         <div className="flex flex-col gap-2">
           <div className="flex flex-col md:flex-row md:items-center gap-3">

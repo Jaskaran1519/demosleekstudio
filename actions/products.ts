@@ -3,6 +3,7 @@
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { slugify } from "@/lib/utils";
+import { Product } from "@/types";
 
 // Types
 type ProductsParams = {
@@ -402,5 +403,62 @@ export async function getFeaturedProducts(limit = 8) {
   } catch (error) {
     console.error("Error fetching featured products:", error);
     throw new Error("Failed to fetch featured products");
+  }
+}
+
+/**
+ * Get products by category with limit
+ */
+export async function getProductsByCategory(category: "MEN" | "WOMEN" | "KIDS", limit = 5) {
+  try {
+    // Validate category
+    if (!category) {
+      throw new Error("Category is required");
+    }
+    
+    // Fetch products by category (no need to normalize since we're using typed categories)
+    const products = await db.product.findMany({
+      where: {
+        isActive: true,
+        category,
+      },
+      orderBy: [
+        { homePageFeatured: 'desc' }, // Featured products first
+        { updatedAt: 'desc' },         // Then newest products
+      ],
+      take: limit,
+      // Include all fields required by the Product type
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        slug: true,
+        price: true,
+        salePrice: true,
+        inventory: true,
+        noBgImage: true,
+        modelImage: true,
+        images: true,
+        category: true,
+        clothType: true,
+        tags: true,
+        sizes: true,
+        isActive: true,
+        homePageFeatured: true,
+        createdAt: true,
+        updatedAt: true,
+        wishedByIds: true, // Add this field to fix the TypeScript error
+        colors: true,      // Include optional fields
+        timesSold: true,   // Include optional fields
+        customisations: true, // Include optional fields
+      },
+    });
+
+    // Use type assertion to ensure compatibility with the Product interface
+    return { products: products as unknown as Product[] };
+  } catch (error) {
+    console.error(`Error fetching ${category} products:`, error);
+    // Return empty array instead of throwing to prevent page crashes
+    return { products: [] as Product[] };
   }
 }

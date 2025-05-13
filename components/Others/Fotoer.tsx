@@ -1,9 +1,17 @@
 // components/Footer.tsx
+'use client';
 import Link from 'next/link';
 import Image from 'next/image';
 import { canelaFont, magerFont } from '@/app/fonts';
+import { usePathname } from 'next/navigation';
 
 export default function Footer() {
+  const pathname = usePathname();
+  
+  // Don't render footer on auth routes or admin routes
+  if (pathname?.startsWith('/auth') || pathname?.startsWith('/admin')) {
+    return null;
+  }
   return (
     <footer className="bg-gray-100 text-gray-800 pt-12 pb-8 md:pt-16  font-sans">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">

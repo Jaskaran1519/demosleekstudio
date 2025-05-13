@@ -19,8 +19,9 @@ const Navbar = () => {
   const fixedPositionRoutes = ['/', '/men', '/women', '/kidswear'];
   const shouldBeFixed = fixedPositionRoutes.includes(pathname || '');
   
-  // Check if it's an admin route
+  // Check if it's an admin route or auth route
   const isAdminRoute = pathname?.startsWith('/admin');
+  const isAuthRoute = pathname?.startsWith('/auth');
   
   useEffect(() => {
     const handleScroll = () => {
@@ -51,8 +52,8 @@ const Navbar = () => {
     };
   }, []); // Remove lastScrollY from dependencies
 
-  // Don't render navbar on admin routes
-  if (isAdminRoute) {
+  // Don't render navbar on admin routes or auth routes
+  if (isAdminRoute || isAuthRoute) {
     return null;
   }
   

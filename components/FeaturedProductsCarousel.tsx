@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getActiveProducts } from "@/actions/getProducts";
 import { Container } from "@/components/ui/container";
 import {
   Carousel,
