@@ -100,7 +100,7 @@ export default function CheckoutPage() {
     }
   }, [selectedAddressId, status]);
 
-  // This effect ensures hydration mismatch is avoided
+  // This effect ensures hydration mismatch is avoided and loads Razorpay script
   useEffect(() => {
     setMounted(true);
 
@@ -108,10 +108,19 @@ export default function CheckoutPage() {
     const script = document.createElement("script");
     script.src = "https://checkout.razorpay.com/v1/checkout.js";
     script.async = true;
-    document.body.appendChild(script);
+    script.id = "razorpay-script";
+    
+    // Only append if not already present
+    if (!document.getElementById("razorpay-script")) {
+      document.body.appendChild(script);
+    }
 
     return () => {
-      document.body.removeChild(script);
+      // Safe removal - check if script exists and if it's still in the document
+      const scriptElement = document.getElementById("razorpay-script");
+      if (scriptElement && document.body.contains(scriptElement)) {
+        document.body.removeChild(scriptElement);
+      }
     };
   }, []);
 
@@ -225,44 +234,93 @@ export default function CheckoutPage() {
 
   // Initialize Razorpay payment
   const initializeRazorpayPayment = (orderData: any) => {
-    if (typeof window === "undefined" || !window.Razorpay) {
-      toast.error("Payment system is not available. Please try again later.");
+    // Check if Razorpay is available
+    if (typeof window === "undefined") {
+      toast.error("Payment system is not available in server environment.");
       setIsCreatingOrder(false);
       return;
     }
 
-    setIsProcessingPayment(true);
-
-    const options = {
-      key: orderData.payment.key,
-      amount: orderData.payment.amount * 100, // Convert to paise
-      currency: orderData.payment.currency,
-      name: "Sleek Studio",
-      description: `Order #${orderData.order.id}`,
-      order_id: orderData.payment.id,
-      handler: function (response: any) {
-        handlePaymentSuccess(response, orderData.order.id);
-      },
-      prefill: {
-        email: "", // Will be filled by Razorpay from user's account
-        contact: "", // Will be filled by Razorpay from user's account
-      },
-      theme: {
-        color: "#9333EA", // Purple for brand consistency
-      },
-      modal: {
-        ondismiss: function () {
-          setIsCreatingOrder(false);
-          setIsProcessingPayment(false);
-          toast.error(
-            "Payment cancelled. Your order is saved and you can try again later."
-          );
-        },
-      },
+    // Wait for Razorpay to load if needed
+    const waitForRazorpay = () => {
+      if (window.Razorpay) {
+        proceedWithPayment();
+      } else {
+        // Check again after a short delay
+        setTimeout(() => {
+          if (window.Razorpay) {
+            proceedWithPayment();
+          } else {
+            toast.error("Payment system is taking too long to load. Please refresh the page and try again.");
+            setIsCreatingOrder(false);
+            setIsProcessingPayment(false);
+          }
+        }, 2000); // Wait 2 seconds before giving up
+      }
     };
 
-    const razorpayInstance = new window.Razorpay(options);
-    razorpayInstance.open();
+    const proceedWithPayment = () => {
+      setIsProcessingPayment(true);
+
+      // Get user data from session if available
+      const userEmail = ""; // You can get this from session if available
+      const userPhone = ""; // You can get this from session if available
+
+      const options = {
+        key: orderData.payment.key,
+        amount: orderData.payment.amount * 100, // Convert to INR (paise)
+        currency: orderData.payment.currency,
+        name: "Sleek Studio",
+        description: `Order #${orderData.order.id}`,
+        order_id: orderData.payment.id,
+        handler: function (response: any) {
+          handlePaymentSuccess(response, orderData.order.id);
+        },
+        prefill: {
+          email: userEmail,
+          contact: userPhone,
+        },
+        notes: {
+          order_id: orderData.order.id,
+          // Add any additional metadata that might help with webhook processing
+        },
+        theme: {
+          color: "#9333EA", // Purple for brand consistency
+        },
+        modal: {
+          ondismiss: function () {
+            setIsCreatingOrder(false);
+            setIsProcessingPayment(false);
+            toast.error(
+              "Payment cancelled. Your order is saved and you can try again later."
+            );
+          },
+        },
+        // Enable this to send SMS/Email notifications
+        send_sms_hash: true,
+        // For better webhook reliability
+        retry: true,
+      };
+
+      try {
+        const razorpayInstance = new window.Razorpay(options);
+        razorpayInstance.on('payment.failed', function(response: any) {
+          toast.error("Payment failed. Please try again.");
+          console.error("Payment failed:", response.error);
+          setIsCreatingOrder(false);
+          setIsProcessingPayment(false);
+        });
+        razorpayInstance.open();
+      } catch (error) {
+        console.error("Error opening Razorpay:", error);
+        toast.error("Failed to initialize payment. Please try again.");
+        setIsCreatingOrder(false);
+        setIsProcessingPayment(false);
+      }
+    };
+
+    // Start the process
+    waitForRazorpay();
   };
 
   // Handle successful payment
@@ -273,8 +331,50 @@ export default function CheckoutPage() {
       // Show a loading state
       toast.success("Payment successful! Finalizing your order...");
 
-      // Optionally: Verify payment with backend
-      // await fetch(`/api/verify-payment`, { method: "POST", body: JSON.stringify(response) });
+      // Verify payment with backend to ensure it's processed even if webhook fails
+      try {
+        console.log("Verifying payment with server...", {
+          payment_id: response.razorpay_payment_id,
+          order_id: response.razorpay_order_id,
+          app_order_id: orderId
+        });
+        
+        const verifyResponse = await fetch(`/api/verify-payment`, { 
+          method: "POST", 
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_signature: response.razorpay_signature,
+            order_id: orderId
+          })
+        });
+        
+        if (!verifyResponse.ok) {
+          const errorData = await verifyResponse.json();
+          throw new Error(`Verification failed: ${errorData.error || 'Unknown error'}`); 
+        }
+        
+        const verifyResult = await verifyResponse.json();
+        console.log("Payment verification result:", verifyResult);
+        
+        if (!verifyResult.success) {
+          throw new Error('Payment verification failed');
+        }
+        
+        // Payment verified successfully
+        toast.success("Order confirmed and payment verified!");
+        
+      } catch (verifyError) {
+        console.error("Error verifying payment:", verifyError);
+        toast.error(
+          "Payment received but order verification failed. Please contact support with your payment ID."
+        );
+        // Continue with the process even if verification fails
+        // The webhook should handle this as a backup
+      }
 
       // Redirect to success page
       router.push(`/order-success?orderId=${orderId}`);
@@ -357,7 +457,7 @@ export default function CheckoutPage() {
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold">Shipping Address</h2>
               <Button variant="outline" asChild>
-                <Link href="/profile?tab=addresses">Manage Addresses</Link>
+                <Link href="/profile/address">Manage Addresses</Link>
               </Button>
             </div>
 

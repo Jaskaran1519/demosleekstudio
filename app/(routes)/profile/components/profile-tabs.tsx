@@ -5,15 +5,11 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Container } from '@/components/ui/container';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
-  ProfileSkeleton, 
   AddressesSkeleton, 
-  OrdersSkeleton, 
   MeasurementsSkeleton 
 } from './skeletons';
 
 // Lazy load tab components
-const UserProfile = lazy(() => import('./user-profile').then(mod => ({ default: mod.UserProfile })));
-const UserOrders = lazy(() => import('./user-orders').then(mod => ({ default: mod.UserOrders })));
 const UserMeasurements = lazy(() => import('./user-measurements').then(mod => ({ default: mod.UserMeasurements })));
 const UserAddresses = lazy(() => import('./user-addresses').then(mod => ({ default: mod.UserAddresses })));
 
@@ -32,7 +28,7 @@ interface ProfileTabsProps {
 export function ProfileTabs({ userProfile }: ProfileTabsProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const tab = searchParams?.get('tab') || 'profile';
+  const tab = searchParams?.get('tab') || 'addresses';
   
   const [currentTab, setCurrentTab] = useState(tab);
   const [isChangingTab, setIsChangingTab] = useState(false);
@@ -67,28 +63,14 @@ export function ProfileTabs({ userProfile }: ProfileTabsProps) {
           onValueChange={handleTabChange} 
           className="w-full"
         >
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="profile">Profile</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="addresses">Addresses</TabsTrigger>
-            <TabsTrigger value="orders">Orders</TabsTrigger>
             <TabsTrigger value="measurements">Measurements</TabsTrigger>
           </TabsList>
-          
-          <TabsContent value="profile" className="pt-6">
-            <Suspense fallback={<ProfileSkeleton />}>
-              <UserProfile user={userProfile} />
-            </Suspense>
-          </TabsContent>
           
           <TabsContent value="addresses" className="pt-6">
             <Suspense fallback={<AddressesSkeleton />}>
               <UserAddresses userId={userProfile.id} addresses={userProfile.addresses} />
-            </Suspense>
-          </TabsContent>
-          
-          <TabsContent value="orders" className="pt-6">
-            <Suspense fallback={<OrdersSkeleton />}>
-              <UserOrders userId={userProfile.id} />
             </Suspense>
           </TabsContent>
           

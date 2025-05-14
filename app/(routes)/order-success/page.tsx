@@ -235,7 +235,7 @@ export default function OrderSuccessPage() {
 
               <div className="space-y-4">
                 <Button asChild className="w-full">
-                  <Link href="/profile?tab=orders">View All Orders</Link>
+                  <Link href="/profile/orders">View All Orders</Link>
                 </Button>
                 <Button variant="outline" asChild className="w-full">
                   <Link href="/products">Continue Shopping</Link>

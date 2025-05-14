@@ -299,7 +299,6 @@ export default function SmallDisplayButton({scrolled, shouldBeFixed}: {scrolled:
                   <div className="ml-auto flex flex-col gap-4 items-end">
                     {isAuthenticated ? (
                       <>
-                        <div className="text-lg font-medium mb-3 text-right">My Account</div>
                         <div className="flex flex-col gap-3 w-full">
                           {isAdmin && (
                             <button 
