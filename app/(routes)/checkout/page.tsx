@@ -34,6 +34,14 @@ declare global {
 }
 
 export default function CheckoutPage() {
+  // Add a loading overlay component at the top level
+  const PaymentSuccessOverlay = () => (
+    <div className="fixed inset-0 bg-black/70 z-50 flex flex-col items-center justify-center text-white">
+      <Loader2 className="h-12 w-12 animate-spin mb-4" />
+      <h2 className="text-xl font-semibold mb-2">Payment Successful!</h2>
+      <p>Finalizing your order...</p>
+    </div>
+  );
   const router = useRouter();
   const searchParams = useSearchParams();
   const { items, getTotalPrice, getTotalItems, clearCart } = useCart();
@@ -62,6 +70,7 @@ export default function CheckoutPage() {
   // Payment and order states
   const [isCreatingOrder, setIsCreatingOrder] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [isPaymentSuccessful, setIsPaymentSuccessful] = useState(false);
 
   // Calculate cart summary
   const subtotal = getTotalPrice();
@@ -291,6 +300,7 @@ export default function CheckoutPage() {
           ondismiss: function () {
             setIsCreatingOrder(false);
             setIsProcessingPayment(false);
+            setIsPaymentSuccessful(false);
             toast.error(
               "Payment cancelled. Your order is saved and you can try again later."
             );
@@ -309,6 +319,7 @@ export default function CheckoutPage() {
           console.error("Payment failed:", response.error);
           setIsCreatingOrder(false);
           setIsProcessingPayment(false);
+          setIsPaymentSuccessful(false);
         });
         razorpayInstance.open();
       } catch (error) {
@@ -327,6 +338,7 @@ export default function CheckoutPage() {
   const handlePaymentSuccess = async (response: any, orderId: string) => {
     try {
       setIsProcessingPayment(true);
+      setIsPaymentSuccessful(true); // Set payment as successful immediately
 
       // Show a loading state
       toast.success("Payment successful! Finalizing your order...");
@@ -392,6 +404,7 @@ export default function CheckoutPage() {
     } finally {
       setIsCreatingOrder(false);
       setIsProcessingPayment(false);
+      // Note: we don't reset isPaymentSuccessful here as we want the overlay to remain until navigation
     }
   };
 
