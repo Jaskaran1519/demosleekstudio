@@ -52,7 +52,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
             )}
           </div>
           <div className="py-3">
-            <h3 className="font-medium text-lg  line-clamp-1">{product.name.toUpperCase()}</h3>
+            <h3 className="font-medium text-sm sm:text-md md:text-lg  line-clamp-1">{product.name.toUpperCase()}</h3>
             <p className="text-sm font-light mt-1">₹ {product.price.toFixed(2)}</p>
           </div>
         </CardContent>

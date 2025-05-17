@@ -10,7 +10,7 @@ const Information: React.FC = () => {
       <div className="flex flex-col md:flex-row items-start gap-8 ">
         
         <div className={` ${canelaFont.className} w-full md:w-1/2`}>
-          <p className="text-4xl md:text-5xl xl:text-8xl font-light md:leading-[1.3] lg:leading-[1.3] xl:leading-[1.3] -pt-4 md:-pt-8 lg:-pt-12 xl:-pt-16 md:text-right">
+          <p className="text-4xl md:text-5xl lg:text-6xl xl:text-8xl font-light md:leading-[1.3] lg:leading-[1.3] xl:leading-[1.3] -pt-4 md:-pt-8 lg:-pt-12 xl:-pt-16 md:text-right">
             Carved with pure <br /> 
             Experience
           </p>
