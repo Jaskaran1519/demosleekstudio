@@ -5,20 +5,23 @@ import { Button } from "@/components/ui/button";
 import { ImageIcon, Loader2, AlertCircle } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
+import axios from "axios";
 
 interface FileUploadProps {
   endpoint: string;
   value?: string;
-  onChange: (url: { url: string }) => void;
+  onChange: (url: { url: string; isBase64?: boolean }) => void;
+  directUpload?: boolean;
 }
 
-// Maximum file size: 700KB
-const MAX_FILE_SIZE = 700 * 1024; // 700KB in bytes
+// Maximum file size: 3MB
+const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB in bytes
 
 export const FileUpload = ({
   endpoint,
   value = "",
   onChange,
+  directUpload = false,
 }: FileUploadProps) => {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,8 +32,8 @@ export const FileUpload = ({
 
     // Check file size
     if (file.size > MAX_FILE_SIZE) {
-      setError(`File size exceeds 700KB limit (${(file.size / 1024).toFixed(2)}KB)`);
-      toast.error(`File size exceeds 700KB limit (${(file.size / 1024).toFixed(2)}KB)`);
+      setError(`File size exceeds 3MB limit (${(file.size / (1024 * 1024)).toFixed(2)}MB)`);
+      toast.error(`File size exceeds 3MB limit (${(file.size / (1024 * 1024)).toFixed(2)}MB)`);
       e.target.value = ''; // Clear the input
       return;
     }
@@ -42,9 +45,29 @@ export const FileUpload = ({
       // Convert file to base64
       const reader = new FileReader();
       reader.readAsDataURL(file);
-      reader.onload = () => {
-        // Send base64 to the API
-        onChange({ url: reader.result as string });
+      reader.onload = async () => {
+        const base64Image = reader.result as string;
+        
+        if (directUpload) {
+          try {
+            // Upload directly to Cloudinary via our API
+            const response = await axios.post('/api/upload', {
+              image: base64Image,
+              folder: 'sleek-studio/products'
+            });
+            
+            // Return the Cloudinary URL
+            onChange({ url: response.data.url });
+          } catch (error: any) {
+            console.error("Error uploading to Cloudinary:", error);
+            setError(error.response?.data?.error || "Failed to upload image");
+            toast.error(error.response?.data?.error || "Failed to upload image");
+          }
+        } else {
+          // Just pass the base64 data for form handling
+          // Mark it as base64 so we know to upload it later
+          onChange({ url: base64Image, isBase64: true });
+        }
       };
     } catch (error) {
       console.error("Error uploading file:", error);
@@ -85,7 +108,7 @@ export const FileUpload = ({
                   <span className="font-semibold">Click to upload</span> or drag and drop
                 </p>
                 <p className="text-xs text-gray-500">
-                  PNG, JPG or WebP (Max: 700KB)
+                  PNG, JPG or WebP (Max: 3MB)
                 </p>
                 {error && (
                   <div className="flex items-center mt-2 text-red-500 text-xs">

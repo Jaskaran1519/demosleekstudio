@@ -24,8 +24,13 @@ export async function uploadImage(file: string, folder = "sleek-studio/products"
       ]
     });
 
+    // Add optimization parameters to the URL
+    // Original URL format: https://res.cloudinary.com/cloud_name/image/upload/v1234567890/folder/public_id.ext
+    // Optimized URL format: https://res.cloudinary.com/cloud_name/image/upload/q_auto,f_auto/v1234567890/folder/public_id.ext
+    const optimizedUrl = result.secure_url.replace('/upload/', '/upload/q_auto,f_auto/');
+
     return {
-      url: result.secure_url,
+      url: optimizedUrl,
       publicId: result.public_id,
     };
   } catch (error) {
@@ -55,9 +60,18 @@ export async function deleteImage(publicId: string) {
  */
 export function getPublicIdFromUrl(url: string): string | null {
   try {
-    // URL format: https://res.cloudinary.com/cloud_name/image/upload/v1234567890/folder/public_id.ext
+    if (!url) return null;
+    
+    // Handle both standard and optimized URLs
+    // Standard: https://res.cloudinary.com/cloud_name/image/upload/v1234567890/folder/public_id.ext
+    // Optimized: https://res.cloudinary.com/cloud_name/image/upload/q_auto,f_auto/v1234567890/folder/public_id.ext
+    
+    // First, normalize the URL by removing any transformation parameters
+    const normalizedUrl = url.replace('/upload/q_auto,f_auto/', '/upload/');
+    
+    // Then extract the public ID
     const regex = /\/v\d+\/(.+)\./;
-    const match = url.match(regex);
+    const match = normalizedUrl.match(regex);
     return match ? match[1] : null;
   } catch (error) {
     console.error("Error extracting public ID:", error);

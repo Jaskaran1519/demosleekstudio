@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import axios from "axios";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -107,6 +108,75 @@ export const ProductForm = ({ initialData }: ProductFormProps) => {
   const onSubmit = async (data: ProductFormValues) => {
     try {
       setLoading(true);
+      
+      // First, check if we have any base64 images that need to be uploaded
+      let isUploading = false;
+      let noBgImageUrl = data.noBgImage;
+      let modelImageUrl = data.modelImage;
+      let additionalImageUrls = [...(data.additionalImages || [])];
+      
+      // Update button text to show uploading status
+      if (noBgImageUrl?.startsWith('data:image/') || 
+          modelImageUrl?.startsWith('data:image/') ||
+          additionalImageUrls.some(img => img?.startsWith('data:image/'))) {
+        isUploading = true;
+        setLoading(true);
+        toast.info('Uploading images...');
+      }
+      
+      // Upload noBgImage if it's base64
+      if (noBgImageUrl?.startsWith('data:image/')) {
+        try {
+          const response = await axios.post('/api/upload', {
+            image: noBgImageUrl,
+            folder: 'sleek-studio/products'
+          });
+          noBgImageUrl = response.data.url;
+        } catch (error: any) {
+          console.error('Error uploading noBgImage:', error);
+          toast.error('Failed to upload main image');
+          setLoading(false);
+          return;
+        }
+      }
+      
+      // Upload modelImage if it's base64
+      if (modelImageUrl?.startsWith('data:image/')) {
+        try {
+          const response = await axios.post('/api/upload', {
+            image: modelImageUrl,
+            folder: 'sleek-studio/products'
+          });
+          modelImageUrl = response.data.url;
+        } catch (error: any) {
+          console.error('Error uploading modelImage:', error);
+          toast.error('Failed to upload model image');
+          setLoading(false);
+          return;
+        }
+      }
+      
+      // Upload any additional images that are base64
+      for (let i = 0; i < additionalImageUrls.length; i++) {
+        if (additionalImageUrls[i]?.startsWith('data:image/')) {
+          try {
+            const response = await axios.post('/api/upload', {
+              image: additionalImageUrls[i],
+              folder: 'sleek-studio/products'
+            });
+            additionalImageUrls[i] = response.data.url;
+          } catch (error: any) {
+            console.error(`Error uploading additional image ${i}:`, error);
+            toast.error(`Failed to upload additional image ${i+1}`);
+            setLoading(false);
+            return;
+          }
+        }
+      }
+      
+      if (isUploading) {
+        toast.success('Images uploaded successfully');
+      }
 
       const tagsArray = data.tags ? data.tags.split(',').map(tag => tag.trim()).filter(Boolean) : [];
       const sizesArray = data.sizes ? data.sizes.split(',').map(size => size.trim()).filter(Boolean) : [];
@@ -114,9 +184,9 @@ export const ProductForm = ({ initialData }: ProductFormProps) => {
 
       // Create images array with main images first, then additional images
       const images = [
-        data.noBgImage, 
-        data.modelImage,
-        ...(data.additionalImages || [])
+        noBgImageUrl, 
+        modelImageUrl,
+        ...additionalImageUrls
       ].filter(Boolean);  // Remove any empty/undefined values
 
       const formData = {
@@ -505,46 +575,25 @@ export const ProductForm = ({ initialData }: ProductFormProps) => {
                 />
               </div>
               <div className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="noBgImage"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>No Background Image (Main Image)</FormLabel>
-                      <FormControl>
-                        <FileUpload
-                          value={field.value}
-                          onChange={handleNoBgImageUpload}
-                          endpoint="productImage"
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Upload product image with transparent background
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="modelImage"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Model Image (Secondary Image)</FormLabel>
-                      <FormControl>
-                        <FileUpload
-                          value={field.value}
-                          onChange={handleModelImageUpload}
-                          endpoint="productImage"
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Upload product image with model
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="space-y-4">
+                  <FormLabel>No Background Image (Main)</FormLabel>
+                  <FileUpload
+                    value={form.watch("noBgImage")}
+                    onChange={(result) => form.setValue("noBgImage", result.url)}
+                    endpoint="productImage"
+                    directUpload={false}
+                  />
+                </div>
+                
+                <div className="space-y-4">
+                  <FormLabel>Model Image (Secondary)</FormLabel>
+                  <FileUpload
+                    value={form.watch("modelImage")}
+                    onChange={(result) => form.setValue("modelImage", result.url)}
+                    endpoint="productImage"
+                    directUpload={false}
+                  />
+                </div>
                 
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
@@ -568,6 +617,7 @@ export const ProductForm = ({ initialData }: ProductFormProps) => {
                           value={image}
                           onChange={(result) => handleAdditionalImageUpload(result, index)}
                           endpoint="productImage"
+                          directUpload={false}
                         />
                         <Button
                           type="button"
