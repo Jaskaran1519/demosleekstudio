@@ -182,12 +182,9 @@ export const ProductForm = ({ initialData }: ProductFormProps) => {
       const sizesArray = data.sizes ? data.sizes.split(',').map(size => size.trim()).filter(Boolean) : [];
       const colorsArray = data.colors ? data.colors.split(',').map(color => color.trim()).filter(Boolean) : [];
 
-      // Create images array with main images first, then additional images
-      const images = [
-        noBgImageUrl, 
-        modelImageUrl,
-        ...additionalImageUrls
-      ].filter(Boolean);  // Remove any empty/undefined values
+      // Create images array with ONLY additional images to avoid duplication
+      // The main images (noBgImage and modelImage) are stored separately in their own fields
+      const images = [...additionalImageUrls].filter(Boolean);  // Remove any empty/undefined values
 
       const formData = {
         ...data,

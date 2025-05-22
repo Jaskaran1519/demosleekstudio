@@ -11,6 +11,7 @@ interface ProductContentProps {
 export async function ProductContent({ slug }: ProductContentProps) {
   // Use server action to fetch product data
   const product = await getProductBySlug(slug);
+  console.log(product);
 
   if (!product) {
     notFound();

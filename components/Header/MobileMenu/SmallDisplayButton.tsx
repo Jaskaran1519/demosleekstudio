@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { LogOut, User, ShoppingBag, LogIn, UserPlus, LayoutDashboard } from 'lucide-react';
+import { LogOut, User, ShoppingBag, LogIn, UserPlus, LayoutDashboard, Menu, AlignLeft } from 'lucide-react';
 import styles from './style.module.scss';
 import Image from 'next/image';
 import { canelaFont } from '@/app/fonts';
@@ -215,7 +215,7 @@ export default function SmallDisplayButton({scrolled, shouldBeFixed}: {scrolled:
     <div className={styles.header}>
       <div className={styles.bar}>
         <div onClick={() => {setIsActive(!isActive)}} className={styles.el}>
-          <div className={`${styles.burger} ${isActive ? styles.burgerActive : ""}`}></div>
+          <AlignLeft className="h-8 w-8" />
           {/* Removed Menu text as requested */}
         </div>
       </div>
