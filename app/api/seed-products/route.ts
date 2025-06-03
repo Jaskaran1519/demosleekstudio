@@ -1,8 +1,7 @@
-"use server";
-
 import { db } from "@/lib/db";
 import { slugify } from "@/lib/utils";
 import { Category, ClothType } from "@prisma/client";
+import { NextResponse } from "next/server";
 
 // Sample product data
 const productTemplates = [
@@ -81,11 +80,11 @@ const productTemplates = [
   // Women's products
   {
     name: "Elegant Evening Dress",
-    description: "A stunning evening dress designed for special occasions. Features delicate embellishments and a flattering silhouette.",
+    description: "A stunning evening dress designed for special occasions. Features premium fabric and elegant details for a sophisticated look.",
     category: Category.WOMEN,
     clothType: ClothType.DRESS,
-    price: 8500,
-    salePrice: 7200,
+    price: 12000,
+    salePrice: 10000,
     noBgImage: "https://res.cloudinary.com/dqymrnulm/image/upload/v1746962163/sleek-studio/products/gpkp10l9o8pfprq6dwiv.jpg",
     modelImage: "https://res.cloudinary.com/dqymrnulm/image/upload/v1746962164/sleek-studio/products/pyuquxqeknd6uxuye8vt.jpg",
   },
@@ -95,17 +94,7 @@ const productTemplates = [
     category: Category.WOMEN,
     clothType: ClothType.LEHNGA,
     price: 18000,
-    salePrice: 15500,
-    noBgImage: "https://res.cloudinary.com/dqymrnulm/image/upload/v1746962163/sleek-studio/products/gpkp10l9o8pfprq6dwiv.jpg",
-    modelImage: "https://res.cloudinary.com/dqymrnulm/image/upload/v1746962164/sleek-studio/products/pyuquxqeknd6uxuye8vt.jpg",
-  },
-  {
-    name: "Casual Kurti",
-    description: "A comfortable and stylish kurti perfect for everyday wear. Features elegant embroidery and a relaxed fit.",
-    category: Category.WOMEN,
-    clothType: ClothType.KURTI,
-    price: 2200,
-    salePrice: null,
+    salePrice: 15000,
     noBgImage: "https://res.cloudinary.com/dqymrnulm/image/upload/v1746962163/sleek-studio/products/gpkp10l9o8pfprq6dwiv.jpg",
     modelImage: "https://res.cloudinary.com/dqymrnulm/image/upload/v1746962164/sleek-studio/products/pyuquxqeknd6uxuye8vt.jpg",
   },
@@ -120,11 +109,11 @@ const productTemplates = [
     modelImage: "https://res.cloudinary.com/dqymrnulm/image/upload/v1746962164/sleek-studio/products/pyuquxqeknd6uxuye8vt.jpg",
   },
   {
-    name: "Silk Blouse",
-    description: "An elegant silk blouse with a timeless design. Features premium fabric and attention to detail for a luxurious feel.",
+    name: "Casual Summer Dress",
+    description: "A lightweight summer dress perfect for warm weather. Features breathable fabric and a comfortable fit for everyday wear.",
     category: Category.WOMEN,
-    clothType: ClothType.SHIRT,
-    price: 4500,
+    clothType: ClothType.DRESS,
+    price: 3500,
     salePrice: null,
     noBgImage: "https://res.cloudinary.com/dqymrnulm/image/upload/v1746962163/sleek-studio/products/gpkp10l9o8pfprq6dwiv.jpg",
     modelImage: "https://res.cloudinary.com/dqymrnulm/image/upload/v1746962164/sleek-studio/products/pyuquxqeknd6uxuye8vt.jpg",
@@ -139,16 +128,6 @@ const productTemplates = [
     noBgImage: "https://res.cloudinary.com/dqymrnulm/image/upload/v1746962163/sleek-studio/products/gpkp10l9o8pfprq6dwiv.jpg",
     modelImage: "https://res.cloudinary.com/dqymrnulm/image/upload/v1746962164/sleek-studio/products/pyuquxqeknd6uxuye8vt.jpg",
   },
-  {
-    name: "Cashmere Sweater",
-    description: "A luxurious cashmere sweater designed for comfort and style. Features premium fabric and a relaxed fit.",
-    category: Category.WOMEN,
-    clothType: ClothType.SWEATER,
-    price: 6500,
-    salePrice: null,
-    noBgImage: "https://res.cloudinary.com/dqymrnulm/image/upload/v1746962163/sleek-studio/products/gpkp10l9o8pfprq6dwiv.jpg",
-    modelImage: "https://res.cloudinary.com/dqymrnulm/image/upload/v1746962164/sleek-studio/products/pyuquxqeknd6uxuye8vt.jpg",
-  },
   
   // Kids products
   {
@@ -158,16 +137,6 @@ const productTemplates = [
     clothType: ClothType.SUIT,
     price: 4500,
     salePrice: 3800,
-    noBgImage: "https://res.cloudinary.com/dqymrnulm/image/upload/v1746962163/sleek-studio/products/gpkp10l9o8pfprq6dwiv.jpg",
-    modelImage: "https://res.cloudinary.com/dqymrnulm/image/upload/v1746962164/sleek-studio/products/pyuquxqeknd6uxuye8vt.jpg",
-  },
-  {
-    name: "Kids Party Dress",
-    description: "A beautiful party dress for special occasions. Features delicate details and a comfortable design.",
-    category: Category.KIDS,
-    clothType: ClothType.DRESS,
-    price: 3800,
-    salePrice: null,
     noBgImage: "https://res.cloudinary.com/dqymrnulm/image/upload/v1746962163/sleek-studio/products/gpkp10l9o8pfprq6dwiv.jpg",
     modelImage: "https://res.cloudinary.com/dqymrnulm/image/upload/v1746962164/sleek-studio/products/pyuquxqeknd6uxuye8vt.jpg",
   },
@@ -211,13 +180,32 @@ const productTemplates = [
     noBgImage: "https://res.cloudinary.com/dqymrnulm/image/upload/v1746962163/sleek-studio/products/gpkp10l9o8pfprq6dwiv.jpg",
     modelImage: "https://res.cloudinary.com/dqymrnulm/image/upload/v1746962164/sleek-studio/products/pyuquxqeknd6uxuye8vt.jpg",
   },
+  {
+    name: "Kids Party Dress",
+    description: "A beautiful party dress designed for young girls. Features elegant details and premium fabric for special occasions.",
+    category: Category.KIDS,
+    clothType: ClothType.DRESS,
+    price: 3500,
+    salePrice: 3000,
+    noBgImage: "https://res.cloudinary.com/dqymrnulm/image/upload/v1746962163/sleek-studio/products/gpkp10l9o8pfprq6dwiv.jpg",
+    modelImage: "https://res.cloudinary.com/dqymrnulm/image/upload/v1746962164/sleek-studio/products/pyuquxqeknd6uxuye8vt.jpg",
+  },
+  {
+    name: "Kids T-Shirt",
+    description: "A comfortable t-shirt designed for everyday wear. Features soft cotton fabric and a relaxed fit.",
+    category: Category.KIDS,
+    clothType: ClothType.T_SHIRT,
+    price: 1200,
+    salePrice: null,
+    noBgImage: "https://res.cloudinary.com/dqymrnulm/image/upload/v1746962163/sleek-studio/products/gpkp10l9o8pfprq6dwiv.jpg",
+    modelImage: "https://res.cloudinary.com/dqymrnulm/image/upload/v1746962164/sleek-studio/products/pyuquxqeknd6uxuye8vt.jpg",
+  },
 ];
 
 /**
- * Create demo products in the database
- * First deletes all existing products, then creates new ones with 5 images each
+ * API route handler to delete all products and seed 20 new products with 5 images each
  */
-export async function createDemoProducts() {
+export async function GET() {
   try {
     console.log("Starting to delete all existing products...");
     
@@ -268,13 +256,18 @@ export async function createDemoProducts() {
       });
       
       createdCount++;
-      console.log(`Created product: ${template.name} (${createdCount}/${templatesForSeeding.length})`);
     }
     
-    console.log(`Successfully created ${createdCount} demo products with 5 images each!`);
-    return { success: true, count: createdCount };
-  } catch (error) {
-    console.error("Error creating demo products:", error);
-    throw new Error("Failed to create demo products");
+    return NextResponse.json({
+      success: true,
+      message: `Successfully deleted all products and created ${createdCount} new products with 5 images each.`,
+      count: createdCount
+    });
+  } catch (error: any) {
+    console.error("Error in seed-products API route:", error);
+    return NextResponse.json(
+      { success: false, error: error.message || "Failed to seed products" },
+      { status: 500 }
+    );
   }
 }

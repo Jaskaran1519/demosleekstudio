@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
+import { Product } from "@prisma/client";
 
 interface AccordionItem {
   title: string;
@@ -9,19 +10,36 @@ interface AccordionItem {
 }
 
 interface CustomAccordionProps {
-  items: AccordionItem[];
+  product: Product;
 }
 
-export const CustomAccordion = ({ items }: CustomAccordionProps) => {
+
+export const CustomAccordion = ({ product }: CustomAccordionProps) => {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   const toggleItem = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);
   };
 
+  const accordionItems = [
+    {
+      title: "Description",
+      content: <p className="text-muted-foreground">{product.description}</p>,
+    },
+    {
+      title: "Delivery Details",
+      content: <div></div>,
+    },
+    {
+      title: "Payment Methods",
+      content: <div></div>,
+    },
+  ];
+  
+
   return (
     <div className="space-y-2">
-      {items.map((item, index) => (
+      {accordionItems.map((item, index) => (
         <div key={index} className=" rounded-lg overflow-hidden">
           <button
             onClick={() => toggleItem(index)}

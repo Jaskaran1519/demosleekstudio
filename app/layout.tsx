@@ -38,7 +38,7 @@ export default function RootLayout({
     <html lang="en">
       <AuthProvider>   
       <body
-        className={`${geistSans.className} antialiased mx-auto bg-[#f9f9f9] `}
+        className={`${geistSans.className} antialiased mx-auto  `}
         >
           <SmoothScroll>
           <ClientSplashScreen>
