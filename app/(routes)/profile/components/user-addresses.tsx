@@ -92,11 +92,15 @@ export function UserAddresses({
     }
   };
 
-  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
+  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const target = e.target as HTMLInputElement | HTMLSelectElement;
+    const value = target.type === 'checkbox' 
+      ? (target as HTMLInputElement).checked 
+      : target.value;
+      
     setAddressForm({
       ...addressForm,
-      [name]: type === "checkbox" ? checked : value,
+      [target.name]: value,
     });
   };
 
@@ -153,21 +157,65 @@ export function UserAddresses({
 
   const handleDelete = async (id: string) => {
     try {
-      const response = await fetch(`/api/addresses?id=${id}`, {
-        method: "DELETE",
+      const response = await fetch(`/api/addresses?id=${encodeURIComponent(id)}`, {
+        method: 'DELETE',
       });
 
+      const responseData = await response.json().catch(() => ({}));
+      
       if (!response.ok) {
-        throw new Error("Failed to delete address");
+        console.error('Failed to delete address:', {
+          status: response.status,
+          statusText: response.statusText,
+          responseData
+        });
+        
+        throw new Error(
+          responseData.error || 
+          responseData.message || 
+          `Failed to delete address (Status: ${response.status})`
+        );
       }
 
-      toast.success("Address deleted");
-
-      // Update state directly to improve speed
-      setAddresses((prev) => prev.filter((address) => address.id !== id));
+      // Update the UI optimistically
+      setAddresses((prev) => {
+        const updated = prev.filter((address) => address.id !== id);
+        
+        // If we deleted the default address, update the first address to be default
+        const wasDefault = prev.find(a => a.id === id)?.isDefault;
+        if (wasDefault && updated.length > 0) {
+          updated[0].isDefault = true;
+        }
+        
+        return updated;
+      });
+      
+      toast.success('Address deleted successfully');
+      
     } catch (error) {
-      console.error("Error deleting address:", error);
-      toast.error("Failed to delete address");
+      console.error('Error deleting address:', error);
+      
+      // More specific error messages based on the error type
+      let errorMessage = 'Failed to delete address';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+        
+        // Handle common error cases
+        if (errorMessage.includes('foreign key constraint')) {
+          errorMessage = 'Cannot delete address as it is being used in existing orders';
+        } else if (errorMessage.includes('400')) {
+          errorMessage = 'Invalid request. Please try again.';
+        } else if (errorMessage.includes('401') || errorMessage.includes('403')) {
+          errorMessage = 'You are not authorized to perform this action';
+        } else if (errorMessage.includes('404')) {
+          errorMessage = 'Address not found or already deleted';
+        }
+      }
+      
+      toast.error(errorMessage);
+      
+      // Refresh the addresses list to ensure consistency
+      fetchAddresses();
     }
   };
 
@@ -202,16 +250,24 @@ export function UserAddresses({
               {/* Country/Region field */}
               <div className="space-y-2">
                 <Label htmlFor="country">Country/Region</Label>
-                <Input
+                <select
                   id="country"
                   name="country"
                   value={addressForm.country}
                   onChange={handleFormChange}
-                  placeholder="Select country"
                   required
                   disabled={isSubmitting}
-                  className="w-full"
-                />
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <option value="">Select a country</option>
+                  <option value="INDIA">India</option>
+                  <option value="USA">United States</option>
+                  <option value="CANADA">Canada</option>
+                  <option value="DUBAI">Dubai (UAE)</option>
+                  <option value="EUROPE">Europe</option>
+                  <option value="AUSTRALIA">Australia</option>
+                  <option value="NEW_ZEALAND">New Zealand</option>
+                </select>
               </div>
 
               {/* Name fields in a row */}

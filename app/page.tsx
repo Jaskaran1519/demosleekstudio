@@ -16,11 +16,13 @@ import Faq from "@/components/Hero/Faq";
 import Link from "next/link";
 import { HeroBackground } from "@/components/Hero/HeroBackground";
 import VideoHoverGrid from "@/components/VideoHoverGrid/VideoHoverGrid";
+import BendCarousel from "@/components/CircularGallery/BendCarousel";
+import Services from "@/components/Hero/Services";
 
 const Page = () => {
   return (
     <div className="w-full max-w-[2000px] mx-auto min-h-screen">
-      <HeroBackground/>
+      {/* <HeroBackground/> */}
       <VideoHoverGrid />
       {/* <MainVideo videoUrl="https://res.cloudinary.com/dk6z5ui4f/video/upload/v1743748072/1-Hero-DSK_hua8cn.mp4" /> */}
       {/* <CarouselDemo/> */}
@@ -29,9 +31,16 @@ const Page = () => {
       {/* <FadeIn>
         <CategorySection />
       </FadeIn> */}
-      <FadeIn>
+      {/* <FadeIn>
         <Information/>
+      </FadeIn> */}
+      <FadeIn>
+      <BendCarousel/>
       </FadeIn>
+
+        <FadeIn>
+        <Services/>
+        </FadeIn>
 
       <FadeIn>
         <FeaturedProductsCarousel />

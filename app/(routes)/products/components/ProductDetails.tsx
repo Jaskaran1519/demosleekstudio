@@ -176,11 +176,11 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
                 <div className="text-sm text-gray-500 mb-1">Price</div>
                 <div className="flex items-baseline gap-2">
                   <span className=" md:text-2xl xl:text-3xl font-bold text-gray-900">
-                    ${product.price}
+                    ₹{product.price}
                   </span>
                   {product.salePrice && (
                     <span className="text-lg xl:text-xl text-gray-400 line-through">
-                      ${product.salePrice}
+                      ₹{product.salePrice}
                     </span>
                   )}
                 </div>

@@ -325,14 +325,8 @@ class Media {
   }
 
   createTitle() {
-    this.title = new Title({
-      gl: this.gl,
-      plane: this.plane,
-      renderer: this.renderer,
-      text: this.text,
-      textColor: this.textColor,
-      font: this.font,
-    });
+    // Title creation disabled to remove text from images
+    return;
   }
 
   update(
@@ -455,7 +449,7 @@ class App {
       bend = 1,
       textColor = "#ffffff",
       borderRadius = 0,
-      font = "bold 30px DM Sans",
+      font = "bold 30px Figtree",
     }: AppConfig,
   ) {
     document.documentElement.classList.remove("no-js");
@@ -505,51 +499,51 @@ class App {
   ) {
     const defaultItems = [
       {
-        image: `https://picsum.photos/seed/1/800/600?grayscale`,
+        image: `/introimages/1.jpg`,
         text: "Bridge",
       },
       {
-        image: `https://picsum.photos/seed/2/800/600?grayscale`,
+        image: `/introimages/2.jpg`,
         text: "Desk Setup",
       },
       {
-        image: `https://picsum.photos/seed/3/800/600?grayscale`,
+        image: `/introimages/3.jpg`,
         text: "Waterfall",
       },
       {
-        image: `https://picsum.photos/seed/4/800/600?grayscale`,
+        image: `/introimages/4.jpg`,
         text: "Strawberries",
       },
       {
-        image: `https://picsum.photos/seed/5/800/600?grayscale`,
+        image: `/introimages/5.jpg`,
         text: "Deep Diving",
       },
       {
-        image: `https://picsum.photos/seed/16/800/600?grayscale`,
+        image: `/introimages/6.jpg`,
         text: "Train Track",
       },
       {
-        image: `https://picsum.photos/seed/17/800/600?grayscale`,
+        image: `/introimages/1.jpg`,
         text: "Santorini",
       },
       {
-        image: `https://picsum.photos/seed/8/800/600?grayscale`,
+        image: `/introimages/2.jpg`,
         text: "Blurry Lights",
       },
       {
-        image: `https://picsum.photos/seed/9/800/600?grayscale`,
+        image: `/introimages/3.jpg`,
         text: "New York",
       },
       {
-        image: `https://picsum.photos/seed/10/800/600?grayscale`,
+        image: `/introimages/4.jpg`,
         text: "Good Boy",
       },
       {
-        image: `https://picsum.photos/seed/21/800/600?grayscale`,
+        image: `/introimages/5.jpg`,
         text: "Coastline",
       },
       {
-        image: `https://picsum.photos/seed/12/800/600?grayscale`,
+        image: `/introimages/6.jpg`,
         text: "Palm Trees",
       },
     ];
@@ -694,7 +688,7 @@ export default function CircularGallery({
   bend = 3,
   textColor = "#ffffff",
   borderRadius = 0.05,
-  font = "bold 30px DM Sans",
+  font = "bold 30px Figtree",
 }: CircularGalleryProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {

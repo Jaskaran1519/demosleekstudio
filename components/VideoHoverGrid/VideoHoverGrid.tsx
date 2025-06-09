@@ -29,14 +29,14 @@ const VideoHoverGrid = () => {
   const videos: VideoItem[] = [
     {
       id: 'men',
-      videoUrl: 'https://res.cloudinary.com/dzrsboari/video/upload/f_auto,q_auto/v1749043079/ssmenvideo_rnurlc.mp4',
+      videoUrl: '/mainvideos/ssmenvideo.webm',
       title: "Men's Collection",
       subtitle: 'Shop now',
       route: '/men',
     },
     {
       id: 'women',
-      videoUrl: 'https://res.cloudinary.com/dzrsboari/video/upload/f_auto,q_auto/v1749043028/sswomenvideo_w28lwt.mp4',
+      videoUrl: '/mainvideos/sswomenvideo.webm',
       title: "Women's Collection",
       subtitle: 'Shop now',
       route: '/women',

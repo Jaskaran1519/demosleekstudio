@@ -3,6 +3,18 @@ import { getAuthSession } from "@/lib/auth";
 import { Container } from "@/components/ui/container";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
+
+type ShippingAddress = {
+  id: string;
+  name: string;
+  addressLine1: string;
+  addressLine2: string | null;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+  // Add any other fields that your address has
+};
 import {
   ArrowLeft,
   PackageCheck,
@@ -42,7 +54,7 @@ async function OrderContent({ orderId }: { orderId: string }) {
   }
 
   let order;
-  let shippingAddress;
+  let shippingAddress: ShippingAddress | null = null;
 
   try {
     order = await getOrderById(orderId);
@@ -51,15 +63,19 @@ async function OrderContent({ orderId }: { orderId: string }) {
       return notFound();
     }
 
-    // Fetch the shipping address using the shippingAddressId
-    shippingAddress = await db.address.findUnique({
-      where: {
-        id: order.shippingAddressId,
-      },
-    });
+    // Fetch the shipping address using the shippingAddressId if it exists
+    if (order.shippingAddressId) {
+      shippingAddress = await db.address.findUnique({
+        where: {
+          id: order.shippingAddressId,
+        },
+      });
 
-    if (!shippingAddress) {
-      console.error(`Shipping address not found for order ${orderId}`);
+      if (!shippingAddress) {
+        console.error(`Shipping address not found for order ${orderId}`);
+      }
+    } else {
+      console.error(`No shipping address ID found for order ${orderId}`);
     }
   } catch (error) {
     console.error("Error fetching order details:", error);
