@@ -10,6 +10,7 @@ import {
 import { Product } from "@/types";
 import ProductCard from "./Others/ProductCard";
 import { getFeaturedProducts } from "@/actions";
+import { magerFont } from "@/app/fonts";
 
 const FeaturedProductsCarousel = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -67,6 +68,12 @@ const FeaturedProductsCarousel = () => {
 
   return (
     <Container className="min-h-[50vh]">
+      <div className="flex items-center justify-center py-5 md:py-10 xl:py-10 w-full">
+        <h1 className={`${magerFont.className} flex items-center gap-2 text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-semibold`}>
+          Our Latest Releases
+          <img src="/extraimages/leaf.svg" alt="Leaf icon" className="w-8 h-8 md:w-10 md:h-10" />
+        </h1>
+      </div>
       {/* First Carousel */}
       <Carousel
         opts={{
@@ -86,26 +93,7 @@ const FeaturedProductsCarousel = () => {
           ))}
         </CarouselContent>
       </Carousel>
-      
-      {/* Second Carousel */}
-      <Carousel
-        opts={{
-          align: "start",
-          loop: true,
-        }}
-        className="w-full"
-      >
-        <CarouselContent className="-ml-0.5 md:-ml-1">
-          {secondCarouselProducts.map((product) => (
-            <CarouselItem
-              key={product.id}
-              className="pl-0.5 md:pl-1 basis-1/2 md:basis-1/3 lg:basis-1/4"
-            >
-              <ProductCard product={product} />
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-      </Carousel>
+
     </Container>
   );
 };

@@ -1,70 +1,75 @@
-// app/api/contact/route.ts
 import { NextResponse } from 'next/server';
+import { Resend } from 'resend';
 
-// --- IMPORTANT ---
-// Install nodemailer: npm install nodemailer
-// Install types: npm install --save-dev @types/nodemailer
-import nodemailer from 'nodemailer';
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-type ResponseData = {
-    message: string;
-    success: boolean;
+type ContactFormData = {
+  firstName: string;
+  lastName: string;
+  phone: string;
+  message: string;
 };
 
 export async function POST(request: Request) {
-    try {
-        const body = await request.json();
-        const { name, phone, message } = body;
+  try {
+    const body = await request.json();
+    const { firstName, lastName, phone, message } = body as ContactFormData;
 
-        // Basic validation
-        if (!name || !message) {
-            return NextResponse.json(
-                { success: false, message: 'Name and Message are required.' },
-                { status: 400 }
-            );
-        }
-
-        // --- Nodemailer Configuration ---
-        // IMPORTANT: Use environment variables for credentials!
-        // Example: process.env.EMAIL_SERVER_USER, process.env.EMAIL_SERVER_PASSWORD, etc.
-        const transporter = nodemailer.createTransport({
-            host: process.env.EMAIL_SERVER_HOST, // e.g., 'smtp.example.com'
-            port: parseInt(process.env.EMAIL_SERVER_PORT || '587'), // e.g., 587 or 465
-            secure: process.env.EMAIL_SECURE === 'true', // true for 465, false for other ports
-            auth: {
-                user: process.env.EMAIL_SERVER_USER, // Your email address
-                pass: process.env.EMAIL_SERVER_PASSWORD, // Your email password or app password
-            },
-        });
-
-        const mailOptions = {
-            from: `"Sleek Studio Contact" <${process.env.EMAIL_FROM || process.env.EMAIL_SERVER_USER}>`, // Sender address (can be same as user)
-            to: process.env.EMAIL_TO, // List of receivers (your business email)
-            replyTo: name && message ? `"${name}" <${message}>` : undefined, // Set Reply-To for easy response - BE CAREFUL WITH VALIDATION IF YOU DO THIS
-            subject: `New Contact Form Submission from ${name}`, // Subject line
-            text: `You received a new message from your website contact form.\n\n` +
-                `Name: ${name}\n` +
-                `Phone: ${phone || 'Not provided'}\n` +
-                `Message:\n${message}`, // Plain text body
-            html: `<p>You received a new message from your website contact form.</p>` +
-                `<ul>` +
-                `<li><strong>Name:</strong> ${name}</li>` +
-                `<li><strong>Phone:</strong> ${phone || 'Not provided'}</li>` +
-                `</ul>` +
-                `<p><strong>Message:</strong></p>` +
-                `<p>${message.replace(/\n/g, '<br>')}</p>`, // HTML body
-        };
-
-        await transporter.sendMail(mailOptions);
-        return NextResponse.json(
-            { success: true, message: 'Message sent successfully!' },
-            { status: 200 }
-        );
-    } catch (error: any) {
-        console.error('Error sending email:', error);
-        return NextResponse.json(
-            { success: false, message: 'Failed to send message. Server error.' },
-            { status: 500 }
-        );
+    // Basic validation
+    if (!firstName || !lastName || !message) {
+      return NextResponse.json(
+        { success: false, message: 'First name, last name, and message are required.' },
+        { status: 400 }
+      );
     }
+
+    // Send email using Resend
+    const { data, error } = await resend.emails.send({
+      from: 'Sleek Studio <onboarding@resend.dev>', // Update with your verified sender email
+      to: process.env.CONTACT_FORM_RECIPIENT || 'your-email@example.com',
+      subject: `New Contact Form Submission from ${firstName} ${lastName}`,
+      text: `New contact form submission:\n\n` +
+        `Name: ${firstName} ${lastName}\n` +
+        `Phone: ${phone || 'Not provided'}\n` +
+        `Message:\n${message}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2>New Contact Form Submission</h2>
+          <p>You've received a new message from the contact form on your website.</p>
+          
+          <div style="background-color: #f9f9f9; padding: 20px; border-radius: 5px; margin: 20px 0;">
+            <p><strong>Name:</strong> ${firstName} ${lastName}</p>
+            <p><strong>Phone:</strong> ${phone || 'Not provided'}</p>
+            <p><strong>Message:</strong></p>
+            <div style="white-space: pre-line; background: white; padding: 10px; border-radius: 5px; margin-top: 5px;">
+              ${message}
+            </div>
+          </div>
+          
+          <p style="color: #666; font-size: 0.9em;">
+            This email was sent from the contact form on your website.
+          </p>
+        </div>
+      `,
+    });
+
+    if (error) {
+      console.error('Error sending email:', error);
+      throw new Error('Failed to send email');
+    }
+
+    return NextResponse.json(
+      { success: true, message: 'Message sent successfully!' },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error('Error processing contact form:', error);
+    return NextResponse.json(
+      { 
+        success: false, 
+        message: error instanceof Error ? error.message : 'An error occurred while sending your message.' 
+      },
+      { status: 500 }
+    );
+  }
 }

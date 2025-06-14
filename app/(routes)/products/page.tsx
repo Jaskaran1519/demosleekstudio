@@ -77,7 +77,7 @@ export default function ProductsPage() {
     {
       revalidateOnFocus: false,
       dedupingInterval: 60000, // cache for 60s
-      // keepPreviousData: true, // Optional: for smoother UI transitions on filter changes
+      keepPreviousData: true, // Optional: for smoother UI transitions on filter changes
     }
   );
 

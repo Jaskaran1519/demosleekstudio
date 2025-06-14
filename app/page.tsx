@@ -18,6 +18,7 @@ import { HeroBackground } from "@/components/Hero/HeroBackground";
 import VideoHoverGrid from "@/components/VideoHoverGrid/VideoHoverGrid";
 import BendCarousel from "@/components/CircularGallery/BendCarousel";
 import Services from "@/components/Hero/Services";
+import ContactForm from "@/components/Hero/ContactForm";
 
 const Page = () => {
   return (
@@ -52,16 +53,22 @@ const Page = () => {
       </FadeIn>
 
       <FadeIn>
+        <StylishFontPage />
+      </FadeIn>
+{/* 
+      <FadeIn>
         <BespokeTailoring />
+      </FadeIn> */}
+
+      <FadeIn>
+        <ContactForm />
       </FadeIn>
 
       {/* <FadeIn>
         <Faq/>
       </FadeIn> */}
 
-      <FadeIn>
-        <StylishFontPage />
-      </FadeIn>
+      
       {/* <Reviews/> */}
     </div>
   );

@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 interface VideoItem {
   id: string;
@@ -32,14 +33,14 @@ const VideoHoverGrid = () => {
       videoUrl: '/mainvideos/ssmenvideo.webm',
       title: "Men's Collection",
       subtitle: 'Shop now',
-      route: '/men',
+      route: '/products?category=MEN&page=1',
     },
     {
       id: 'women',
       videoUrl: '/mainvideos/sswomenvideo.webm',
       title: "Women's Collection",
       subtitle: 'Shop now',
-      route: '/women',
+      route: '/products?category=WOMEN&page=1',
     },
   ];
 
@@ -89,8 +90,18 @@ const VideoHoverGrid = () => {
     <section className="relative w-full h-screen overflow-hidden">
       {/* Sleek Studio Text Overlay - Hidden on mobile */}
       <div className="hidden md:flex absolute inset-0 flex-col items-center justify-center z-10 text-white text-center pointer-events-none">
-        <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[0.9]">Sleek</h1>
-        <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[0.9]">Studio</h1>
+        <div className="relative w-24 h-24">
+          <Image 
+            src="/logo.svg" 
+            alt="Sleek Studio" 
+            fill
+            style={{
+              filter: 'brightness(0) invert(1)', // Makes the logo pure white
+              objectFit: 'contain'
+            }}
+            priority
+          />
+        </div>
       </div>
 
       {/* Video Grid */}
