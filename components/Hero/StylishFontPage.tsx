@@ -14,12 +14,12 @@ import {
 
 // Instagram-style post data
 const posts = [
-  { id: 1, username: "anamariaburs", image: "/instaposts/1.jpg", description: "Megan Sheep Jumper", postLink: "/products/megan-sheep-jumper" },
-  { id: 2, username: "sophiestyles", image: "/instaposts/2.jpg", description: "Alpine Wool Cardigan", postLink: "/products/alpine-wool-cardigan" },
-  { id: 3, username: "fashionforward", image: "/instaposts/3.jpg", description: "Nordic Pattern Sweater", postLink: "/products/nordic-pattern-sweater" },
-  { id: 4, username: "winterwardrobe", image: "/instaposts/4.jpg", description: "Merino Blend Pullover", postLink: "/products/merino-blend-pullover" },
-  { id: 5, username: "winterwardrobe", image: "/instaposts/5.jpg", description: "Merino Blend Pullover", postLink: "/products/merino-blend-pullover" },
-  { id: 6, username: "winterwardrobe", image: "/instaposts/6.jpg", description: "Merino Blend Pullover", postLink: "/products/merino-blend-pullover" },
+  { id: 1, username: "anamariaburs", image: "/instaposts/1.jpg", description: "Megan Sheep Jumper", postLink: "https://www.instagram.com/" },
+  { id: 2, username: "sophiestyles", image: "/instaposts/2.jpg", description: "Alpine Wool Cardigan", postLink: "https://www.instagram.com/" },
+  { id: 3, username: "fashionforward", image: "/instaposts/3.jpg", description: "Nordic Pattern Sweater", postLink: "https://www.instagram.com/" },
+  { id: 4, username: "winterwardrobe", image: "/instaposts/4.jpg", description: "Merino Blend Pullover", postLink: "https://www.instagram.com/" },
+  { id: 5, username: "winterwardrobe", image: "/instaposts/5.jpg", description: "Merino Blend Pullover", postLink: "https://www.instagram.com/" },
+  { id: 6, username: "winterwardrobe", image: "/instaposts/6.jpg", description: "Merino Blend Pullover", postLink: "https://www.instagram.com/" },
 ];
 
 interface CarouselItemData {
@@ -50,7 +50,7 @@ const AnimatedCarouselCardContent = ({
         rounded-lg overflow-hidden shadow-xl relative bg-neutral-200 dark:bg-neutral-800
       `}
     >
-      <Link href={itemData.postLink} className="block h-full w-full">
+      <Link href={itemData.postLink} className="block h-full w-full" target="_blank" rel="noopener noreferrer">
         <Image
           src={itemData.image || "/placeholder.svg"}
           alt={itemData.description}
