@@ -18,7 +18,7 @@ const CustomLoader: React.FC<CustomLoaderProps> = ({ className = '' }) => {
   return (
     <div style={optimizedStyles} className={className}>
       {/* We're using a custom class for the 5-second shimmer animation */}
-      <Loader className="animate-[shimmer_5s_ease-in-out_infinite]" />
+      <Loader />
     </div>
   );
 };

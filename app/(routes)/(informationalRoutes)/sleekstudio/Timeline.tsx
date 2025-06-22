@@ -1,0 +1,250 @@
+"use client"
+
+import React, { useRef, useState } from "react"
+import { motion, useInView } from "framer-motion"
+import { magerFont } from "@/app/fonts"
+
+interface TimelineStage {
+  year: string
+  title: string
+  description: string
+  image?: string
+  isStart?: boolean
+}
+
+const timelineData: TimelineStage[] = [
+  {
+    year: "1989",
+    title: "Started ‘Aay Ess Suitings’",
+    description: "Just a couple of years before the country set on its course towards economic liberalization, we set foot to change the paradigm of the then-fragmented Indian textile market.",
+    image: "/history/1989.jpg",
+  },
+  {
+    year: "2000",
+    title: "Founded ‘Sleek’",
+    description: "Embracing the tech revolution that took place in the early 2000s, we registered Sleek to set on a course to democratize India’s occasion-wear industry.",
+    image: "/history/2000.jpg",
+  },
+  {
+    year: "2008",
+    title: "Expanded operations under sleek to 100 stores.",
+    description: "While the market was in a state of recession in 2008, Sleek remained indifferent and was on an expansion spree with operations & project deliveries across PAN-India.",
+    image: "/history/2008.jpg",
+  },
+  {
+    year: "2013",
+    title: "Ventured as Sleek Studio",
+    description: "With the fast-changing landscape of the Indian couture industry, Sleek was registered as Sleek Studio with the intent to appeal to the contemporary audience with modern embellishments.",
+    image: "/history/2013.jpg",
+  },
+  {
+    year: "2021",
+    title: "Launched thesleekstudio.com",
+    description: "Keeping our momentum of tailored texture designs intact and setting a foot in the surging Indian eCommerce, we are giving the surefooted off-the-rack millennials of today the required dapper feel through our couture exuding valor, pride, and discipline.",
+    image: "/history/2021.jpg",
+  },
+]
+
+function PlayIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...props} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M8 5v14l11-7z" />
+    </svg>
+  )
+}
+
+function PauseIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...props} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+    </svg>
+  )
+}
+
+function VideoHero() {
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
+
+  const handlePlayPause = () => {
+    if (videoRef.current) {
+      if (videoRef.current.paused) {
+        videoRef.current.play()
+      } else {
+        videoRef.current.pause()
+      }
+    }
+  }
+
+  return (
+    <div className="relative w-full h-screen flex items-center justify-center bg-black mb-20 overflow-hidden">
+      <div className="absolute inset-0 w-full h-full flex items-center justify-center">
+        <video
+          ref={videoRef}
+          src="/ss-video.webm"
+          loop
+          muted
+          autoPlay
+          playsInline
+          className="h-full w-full object-cover md:w-auto md:max-w-none"
+          onPlay={() => setIsPlaying(true)}
+          onPause={() => setIsPlaying(false)}
+          onClick={handlePlayPause}
+        />
+      </div>
+      <div
+        className={`absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 transition-opacity duration-300 pointer-events-none ${
+          isPlaying && !isHovered ? "opacity-0" : "opacity-100"
+        }`}
+      >
+        <button
+          className="bg-black bg-opacity-40 rounded-full p-3 hover:bg-opacity-60 transition-all duration-300 focus:outline-none pointer-events-auto"
+        >
+          {isPlaying ? (
+            <PauseIcon className="w-16 h-16 text-white" />
+          ) : (
+            <PlayIcon className="w-16 h-16 text-white pl-2" />
+          )}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+export default function TimelineHistory() {
+  return (
+    <div className="min-h-screen pb-12">
+      {/* Hero Section */}
+      <VideoHero />
+
+      <div className="text-center my-16">
+        <h2 className={`${magerFont.className} text-5xl md:text-6xl text-gray-900 tracking-wider`}>
+          Our Journey
+        </h2>
+      </div>
+
+      {/* Timeline Section */}
+      <div className="relative max-w-6xl mx-auto px-4">
+        {/* Vertical Line */}
+        <div className="absolute left-4 md:left-1/2 w-1 bg-gray-200 h-full transform -translate-x-1/2" />
+
+        {timelineData.map((stage, index) => (
+          <TimelineItem
+            key={index}
+            stage={stage}
+            index={index}
+            isLeft={index % 2 === 0}
+          />
+        ))}
+      </div>
+
+      {/* Final Message */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        transition={{ duration: 1 }}
+        className="max-w-6xl mx-auto px-4 mt-32 text-center"
+      >
+        <h2 className="text-2xl md:text-4xl font-light text-gray-900 mb-8 tracking-wider">
+          --JOURNEY NEVER STOP--
+        </h2>
+      </motion.div>
+
+      {/* Decorative Elements */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-20 right-10 w-32 h-32 border border-gray-200 rounded-full opacity-30" />
+        <div className="absolute bottom-40 left-10 w-48 h-48 border border-gray-200 rounded-full opacity-20" />
+        <div className="absolute top-1/2 right-20 w-24 h-24 border border-gray-200 rounded-full opacity-25" />
+      </div>
+    </div>
+  )
+}
+
+function TimelineItem({
+  stage,
+  index,
+  isLeft,
+}: {
+  stage: TimelineStage
+  index: number
+  isLeft: boolean
+}) {
+  const ref = useRef(null)
+  const isInView = useInView(ref, { once: true, margin: "-50px" })
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 20 }}
+      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+      transition={{ duration: 0.4, delay: index * 0.1 }}
+      className={`relative flex items-center ${isLeft ? "md:justify-start" : "md:justify-end"}`}
+    >
+      {/* Timeline Dot */}
+      <motion.div
+        initial={{ scale: 0 }}
+        animate={isInView ? { scale: 1 } : { scale: 0 }}
+        transition={{ duration: 0.3, delay: index * 0.1 + 0.1 }}
+        className="absolute left-4 md:left-1/2 w-4 h-4 bg-gray-800 rounded-full transform -translate-x-2 md:-translate-x-2 z-10 border-4 border-white shadow-lg"
+      />
+
+      {/* Content Container */}
+      <div
+        className={`w-full md:w-1/2 ${
+          // On mobile, always position content to the right of the line
+          "ml-12 md:ml-0 " +
+          (isLeft ? "md:w-1/2 md:pr-12 md:text-right" : "md:w-1/2 md:pl-12 md:text-left md:ml-auto")
+        }`}
+      >
+        <div className="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
+          {stage.year && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={isInView ? { opacity: 1 } : { opacity: 0 }}
+              transition={{ duration: 0.3, delay: index * 0.1 + 0.2 }}
+              className="text-sm text-gray-500 mb-2 tracking-wider"
+            >
+              {stage.year}
+            </motion.div>
+          )}
+
+          <motion.h3
+            initial={{ opacity: 0, y: 10 }}
+            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+            transition={{ duration: 0.3, delay: index * 0.1 + 0.25 }}
+            className={`text-xl md:text-2xl font-light text-gray-900 mb-4 tracking-wide ${
+              stage.isStart ? "text-center text-2xl md:text-3xl" : ""
+            }`}
+          >
+            {stage.title}
+          </motion.h3>
+
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+            transition={{ duration: 0.3, delay: index * 0.1 + 0.3 }}
+            className="text-gray-600 leading-relaxed mb-6"
+          >
+            {stage.description}
+          </motion.p>
+
+          {stage.image && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.4, delay: index * 0.1 + 0.35 }}
+              className="overflow-hidden rounded-lg"
+            >
+              <img
+                src={stage.image || "/placeholder.svg"}
+                alt={stage.title}
+                className="w-full h-48 md:h-64 object-cover hover:scale-105 transition-transform duration-500"
+              />
+            </motion.div>
+          )}
+        </div>
+      </div>
+    </motion.div>
+  )
+}
+

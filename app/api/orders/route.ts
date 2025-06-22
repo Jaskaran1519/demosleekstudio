@@ -76,7 +76,80 @@ export async function POST(req: NextRequest) {
     });
 
     // Create order in database with PENDING status
-    console.log("[ORDER_CREATE] Cart items:", JSON.stringify(items));
+    console.log("[ORDER_CREATE] Received items:", JSON.stringify(items, null, 2));
+    
+    // Process items to ensure valid product references
+    const orderItems = await Promise.all(items.map(async (item: any) => {
+      const productId = item.productId || item.id;
+      
+      try {
+        let product;
+        
+        // Check if the ID is a UUID (contains hyphens)
+        const isUUID = productId.includes('-');
+        
+        if (isUUID) {
+          // If it's a UUID, try to find by name and size
+          console.log(`[ORDER_CREATE] UUID detected, searching by name: ${item.name}`);
+          product = await db.product.findFirst({
+            where: { 
+              name: item.name,
+              sizes: { has: item.size }
+            },
+            select: { id: true, name: true, price: true, sizes: true }
+          });
+        } else {
+          // Try to find by ID first if it's not a UUID
+          try {
+            product = await db.product.findUnique({
+              where: { id: productId },
+              select: { id: true, name: true, price: true, sizes: true }
+            });
+          } catch (error) {
+            console.log(`[ORDER_CREATE] Error finding by ID, trying name: ${item.name}`);
+            // If ID lookup fails, try by name
+            product = await db.product.findFirst({
+              where: { 
+                name: item.name,
+                sizes: { has: item.size }
+              },
+              select: { id: true, name: true, price: true, sizes: true }
+            });
+          }
+        }
+
+        // If still not found, try a more flexible name search
+        if (!product && item.name) {
+          console.log(`[ORDER_CREATE] Product not found by exact name, trying fuzzy search: ${item.name}`);
+          product = await db.product.findFirst({
+            where: {
+              name: { contains: item.name, mode: 'insensitive' },
+              sizes: { has: item.size }
+            },
+            select: { id: true, name: true, price: true, sizes: true }
+          });
+        }
+
+        if (!product) {
+          console.error(`[ORDER_CREATE] Product not found: ${productId} (${item.name || 'no name'})`);
+          throw new Error(`Product not found: ${item.name || productId}`);
+        }
+
+        return {
+          productId: product.id, // Use the database ID
+          quantity: item.quantity,
+          price: product.price, // Use the price from the database to prevent tampering
+          size: item.size,
+          color: item.color,
+          totalPrice: product.price * item.quantity
+        };
+      } catch (error) {
+        console.error(`[ORDER_CREATE] Error processing product ${productId}:`, error);
+        throw new Error(`Error processing product: ${item.name || productId}`);
+      }
+    }));
+
+    console.log('[ORDER_CREATE] Processed order items:', JSON.stringify(orderItems, null, 2));
     
     const order = await db.order.create({
       data: {
@@ -92,17 +165,7 @@ export async function POST(req: NextRequest) {
         couponCode: validatedCoupon?.code,
         discountAmount: discountAmount || 0,
         items: {
-          create: items.map((item: any) => {
-            console.log(`[ORDER_CREATE] Processing item: ${item.productId || item.id} (${item.name || 'unnamed'})`);
-            return {
-              productId: item.productId || item.id,
-              quantity: item.quantity,
-              price: item.price,
-              size: item.size,
-              color: item.color,
-              totalPrice: item.price * item.quantity
-            };
-          })
+          create: orderItems
         }
       }
     });

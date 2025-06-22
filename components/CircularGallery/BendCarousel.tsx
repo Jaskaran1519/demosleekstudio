@@ -30,10 +30,10 @@ export const BendCarousel = () => {
 
     return (
         <div className='relative'>
-            <div className='relative h-[400px] md:h-[600px] lg:h-[700px]'>
-                <CircularGallery bend={0} textColor="#ffffff" borderRadius={0.05} />
+            <div className='relative'>
+                <CircularGallery bend={bend} textColor="#ffffff" borderRadius={0.05} />
             </div>
-            <div className={`${magerFont.className} text-black relative -mt-6 md:-mt-12 pb-5 md:pb-10 xl:pb-16 text-center text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-semibold w-full`}>
+            <div className={`${magerFont.className} text-black relative mt-8 pb-5 md:pb-10 xl:pb-16 text-center text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-semibold w-full`}>
             <div className='text-primary flex items-center justify-center gap-2 mt-2'>
                     <span>We dont just stitch clothes</span>
                 </div>

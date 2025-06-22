@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 
 interface ShimmerLoaderProps {
   className?: string;
@@ -29,25 +30,14 @@ const Loader: React.FC<ShimmerLoaderProps> = ({ className = '' }) => {
         className="relative z-10 h-full w-full flex items-center justify-center"
         style={optimizedStyles}
       >
-        <h1
-          className="
-            text-4xl md:text-6xl lg:text-7xl xl:text-8xl
-            font-bold
-            tracking-tight
-            text-center
-            bg-gradient-to-r from-black via-gray-300 to-black
-            dark:from-white dark:via-gray-600 dark:to-white
-            bg-[length:200%_100%]
-            bg-clip-text
-            text-transparent
-            animate-shimmer
-          "
-          role="status"
-          aria-live="polite"
+        <Image
+          src="/logo.svg"
+          alt="Sleek Studio Logo"
+          width={100}
+          height={27}
           style={optimizedStyles}
-        >
-          Sleek Studio
-        </h1>
+          priority
+        />
       </div>
     </div>
   );

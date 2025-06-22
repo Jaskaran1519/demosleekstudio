@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { businessPhoneNumber, whatsappNumber } from "@/config/config"
+import Image from "next/image"
 
 const ContactForm = () => {
   const [formData, setFormData] = useState({
@@ -71,13 +72,16 @@ const ContactForm = () => {
   }
 
   return (
-    <section className="py-16 bg-gray-50 min-h-screen">
+    <section className="py-16 min-h-screen bg-gray-50" style={{
+      backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'80\' height=\'80\' viewBox=\'0 0 80 80\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%239C92AC\' fill-opacity=\'0.05\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'2\'/%3E%3Ccircle cx=\'23\' cy=\'3\' r=\'2\'/%3E%3Ccircle cx=\'43\' cy=\'3\' r=\'2\'/%3E%3Ccircle cx=\'63\' cy=\'3\' r=\'2\'/%3E%3Ccircle cx=\'83\' cy=\'3\' r=\'2\'/%3E%3Ccircle cx=\'13\' cy=\'23\' r=\'2\'/%3E%3Ccircle cx=\'33\' cy=\'23\' r=\'2\'/%3E%3Ccircle cx=\'53\' cy=\'23\' r=\'2\'/%3E%3Ccircle cx=\'73\' cy=\'23\' r=\'2\'/%3E%3Ccircle cx=\'3\' cy=\'23\' r=\'2\'/%3E%3Ccircle cx=\'23\' cy=\'43\' r=\'2\'/%3E%3Ccircle cx=\'43\' cy=\'43\' r=\'2\'/%3E%3Ccircle cx=\'63\' cy=\'43\' r=\'2\'/%3E%3Ccircle cx=\'83\' cy=\'43\' r=\'2\'/%3E%3Ccircle cx=\'13\' cy=\'63\' r=\'2\'/%3E%3Ccircle cx=\'33\' cy=\'63\' r=\'2\'/%3E%3Ccircle cx=\'53\' cy=\'63\' r=\'2\'/%3E%3Ccircle cx=\'73\' cy=\'63\' r=\'2\'/%3E%3Ccircle cx=\'3\' cy=\'63\' r=\'2\'/%3E%3Ccircle cx=\'23\' cy=\'83\' r=\'2\'/%3E%3Ccircle cx=\'43\' cy=\'83\' r=\'2\'/%3E%3Ccircle cx=\'63\' cy=\'83\' r=\'2\'/%3E%3Ccircle cx=\'83\' cy=\'83\' r=\'2\'/%3E%3C/g%3E%3C/svg%3E")',
+      backgroundSize: '40px 40px'
+    }}>
       <div className="container mx-auto px-4 max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
           {/* Left Side - Contact Form */}
-          <div className="bg-white p-8 lg:p-12 rounded-2xl shadow-sm">
+          <div className="bg-white/90 backdrop-blur-sm p-8 lg:p-12 rounded-2xl shadow-sm border border-gray-100">
             <div className="mb-8">
-              <p className="text-orange-500 font-medium mb-2">Get in Touch</p>
+              <p className="text-[#476f66] font-medium mb-2">Get in Touch</p>
               <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">Let's Chat, Reach Out to Us</h2>
               <p className="text-gray-600">
                 Have questions or feedback? We're here to help. Send us a message, and we'll respond within 24 hours
@@ -91,13 +95,13 @@ const ContactForm = () => {
                     First Name
                   </label>
                   <Input
+                    type="text"
                     id="firstName"
                     name="firstName"
-                    type="text"
                     required
                     value={formData.firstName}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#476f66] focus:border-transparent"
                     placeholder="First name"
                   />
                 </div>
@@ -106,13 +110,13 @@ const ContactForm = () => {
                     Last Name
                   </label>
                   <Input
+                    type="text"
                     id="lastName"
                     name="lastName"
-                    type="text"
                     required
                     value={formData.lastName}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#476f66] focus:border-transparent"
                     placeholder="Last name"
                   />
                 </div>
@@ -123,13 +127,13 @@ const ContactForm = () => {
                   Phone Number
                 </label>
                 <Input
+                  type="tel"
                   id="phone"
                   name="phone"
-                  type="tel"
                   required
                   value={formData.phone}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#476f66] focus:border-transparent"
                   placeholder="Phone number"
                 />
               </div>
@@ -145,7 +149,7 @@ const ContactForm = () => {
                   required
                   value={formData.message}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#476f66] focus:border-transparent resize-none"
                   placeholder="Leave us message"
                 />
               </div>
@@ -154,7 +158,7 @@ const ContactForm = () => {
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 px-6 rounded-lg transition duration-300 font-medium text-lg"
+                  className="w-full bg-[#476f66] hover:bg-[#3a5c54] text-white py-4 px-6 rounded-lg transition duration-300 font-medium text-lg"
                 >
                   {isSubmitting ? "Sending..." : "Send Message"}
                 </Button>
@@ -174,21 +178,16 @@ const ContactForm = () => {
           <div className="hidden lg:block space-y-12">
             {/* Hero Image */}
             <div className="relative">
-              <div className="relative h-[500px] rounded-2xl overflow-hidden bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-100 via-blue-200 to-blue-300">
-                  {/* Circular background pattern */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-96 h-96 rounded-full border-4 border-blue-300 opacity-30"></div>
-                    <div className="absolute w-80 h-80 rounded-full border-4 border-blue-400 opacity-40"></div>
-                    <div className="absolute w-64 h-64 rounded-full border-4 border-blue-500 opacity-50"></div>
-                  </div>
+              <div className="relative h-[400px] rounded-2xl overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                <div className="absolute inset-0">
+                  <Image
+                    src="/contact.webp"
+                    alt="Contact Us"
+                    fill
+                    className="object-cover"
+                  />
                 </div>
-                {/* Person illustration */}
-                <div className="relative z-10 flex items-center justify-center">
-                  <div className="w-40 h-40 bg-gray-300 rounded-full flex items-center justify-center">
-                    <Phone className="w-20 h-20 text-gray-600" />
-                  </div>
-                </div>
+                <div className="absolute inset-0 bg-black/10"></div>
               </div>
             </div>
 
@@ -198,26 +197,25 @@ const ContactForm = () => {
                 href={`https://wa.me/${whatsappNumber}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-600 hover:text-blue-600 transition block mb-8"
+                className="text-gray-600 hover:text-[#476f66] transition block mb-8"
               >
                 <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0 h-12 w-12 rounded-full bg-blue-600 flex items-center justify-center">
-                    <svg className="h-6 w-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M17.498 14.382v-.002c-.301-.15-1.767-.867-2.04-.966-.273-.101-.473-.15-.673.15-.197.295-.771.963-.944 1.162-.175.195-.349.21-.646.075-.3-.15-1.263-.465-2.403-1.485-.888-.795-1.484-1.761-1.66-2.059-.173-.297-.018-.458.13-.606.136-.135.297-.345.446-.523.146-.181.194-.301.297-.496.1-.21.049-.375-.025-.524-.075-.15-.672-1.62-.922-2.206-.24-.584-.487-.51-.672-.516-.173-.008-.371-.01-.571-.01-.2 0-.524.074-.797.359-.276.3-1.05 1.02-1.05 2.475 0 1.455 1.04 2.876 1.185 3.075.15.195 2.1 3.195 5.1 4.485.715.3 1.27.48 1.71.615.715.227 1.37.195 1.885.118.57-.09 1.765-.72 2.01-1.425.255-.705.255-1.29.18-1.425-.074-.135-.27-.21-.57-.345m-5.446 7.443h-.016c-1.77 0-3.524-.48-5.055-1.38l-.36-.216-3.75.975 1.005-3.645-.239-.375a9.878 9.878 0 01-1.5-5.26c.015-5.445 4.455-9.885 9.943-9.885 2.64 0 5.145 1.035 7.035 2.91 1.89 1.86 2.925 4.35 2.91 6.99-.015 5.444-4.455 9.885-9.943 9.885M20.52 3.45C18.24 1.2 15.24 0 12.045 0 5.46 0 .105 5.37.105 11.985c-.015 2.13.555 4.14 1.53 5.85L0 24l6.3-1.65c1.74.93 3.705 1.444 5.76 1.444h.006c6.58 0 11.94-5.365 11.94-11.96 0-3.18-1.26-6.21-3.485-8.38" />
-                    </svg>
+                  <div className="flex-shrink-0">
+                    <Image src="/whatsapp.svg" width={30} height={30} alt="WhatsApp" className="w-6 h-6" />
                   </div>
                   <div>
                     <h3 className="text-xl font-semibold text-gray-900 mb-1">WhatsApp</h3>
-
                     {whatsappNumber}
                   </div>
                 </div>
               </Link>
-              <Link href="tel:+912528324923" className="text-gray-600 hover:text-blue-600 transition">
-
+              <Link 
+                href="tel:+912528324923" 
+                className="text-gray-600 hover:text-[#476f66] transition"
+              >
                 <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0 h-12 w-12 rounded-full bg-blue-600 flex items-center justify-center">
-                    <Phone className="h-6 w-6 text-white" />
+                  <div className="flex-shrink-0">
+                    <Phone className="h-6 w-6 text-[#476f66]" />
                   </div>
                   <div>
                     <h3 className="text-xl font-semibold text-gray-900 mb-1">Phone</h3>

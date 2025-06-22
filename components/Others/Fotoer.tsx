@@ -50,7 +50,7 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/about-us" className="text-gray-700 hover:text-black transition-colors">
+                <Link href="/sleekstudio" className="text-gray-700 hover:text-black transition-colors">
                   About
                 </Link>
               </li>
