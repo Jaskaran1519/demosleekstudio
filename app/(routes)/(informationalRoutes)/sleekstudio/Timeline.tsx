@@ -45,22 +45,6 @@ const timelineData: TimelineStage[] = [
   },
 ]
 
-function PlayIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg {...props} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M8 5v14l11-7z" />
-    </svg>
-  )
-}
-
-function PauseIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg {...props} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
-    </svg>
-  )
-}
-
 function VolumeUpIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg {...props} viewBox="0 0 24 24" fill="currentColor">
@@ -79,57 +63,26 @@ function VolumeOffIcon(props: React.SVGProps<SVGSVGElement>) {
 
 function VideoHero() {
   const videoRef = useRef<HTMLVideoElement>(null)
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [isHovered, setIsHovered] = useState(false)
-  const [isMuted, setIsMuted] = useState(true) // Start muted by default
-  const [hasUserInteracted, setHasUserInteracted] = useState(false)
+  const [isMuted, setIsMuted] = useState(false) // Start unmuted by default
 
-  // Try to autoplay when component mounts
   useEffect(() => {
     const video = videoRef.current
     if (video) {
+      // Try to play the video when component mounts
       const playPromise = video.play()
       
       if (playPromise !== undefined) {
-        playPromise.catch(() => {
-          // Autoplay failed, mute and try again
-          video.muted = true
-          setIsMuted(true)
-          video.play().catch(console.error)
+        playPromise.catch((error) => {
+          console.error('Autoplay failed:', error)
         })
       }
     }
   }, [])
 
-  const handlePlayPause = () => {
-    if (videoRef.current) {
-      if (videoRef.current.paused) {
-        videoRef.current.play().then(() => {
-          setIsPlaying(true)
-          setHasUserInteracted(true)
-        }).catch(() => {
-          // If play fails, mute and try again
-          if (videoRef.current) {
-            videoRef.current.muted = true
-            setIsMuted(true)
-            videoRef.current.play().then(() => {
-              setIsPlaying(true)
-              setHasUserInteracted(true)
-            }).catch(console.error)
-          }
-        })
-      } else {
-        videoRef.current.pause()
-        setIsPlaying(false)
-      }
-    }
-  }
-
   const toggleMute = () => {
     if (videoRef.current) {
       videoRef.current.muted = !videoRef.current.muted
       setIsMuted(videoRef.current.muted)
-      setHasUserInteracted(true)
     }
   }
 
@@ -141,47 +94,23 @@ function VideoHero() {
           src="/ss-video.webm"
           loop
           autoPlay
-          muted
           playsInline
           className="h-full w-full object-cover md:w-auto md:max-w-none"
-          onPlay={() => setIsPlaying(true)}
-          onPause={() => setIsPlaying(false)}
-          onClick={handlePlayPause}
         />
       </div>
-      <div
-        className={`absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 transition-opacity duration-300 pointer-events-none ${
-          isPlaying && !isHovered ? "opacity-0" : "opacity-100"
-        }`}
+      
+      {/* Mute Toggle Button */}
+      <button
+        onClick={toggleMute}
+        className="absolute bottom-8 right-8 bg-black bg-opacity-40 rounded-full p-2 hover:bg-opacity-60 transition-all duration-300 focus:outline-none pointer-events-auto"
+        aria-label={isMuted ? "Unmute" : "Mute"}
       >
-        <button
-          className="bg-black bg-opacity-40 rounded-full p-3 hover:bg-opacity-60 transition-all duration-300 focus:outline-none pointer-events-auto"
-        >
-          {isPlaying ? (
-            <PauseIcon className="w-16 h-16 text-white" />
-          ) : (
-            <PlayIcon className="w-16 h-16 text-white pl-2" />
-          )}
-        </button>
-        
-        {/* Mute Toggle Button - Only show if user has interacted */}
-        {(hasUserInteracted || isMuted) && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              toggleMute()
-            }}
-            className="absolute bottom-8 right-8 bg-black bg-opacity-40 rounded-full p-2 hover:bg-opacity-60 transition-all duration-300 focus:outline-none pointer-events-auto"
-            aria-label={isMuted ? "Unmute" : "Mute"}
-          >
-            {isMuted ? (
-              <VolumeOffIcon className="w-8 h-8 text-white" />
-            ) : (
-              <VolumeUpIcon className="w-8 h-8 text-white" />
-            )}
-          </button>
+        {isMuted ? (
+          <VolumeOffIcon className="w-8 h-8 text-white" />
+        ) : (
+          <VolumeUpIcon className="w-8 h-8 text-white" />
         )}
-      </div>
+      </button>
     </div>
   )
 }
