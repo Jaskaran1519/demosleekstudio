@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useRef, useState } from "react"
+import React, { useRef, useState, useEffect } from "react"
 import { motion, useInView } from "framer-motion"
 import { magerFont } from "@/app/fonts"
 
@@ -61,18 +61,75 @@ function PauseIcon(props: React.SVGProps<SVGSVGElement>) {
   )
 }
 
+function VolumeUpIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...props} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" />
+    </svg>
+  )
+}
+
+function VolumeOffIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...props} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 4L2.99 5.27 7 9.27v2.46h2.18l2.28 2.28-1.27 1.27L7 14.73v2.46l5-5h2.73l4.5 4.5 1.27-1.27L5.27 4 4.27 4zM12 8.27L9.27 11 12 13.73V8.27z" />
+    </svg>
+  )
+}
+
 function VideoHero() {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
+  const [isMuted, setIsMuted] = useState(true) // Start muted by default
+  const [hasUserInteracted, setHasUserInteracted] = useState(false)
+
+  // Try to autoplay when component mounts
+  useEffect(() => {
+    const video = videoRef.current
+    if (video) {
+      const playPromise = video.play()
+      
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          // Autoplay failed, mute and try again
+          video.muted = true
+          setIsMuted(true)
+          video.play().catch(console.error)
+        })
+      }
+    }
+  }, [])
 
   const handlePlayPause = () => {
     if (videoRef.current) {
       if (videoRef.current.paused) {
-        videoRef.current.play()
+        videoRef.current.play().then(() => {
+          setIsPlaying(true)
+          setHasUserInteracted(true)
+        }).catch(() => {
+          // If play fails, mute and try again
+          if (videoRef.current) {
+            videoRef.current.muted = true
+            setIsMuted(true)
+            videoRef.current.play().then(() => {
+              setIsPlaying(true)
+              setHasUserInteracted(true)
+            }).catch(console.error)
+          }
+        })
       } else {
         videoRef.current.pause()
+        setIsPlaying(false)
       }
+    }
+  }
+
+  const toggleMute = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = !videoRef.current.muted
+      setIsMuted(videoRef.current.muted)
+      setHasUserInteracted(true)
     }
   }
 
@@ -83,8 +140,8 @@ function VideoHero() {
           ref={videoRef}
           src="/ss-video.webm"
           loop
-          muted
           autoPlay
+          muted
           playsInline
           className="h-full w-full object-cover md:w-auto md:max-w-none"
           onPlay={() => setIsPlaying(true)}
@@ -106,6 +163,24 @@ function VideoHero() {
             <PlayIcon className="w-16 h-16 text-white pl-2" />
           )}
         </button>
+        
+        {/* Mute Toggle Button - Only show if user has interacted */}
+        {(hasUserInteracted || isMuted) && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              toggleMute()
+            }}
+            className="absolute bottom-8 right-8 bg-black bg-opacity-40 rounded-full p-2 hover:bg-opacity-60 transition-all duration-300 focus:outline-none pointer-events-auto"
+            aria-label={isMuted ? "Unmute" : "Mute"}
+          >
+            {isMuted ? (
+              <VolumeOffIcon className="w-8 h-8 text-white" />
+            ) : (
+              <VolumeUpIcon className="w-8 h-8 text-white" />
+            )}
+          </button>
+        )}
       </div>
     </div>
   )

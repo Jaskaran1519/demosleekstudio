@@ -127,7 +127,7 @@ const links = [
   },
   {
     title: "About",
-    href: "/about-us"
+    href: "/sleekstudio"
   },
   {
     title: "Contact Us",

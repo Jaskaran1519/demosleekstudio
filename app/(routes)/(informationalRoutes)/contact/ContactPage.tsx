@@ -45,7 +45,7 @@ const ContactPage: React.FC = () => {
                                             href={`tel:${businessPhoneNumber}`}
                                             className="inline-block px-5 py-2 text-base font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-200"
                                         >
-                                            {businessPhoneNumber} {/* Display the number */}
+                                            1800 419 0490 {/* Display the number */}
                                         </a>
                                     </div>
                                 </div>
