@@ -23,7 +23,7 @@ const menContent: ContentItem[] = [
   {
     id: 'men-1',
     title: 'Blazers',
-    imageUrl: 'https://res.cloudinary.com/dtopsoqao/image/upload/v1744178054/blazer-Picsart-AiImageEnhancer_cp6gmf.png',
+    imageUrl: '/mencategory/blazer.jpg',
     link: '/products?category=MEN&clothType=BLAZER&page=1',
     description: 'Comfortable and stylish casual wear for everyday occasions'
   },
@@ -37,7 +37,7 @@ const menContent: ContentItem[] = [
   {
     id: 'men-3',
     title: 'Suits',
-    imageUrl: 'https://res.cloudinary.com/dtopsoqao/image/upload/v1744178052/suit-Picsart-AiImageEnhancer_jk6rey.png',
+    imageUrl: '/mencategory/suit.webp',
     link: '/products?category=MEN&clothType=SUIT&page=1',
     description: 'Performance-focused athletic wear'
   },
@@ -157,7 +157,7 @@ const CategoryContent: React.FC<CategoryContentProps> = ({ category }) => {
                 alt={item.title}
                 fill
                 className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                sizes="(max-width: 768px) 100vw, 50vw"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </div>

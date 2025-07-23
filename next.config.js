@@ -7,7 +7,13 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['www.vistaprint.com', 'res.cloudinary.com','lh3.googleusercontent.com','plus.unsplash.com','thesleekstudio.com']
+    remotePatterns: [
+      { hostname: 'www.vistaprint.com' },
+      { hostname: 'res.cloudinary.com' },
+      { hostname: 'lh3.googleusercontent.com' },
+      { hostname: 'plus.unsplash.com' },
+      { hostname: 'thesleekstudio.com' }
+    ]
   },
   experimental: {
     viewTransition: true,

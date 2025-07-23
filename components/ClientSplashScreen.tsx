@@ -23,7 +23,7 @@ const ClientSplashScreen: React.FC<{ children: React.ReactNode }> = ({ children 
     let animationFrameId: number;
     
     const checkTime = (currentTime: number) => {
-      if (currentTime - startTime >= 3000) {
+      if (currentTime - startTime >= 2000) {
         setShowSplash(false);
         return;
       }

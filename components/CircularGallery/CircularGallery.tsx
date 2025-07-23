@@ -5,18 +5,18 @@ import { useScroll, useTransform, useMotionValue, useSpring } from 'framer-motio
 import Image from 'next/image';
 
 const defaultItems = [
-  { image: `/introimages/1.jpg`, text: "Bridge" },
-  { image: `/introimages/2.jpg`, text: "Desk Setup" },
-  { image: `/introimages/3.jpg`, text: "Waterfall" },
-  { image: `/introimages/4.jpg`, text: "Strawberries" },
-  { image: `/introimages/5.jpg`, text: "Deep Diving" },
-  { image: `/introimages/6.jpg`, text: "Train Track" },
-  { image: `/introimages/1.jpg`, text: "Santorini" },
-  { image: `/introimages/2.jpg`, text: "Blurry Lights" },
-  { image: `/introimages/3.jpg`, text: "New York" },
-  { image: `/introimages/4.jpg`, text: "Good Boy" },
-  { image: `/introimages/5.jpg`, text: "Coastline" },
-  { image: `/introimages/6.jpg`, text: "Palm Trees" },
+  { image: `/introimages/1.webp`, text: "Bridge" },
+  { image: `/introimages/2.webp`, text: "Desk Setup" },
+  { image: `/introimages/3.webp`, text: "Waterfall" },
+  { image: `/introimages/4.webp`, text: "Strawberries" },
+  { image: `/introimages/5.webp`, text: "Deep Diving" },
+  { image: `/introimages/6.webp`, text: "Train Track" },
+  { image: `/introimages/1.webp`, text: "Santorini" },
+  { image: `/introimages/2.webp`, text: "Blurry Lights" },
+  { image: `/introimages/3.webp`, text: "New York" },
+  { image: `/introimages/4.webp`, text: "Good Boy" },
+  { image: `/introimages/5.webp`, text: "Coastline" },
+  { image: `/introimages/6.webp`, text: "Palm Trees" },
 ];
 
 interface GalleryItemProps {

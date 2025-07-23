@@ -9,6 +9,8 @@ import Footer from "@/components/Others/Fotoer";
 import localFont from 'next/font/local';
 import ClientSplashScreen from '@/components/ClientSplashScreen'
 import { mainFont } from "./fonts";
+import { Analytics } from "@vercel/analytics/next"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 // Load the font
 const magerFont = localFont({
@@ -50,7 +52,9 @@ export default function RootLayout({
               <Footer/>
           </ClientSplashScreen>
           </SmoothScroll>
-      </body>
+          <SpeedInsights/>
+          <Analytics/>
+            </body>
         </AuthProvider>
     </html>
   );
