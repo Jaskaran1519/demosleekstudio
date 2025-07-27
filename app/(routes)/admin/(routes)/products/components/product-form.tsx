@@ -6,6 +6,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import axios from "axios";
+import dynamic from 'next/dynamic';
+import { Skeleton } from '@/components/ui/skeleton';
+import { X } from 'lucide-react';
 
 import { Button } from "@/components/ui/button";
 import {
@@ -30,12 +33,24 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import Image from "next/image";
-import { FileUpload } from "@/components/ui/file-upload";
-import { Plus, X } from "lucide-react";
 import { slugify } from "@/lib/utils";
 import { AlertModal } from "@/components/modals/alert-modal";
 import { Category, ClothType } from "@prisma/client";
+
+// Lazy load the heavy image manager component
+const ProductImageManager = dynamic(() => 
+  import('./product-image-manager').then(mod => mod.ProductImageManager), 
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="space-y-8">
+        <Skeleton className="h-40 w-full" />
+        <Skeleton className="h-40 w-full" />
+        <Skeleton className="h-40 w-full" />
+      </div>
+    )
+  }
+);
 
 const categories = [
   "MEN",
@@ -50,16 +65,16 @@ const productFormSchema = z.object({
   price: z.coerce.number().positive({ message: "Price must be a positive number" }),
   salePrice: z.coerce.number().nonnegative({ message: "Sale price must be zero or positive" }).optional(),
   inventory: z.coerce.number().int().nonnegative({ message: "Inventory must be zero or positive" }),
-  noBgImage: z.string().optional(),
-  modelImage: z.string().optional(),
-  additionalImages: z.array(z.string()).default([]),
   category: z.nativeEnum(Category),
   clothType: z.nativeEnum(ClothType),
-  colors: z.string().optional(),
   tags: z.string().optional(),
   sizes: z.string().optional(),
+  colors: z.string().optional(),
   isActive: z.boolean().default(true),
   homePageFeatured: z.boolean().default(false),
+  noBgImage: z.string().optional(),
+  modelImage: z.string().optional(),
+  additionalImages: z.array(z.string()).optional(),
 });
 
 type ProductFormValues = z.infer<typeof productFormSchema>;
@@ -77,31 +92,25 @@ export const ProductForm = ({ initialData }: ProductFormProps) => {
     resolver: zodResolver(productFormSchema),
     defaultValues: initialData ? {
       ...initialData,
-      slug: initialData.slug || "",
       tags: initialData.tags?.join(", ") || "",
       sizes: initialData.sizes?.join(", ") || "",
       colors: initialData.colors?.join(", ") || "",
-      // Only take additional images, excluding noBgImage and modelImage
-      additionalImages: initialData.images?.filter((img: string) => 
-        img !== initialData.noBgImage && 
-        img !== initialData.modelImage
-      ) || [],
     } : {
       name: "",
       slug: "",
       description: "",
       price: 0,
       inventory: 0,
+      category: Category.MEN,
+      clothType: ClothType.SHIRT,
+      tags: "",
+      sizes: "",
+      colors: "",
+      isActive: true,
+      homePageFeatured: false,
       noBgImage: "",
       modelImage: "",
       additionalImages: [],
-      category: Category.MEN,
-      clothType: ClothType.SHIRT,
-      colors: "",
-      tags: "",
-      sizes: "",
-      isActive: true,
-      homePageFeatured: false,
     },
   });
 
@@ -109,183 +118,32 @@ export const ProductForm = ({ initialData }: ProductFormProps) => {
     try {
       setLoading(true);
       
-      // First, check if we have any base64 images that need to be uploaded
-      let isUploading = false;
-      let noBgImageUrl = data.noBgImage;
-      let modelImageUrl = data.modelImage;
-      let additionalImageUrls = [...(data.additionalImages || [])];
-      
-      // Update button text to show uploading status
-      if (noBgImageUrl?.startsWith('data:image/') || 
-          modelImageUrl?.startsWith('data:image/') ||
-          additionalImageUrls.some(img => img?.startsWith('data:image/'))) {
-        isUploading = true;
-        setLoading(true);
-        toast.info('Uploading images...');
-      }
-      
-      // Upload noBgImage if it's base64
-      if (noBgImageUrl?.startsWith('data:image/')) {
-        try {
-          const response = await axios.post('/api/upload', {
-            image: noBgImageUrl,
-            folder: 'sleek-studio/products'
-          });
-          noBgImageUrl = response.data.url;
-        } catch (error: any) {
-          console.error('Error uploading noBgImage:', error);
-          toast.error('Failed to upload main image');
-          setLoading(false);
-          return;
-        }
-      }
-      
-      // Upload modelImage if it's base64
-      if (modelImageUrl?.startsWith('data:image/')) {
-        try {
-          const response = await axios.post('/api/upload', {
-            image: modelImageUrl,
-            folder: 'sleek-studio/products'
-          });
-          modelImageUrl = response.data.url;
-        } catch (error: any) {
-          console.error('Error uploading modelImage:', error);
-          toast.error('Failed to upload model image');
-          setLoading(false);
-          return;
-        }
-      }
-      
-      // Upload any additional images that are base64
-      for (let i = 0; i < additionalImageUrls.length; i++) {
-        if (additionalImageUrls[i]?.startsWith('data:image/')) {
-          try {
-            const response = await axios.post('/api/upload', {
-              image: additionalImageUrls[i],
-              folder: 'sleek-studio/products'
-            });
-            additionalImageUrls[i] = response.data.url;
-          } catch (error: any) {
-            console.error(`Error uploading additional image ${i}:`, error);
-            toast.error(`Failed to upload additional image ${i+1}`);
-            setLoading(false);
-            return;
-          }
-        }
-      }
-      
-      if (isUploading) {
-        toast.success('Images uploaded successfully');
-      }
-
       const tagsArray = data.tags ? data.tags.split(',').map(tag => tag.trim()).filter(Boolean) : [];
       const sizesArray = data.sizes ? data.sizes.split(',').map(size => size.trim()).filter(Boolean) : [];
       const colorsArray = data.colors ? data.colors.split(',').map(color => color.trim()).filter(Boolean) : [];
-
-      // Create images array with ONLY additional images to avoid duplication
-      // The main images (noBgImage and modelImage) are stored separately in their own fields
-      const images = [...additionalImageUrls].filter(Boolean);  // Remove any empty/undefined values
 
       const formData = {
         ...data,
         tags: tagsArray,
         sizes: sizesArray,
         colors: colorsArray,
-        images,
       };
 
       if (initialData) {
-        const response = await fetch(`/api/products/${initialData.id}`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to update product");
-        }
-
+        await axios.patch(`/api/products/${initialData.id}`, formData);
         toast.success("Product updated successfully");
       } else {
-        const response = await fetch("/api/products", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to create product");
-        }
-
+        await axios.post("/api/products", formData);
         toast.success("Product created successfully");
-        router.push("/admin/products");
       }
+      router.push("/admin/products");
+      router.refresh();
     } catch (error: any) {
-      toast.error(error.message || "Something went wrong");
+      toast.error(error.response?.data?.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
   };
-
-  const handleNoBgImageUpload = useCallback(
-    (result: { url: string }) => {
-      form.setValue("noBgImage", result.url, {
-        shouldValidate: true,
-        shouldDirty: true,
-      });
-    },
-    [form]
-  );
-
-  const handleModelImageUpload = useCallback(
-    (result: { url: string }) => {
-      form.setValue("modelImage", result.url, {
-        shouldValidate: true,
-        shouldDirty: true,
-      });
-    },
-    [form]
-  );
-
-  const handleAdditionalImageUpload = useCallback(
-    (result: { url: string }, index: number) => {
-      const currentImages = form.getValues("additionalImages") || [];
-      const newImages = [...currentImages];
-      newImages[index] = result.url;
-      
-      form.setValue("additionalImages", newImages, {
-        shouldValidate: true,
-        shouldDirty: true,
-      });
-    },
-    [form]
-  );
-
-  const addImageSlot = useCallback(() => {
-    const currentImages = form.getValues("additionalImages") || [];
-    if (currentImages.length < 3) {
-      form.setValue("additionalImages", [...currentImages, ""], {
-        shouldValidate: true,
-        shouldDirty: true,
-      });
-    } else {
-      toast.error("Maximum 5 images allowed (2 main + 3 additional)");
-    }
-  }, [form]);
-
-  const removeAdditionalImage = useCallback((index: number) => {
-    const currentImages = form.getValues("additionalImages") || [];
-    const newImages = currentImages.filter((_, i) => i !== index);
-    
-    form.setValue("additionalImages", newImages, {
-      shouldValidate: true,
-      shouldDirty: true,
-    });
-  }, [form]);
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const name = e.target.value;
@@ -303,9 +161,7 @@ export const ProductForm = ({ initialData }: ProductFormProps) => {
   const onDelete = async () => {
     try {
       setLoading(true);
-      await fetch(`/api/products/${initialData.id}`, {
-        method: "DELETE",
-      });
+      await axios.delete(`/api/products/${initialData.id}`);
       router.push("/admin/products");
       router.refresh();
       toast.success("Product deleted");
@@ -403,9 +259,9 @@ export const ProductForm = ({ initialData }: ProductFormProps) => {
                     name="price"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Price ($)</FormLabel>
+                        <FormLabel>Price</FormLabel>
                         <FormControl>
-                          <Input type="number" step="0.01" {...field} />
+                          <Input type="number" placeholder="99.99" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -416,19 +272,10 @@ export const ProductForm = ({ initialData }: ProductFormProps) => {
                     name="salePrice"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Sale Price ($)</FormLabel>
+                        <FormLabel>Sale Price (Optional)</FormLabel>
                         <FormControl>
-                          <Input 
-                            type="number" 
-                            step="0.01" 
-                            placeholder="Optional" 
-                            {...field} 
-                            value={field.value || ""}
-                          />
+                          <Input type="number" placeholder="79.99" {...field} />
                         </FormControl>
-                        <FormDescription>
-                          Leave empty for no sale
-                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -441,23 +288,25 @@ export const ProductForm = ({ initialData }: ProductFormProps) => {
                     <FormItem>
                       <FormLabel>Inventory</FormLabel>
                       <FormControl>
-                        <Input type="number" {...field} />
+                        <Input type="number" placeholder="100" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+              </div>
+              <ProductImageManager form={form} />
+            </div>
+            <Separator />
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
                 <FormField
                   control={form.control}
                   name="category"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Category</FormLabel>
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select a category" />
@@ -481,11 +330,7 @@ export const ProductForm = ({ initialData }: ProductFormProps) => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Cloth Type</FormLabel>
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select a cloth type" />
@@ -542,103 +387,26 @@ export const ProductForm = ({ initialData }: ProductFormProps) => {
                     <FormItem>
                       <FormLabel>Available Colors</FormLabel>
                       <FormControl>
-                        <Input 
-                          placeholder="Comma separated hex codes" 
-                          {...field}
-                          value={field.value || ""}
-                        />
+                        <Input placeholder="Comma separated colors" {...field} value={field.value || ""} />
                       </FormControl>
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {field.value?.split(',').map((color, index) => (
-                          color.trim() && (
-                            <div key={index} className="flex items-center gap-2">
-                              <div 
-                                className="w-6 h-6 rounded-full border"
-                                style={{ backgroundColor: color.trim() }}
-                              />
-                              <span className="text-sm text-muted-foreground">
-                                {color.trim()}
-                              </span>
-                            </div>
-                          )
-                        ))}
-                      </div>
                       <FormDescription>
-                        Enter hex color codes separated by commas (e.g., "#FF0000, #00FF00, #0000FF")
+                        Separate colors with commas (e.g., "Red, Blue, Green")
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
               </div>
-              <div className="space-y-6">
-                <div className="space-y-4">
-                  <FormLabel>No Background Image (Main)</FormLabel>
-                  <FileUpload
-                    value={form.watch("noBgImage")}
-                    onChange={(result) => form.setValue("noBgImage", result.url)}
-                    endpoint="productImage"
-                    directUpload={false}
-                  />
-                </div>
-                
-                <div className="space-y-4">
-                  <FormLabel>Model Image (Secondary)</FormLabel>
-                  <FileUpload
-                    value={form.watch("modelImage")}
-                    onChange={(result) => form.setValue("modelImage", result.url)}
-                    endpoint="productImage"
-                    directUpload={false}
-                  />
-                </div>
-                
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <FormLabel>Additional Images (Max 3)</FormLabel>
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      size="sm"
-                      onClick={addImageSlot}
-                      disabled={form.watch("additionalImages")?.length >= 3}
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Image
-                    </Button>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    {form.watch("additionalImages")?.map((image, index) => (
-                      <div key={index} className="relative">
-                        <FileUpload
-                          value={image}
-                          onChange={(result) => handleAdditionalImageUpload(result, index)}
-                          endpoint="productImage"
-                          directUpload={false}
-                        />
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="sm"
-                          className="absolute top-0 right-0"
-                          onClick={() => removeAdditionalImage(index)}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                  
-                  <FormDescription>
-                    Add up to 3 additional product images (5 total including main images)
-                  </FormDescription>
-                </div>
-                
+            </div>
+            <Separator />
+            <div className="space-y-6">
+              <Heading title="Settings" description="Manage product visibility and features" />
+              <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
                 <FormField
                   control={form.control}
                   name="isActive"
                   render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 border p-4 rounded-md">
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                       <FormControl>
                         <Checkbox
                           checked={field.value}
@@ -648,7 +416,7 @@ export const ProductForm = ({ initialData }: ProductFormProps) => {
                       <div className="space-y-1 leading-none">
                         <FormLabel>Active</FormLabel>
                         <FormDescription>
-                          This product will be visible in the store
+                          Is this product available for purchase?
                         </FormDescription>
                       </div>
                     </FormItem>
@@ -658,7 +426,7 @@ export const ProductForm = ({ initialData }: ProductFormProps) => {
                   control={form.control}
                   name="homePageFeatured"
                   render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 border p-4 rounded-md">
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                       <FormControl>
                         <Checkbox
                           checked={field.value}
@@ -666,9 +434,9 @@ export const ProductForm = ({ initialData }: ProductFormProps) => {
                         />
                       </FormControl>
                       <div className="space-y-1 leading-none">
-                        <FormLabel>Featured on Home Page</FormLabel>
+                        <FormLabel>Featured</FormLabel>
                         <FormDescription>
-                          This product will be displayed on the home page
+                          Should this product be featured on the home page?
                         </FormDescription>
                       </div>
                     </FormItem>
@@ -676,16 +444,9 @@ export const ProductForm = ({ initialData }: ProductFormProps) => {
                 />
               </div>
             </div>
-            <div className="flex items-center justify-end space-x-2">
-              <Button
-                variant="outline"
-                onClick={() => router.push("/admin/products")}
-                type="button"
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={loading}>
-                {loading ? "Saving..." : initialData ? "Save Changes" : "Create Product"}
+            <div className="flex items-center justify-end gap-2">
+              <Button disabled={loading} className="ml-auto" type="submit">
+                {initialData ? "Save Changes" : "Create Product"}
               </Button>
             </div>
           </form>
@@ -693,4 +454,4 @@ export const ProductForm = ({ initialData }: ProductFormProps) => {
       </div>
     </>
   );
-}; 
+};

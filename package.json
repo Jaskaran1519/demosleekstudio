@@ -7,7 +7,8 @@
     "build": "npx prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
-    "empty-images": "npx tsx scripts/empty-product-images.ts"
+    "empty-images": "npx tsx scripts/empty-product-images.ts",
+    "analyze": "ANALYZE=true next build"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.8.0",
@@ -80,6 +81,7 @@
     "postcss-import": "^16.0.0",
     "prisma": "^6.5.0",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "typescript": "^5",
+    "webpack-bundle-analyzer": "^4.10.2"
   }
 }

@@ -361,49 +361,52 @@ export default function ProductsPage() {
         </div>
       </div>
 
-      { (selectedCategories.length > 0 || selectedClothTypes.length > 0 || sortOption) && (
-        <div className="flex flex-wrap gap-2 mt-2">
-          {selectedCategories.map((category) => (
-            <Badge
-              key={category}
-              variant="secondary"
-              className="px-2 py-0.5 text-xs cursor-pointer"
-              onClick={() => { /* Logic to remove specific category */
-                  const newCats = selectedCategories.filter(c => c !== category);
-                  setSelectedCategories(newCats);
-                  updateUrl({ category: newCats.length > 0 ? newCats : null, page: "1"});
-              }}
-            >
-              Category: {formatDisplayName(category)}
-              <X className="ml-1 h-3 w-3" />
-            </Badge>
-          ))}
-           {selectedClothTypes.map((clothType) => (
-            <Badge
-              key={clothType}
-              variant="secondary"
-              className="px-2 py-0.5 text-xs cursor-pointer"
-              onClick={() => toggleClothType(clothType)} // Reuses toggle which handles removal
-            >
-              Type: {formatDisplayName(clothType)}
-              <X className="ml-1 h-3 w-3" />
-            </Badge>
-          ))}
-          {sortOption && (
-            <Badge variant="secondary" className="px-2 py-0.5 text-xs cursor-pointer" onClick={() => handleSortChange("")}>
-              Sort:{" "}
-              {sortOption === "price-asc"
-                ? "Price: Low to High"
-                : sortOption === "price-desc"
-                ? "Price: High to Low"
-                : sortOption === "popularity"
-                ? "Popularity"
-                : formatDisplayName(sortOption)}
-              <X className="ml-1 h-3 w-3" />
-            </Badge>
-          )}
-        </div>
-      )}
+      {/* Container for filter badges with reserved space to prevent CLS */}
+      <div className="flex min-h-[34px] flex-wrap gap-2 mt-2">
+        {selectedCategories.map((category) => (
+          <Badge
+            key={category}
+            variant="secondary"
+            className="cursor-pointer px-2 py-0.5 text-xs"
+            onClick={() => {
+              const newCats = selectedCategories.filter((c) => c !== category);
+              setSelectedCategories(newCats);
+              updateUrl({ category: newCats.length > 0 ? newCats : null, page: "1" });
+            }}
+          >
+            Category: {formatDisplayName(category)}
+            <X className="ml-1 h-3 w-3" />
+          </Badge>
+        ))}
+        {selectedClothTypes.map((clothType) => (
+          <Badge
+            key={clothType}
+            variant="secondary"
+            className="cursor-pointer px-2 py-0.5 text-xs"
+            onClick={() => toggleClothType(clothType)} // Reuses toggle which handles removal
+          >
+            Type: {formatDisplayName(clothType)}
+            <X className="ml-1 h-3 w-3" />
+          </Badge>
+        ))}
+        {sortOption && (
+          <Badge
+            variant="secondary"
+            className="cursor-pointer px-2 py-0.5 text-xs"
+            onClick={() => handleSortChange("")}
+          >
+            Sort:{" "}
+            {sortOption === "price-asc"
+              ? "Price: Low to High"
+              : sortOption === "price-desc"
+              ? "Price: High to Low"
+              : sortOption === "popularity"
+              ? "Popularity"
+              : "Newest"}
+            <X className="ml-1 h-3 w-3" />
+          </Badge>
+        )}
+      </div>
 
       <Separator className="my-4" />
 

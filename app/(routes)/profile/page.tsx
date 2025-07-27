@@ -6,6 +6,8 @@ import { ProfileSkeleton } from './components/skeletons';
 import Link from 'next/link';
 import { ShoppingBag, MapPin, Ruler } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 export default async function ProfilePage() {
   const userProfile = await getCurrentUserProfile();
 

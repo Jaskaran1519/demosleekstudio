@@ -6,6 +6,8 @@ import { MeasurementsSkeleton } from '../components/skeletons';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 export default async function MeasurementPage() {
   const userProfile = await getCurrentUserProfile();
 

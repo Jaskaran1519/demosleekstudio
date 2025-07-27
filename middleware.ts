@@ -18,21 +18,10 @@ export default withAuth(
 
     // If navigating to admin panel but not an admin
     if (isAdminPanel && !isAdmin) {
-      // Return 403 with a clear error message
-      return new NextResponse(
-        JSON.stringify({
-          error: "Access denied",
-          message: "You don't have permission to access the admin area",
-          role: token?.role || "Not set",
-          isAdmin: false,
-        }),
-        {
-          status: 403,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      // Redirect to home page if not an admin
+      const url = req.nextUrl.clone();
+      url.pathname = '/';
+      return NextResponse.redirect(url);
     }
 
     return NextResponse.next();

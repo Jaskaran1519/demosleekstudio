@@ -13,7 +13,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Eye, Edit, MoreHorizontal, PowerOff, Star, Trash } from "lucide-react";
 import { toast } from "sonner";
-import { AlertModal } from "@/components/modals/alert-modal";
 
 interface ProductActionsProps {
   product: any;
@@ -22,7 +21,6 @@ interface ProductActionsProps {
 export const ProductActions = ({ product }: ProductActionsProps) => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [openDeleteModal, setOpenDeleteModal] = useState(false);
 
   const onToggleStatus = async () => {
     try {
@@ -79,6 +77,12 @@ export const ProductActions = ({ product }: ProductActionsProps) => {
   const onDelete = async () => {
     try {
       setLoading(true);
+      // Optimistically remove the product from the UI
+      const productElement = document.querySelector(`[data-product-id="${product.id}"]`);
+      if (productElement) {
+        productElement.remove();
+      }
+
       const response = await fetch(`/api/products/${product.id}`, {
         method: "DELETE",
       });
@@ -88,27 +92,26 @@ export const ProductActions = ({ product }: ProductActionsProps) => {
       }
 
       toast.success("Product deleted successfully");
+      
+      // Refresh the product list
       router.refresh();
-      router.push("/admin/products");
+      
+      // Only navigate if we're on the product detail page
+      if (window.location.pathname !== "/admin/products") {
+        router.push("/admin/products");
+      }
     } catch (error) {
-      toast.error("Something went wrong");
+      // If there was an error, show an error toast and refresh to restore the product
+      toast.error("Failed to delete product. Please try again.");
       console.error(error);
+      router.refresh();
     } finally {
       setLoading(false);
-      setOpenDeleteModal(false);
     }
   };
 
   return (
     <>
-      <AlertModal 
-        isOpen={openDeleteModal} 
-        onClose={() => setOpenDeleteModal(false)}
-        onConfirm={onDelete}
-        loading={loading}
-        title="Delete Product"
-        description="Are you sure you want to delete this product? This action cannot be undone."
-      />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-8 w-8 p-0" disabled={loading}>
@@ -119,30 +122,41 @@ export const ProductActions = ({ product }: ProductActionsProps) => {
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuItem
-            onClick={() => router.push(`/admin/products/${product.id}`)}
+            onClick={() => router.push(`/products/${product.slug}`)}
+            className="cursor-pointer"
           >
-            <Eye className="mr-2 h-4 w-4" /> View details
+            <Eye className="mr-2 h-4 w-4" /> View
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => router.push(`/admin/products/${product.id}/edit`)}
+            className="cursor-pointer"
           >
             <Edit className="mr-2 h-4 w-4" /> Edit
           </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={onToggleStatus}>
-            <PowerOff className="mr-2 h-4 w-4" /> 
+          <DropdownMenuItem
+            onClick={onToggleStatus}
+            className="cursor-pointer"
+            disabled={loading}
+          >
+            <PowerOff className="mr-2 h-4 w-4" />
             {product.isActive ? "Deactivate" : "Activate"}
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={onToggleFeatured}>
-            <Star className="mr-2 h-4 w-4" /> 
+          <DropdownMenuItem
+            onClick={onToggleFeatured}
+            className="cursor-pointer"
+            disabled={loading}
+          >
+            <Star className="mr-2 h-4 w-4" />
             {product.homePageFeatured ? "Remove from featured" : "Add to featured"}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem 
-            onClick={() => setOpenDeleteModal(true)}
-            className="text-destructive focus:text-destructive"
+            onClick={onDelete}
+            className="text-destructive focus:text-destructive cursor-pointer"
+            disabled={loading}
           >
-            <Trash className="mr-2 h-4 w-4" /> Delete product
+            <Trash className="mr-2 h-4 w-4" />
+            {loading ? 'Deleting...' : 'Delete product'}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

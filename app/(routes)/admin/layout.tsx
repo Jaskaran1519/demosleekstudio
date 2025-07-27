@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import { getAuthSession } from "@/lib/auth";
 import { adminFont } from "@/app/fonts";
 
+export const dynamic = 'force-dynamic';
+
 export default async function AdminLayout({
   children,
 }: {
