@@ -122,18 +122,19 @@ export const ProductForm = ({ initialData }: ProductFormProps) => {
       const sizesArray = data.sizes ? data.sizes.split(',').map(size => size.trim()).filter(Boolean) : [];
       const colorsArray = data.colors ? data.colors.split(',').map(color => color.trim()).filter(Boolean) : [];
 
-      const formData = {
+      const productData = {
         ...data,
         tags: tagsArray,
         sizes: sizesArray,
         colors: colorsArray,
+        images: form.getValues("additionalImages"), // Add this line
       };
 
       if (initialData) {
-        await axios.patch(`/api/products/${initialData.id}`, formData);
+        await axios.patch(`/api/products/${initialData.id}`, productData);
         toast.success("Product updated successfully");
       } else {
-        await axios.post("/api/products", formData);
+        await axios.post("/api/products", productData);
         toast.success("Product created successfully");
       }
       router.push("/admin/products");
