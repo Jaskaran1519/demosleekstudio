@@ -74,6 +74,7 @@ const productFormSchema = z.object({
   homePageFeatured: z.boolean().default(false),
   noBgImage: z.string().optional(),
   modelImage: z.string().optional(),
+  images: z.array(z.string()).optional(),
   additionalImages: z.array(z.string()).optional(),
 });
 
@@ -90,28 +91,29 @@ export const ProductForm = ({ initialData }: ProductFormProps) => {
   
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productFormSchema),
-    defaultValues: initialData ? {
-      ...initialData,
-      tags: initialData.tags?.join(", ") || "",
-      sizes: initialData.sizes?.join(", ") || "",
-      colors: initialData.colors?.join(", ") || "",
-    } : {
-      name: "",
-      slug: "",
-      description: "",
-      price: 0,
-      inventory: 0,
-      category: Category.MEN,
-      clothType: ClothType.SHIRT,
-      tags: "",
-      sizes: "",
-      colors: "",
-      isActive: true,
-      homePageFeatured: false,
-      noBgImage: "",
-      modelImage: "",
-      additionalImages: [],
-    },
+    defaultValues: initialData
+      ? {
+          ...initialData,
+          price: parseFloat(String(initialData?.price || "0")),
+          additionalImages: initialData.additionalImages || [],
+        }
+      : {
+          name: "",
+          slug: "",
+          description: "",
+          price: 0,
+          inventory: 0,
+          category: Category.MEN,
+          clothType: ClothType.SHIRT,
+          tags: "",
+          sizes: "",
+          colors: "",
+          isActive: true,
+          homePageFeatured: false,
+          noBgImage: "",
+          modelImage: "",
+          additionalImages: [],
+        },
   });
 
   const onSubmit = async (data: ProductFormValues) => {
@@ -127,7 +129,7 @@ export const ProductForm = ({ initialData }: ProductFormProps) => {
         tags: tagsArray,
         sizes: sizesArray,
         colors: colorsArray,
-        images: form.getValues("additionalImages"), // Add this line
+        additionalImages: form.getValues("additionalImages"),
       };
 
       if (initialData) {

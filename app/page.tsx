@@ -6,11 +6,15 @@ import VideoHoverGrid from "@/components/VideoHoverGrid/VideoHoverGrid";
 import BendCarousel from "@/components/CircularGallery/BendCarousel";
 import Services from "@/components/Hero/Services";
 import ContactForm from "@/components/Hero/ContactForm";
+import LaunchingSoonPage from "@/components/Launchingpage";
 
 const Page = () => {
   return (
     <div className="w-full max-w-[2000px] mx-auto min-h-screen">
-      <FadeIn>
+     
+     
+
+      {/* <FadeIn>
       <VideoHoverGrid />
       </FadeIn>
 
@@ -37,7 +41,7 @@ const Page = () => {
 
       <FadeIn>
       <ContactForm />
-      </FadeIn>
+      </FadeIn> */}
 
     </div>
   );

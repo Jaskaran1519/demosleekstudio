@@ -11,6 +11,7 @@ import ClientSplashScreen from '@/components/ClientSplashScreen'
 import { mainFont } from "./fonts";
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import LaunchingSoonPage from "@/components/Launchingpage";
 
 // Load the font
 const magerFont = localFont({
@@ -44,12 +45,14 @@ export default function RootLayout({
         >
           <SmoothScroll>
           <ClientSplashScreen>
-              <ScrollProgress className="top-0" />
-              <Navbar/>
-              <div className="min-h-screen">
+
+          <LaunchingSoonPage/>
+              {/* <ScrollProgress className="top-0" />
+              <Navbar/> */}
+              <div className="hidden">
               {children}
               </div>
-              <Footer/>
+              {/* <Footer/> */}
           </ClientSplashScreen>
           </SmoothScroll>
           <SpeedInsights/>
