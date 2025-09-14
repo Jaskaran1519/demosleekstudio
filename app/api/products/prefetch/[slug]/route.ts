@@ -3,10 +3,10 @@ import { getProductBySlug } from "@/actions/products";
 
 export async function GET(
   _req: Request,
-  { params }: { params: { slug: string } }
+  context: any
 ) {
   try {
-    const { slug } = params;
+    const { slug } = context.params;
     if (!slug) {
       return NextResponse.json({ error: "Missing slug" }, { status: 400 });
     }
