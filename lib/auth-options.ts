@@ -71,63 +71,11 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async signIn({ user, account, profile, email, credentials }) {
-      // console.log("Sign-in attempt:", account?.provider, user.email);
-      
-      // Always allow credential provider sign in
-      if (account?.provider === 'credentials') {
-        return true;
-      }
-      
-      // For Google auth, make sure they're in the DB
-      if (account?.provider === 'google' && user.email) {
-        try {
-          // Check if user exists with this email
-          const existingUser = await db.user.findUnique({
-            where: { email: user.email }
-          });
-          
-          if (!existingUser) {
-            // Create new user with default role
-            const newUser = await db.user.create({
-              data: {
-                name: user.name,
-                email: user.email,
-                image: user.image,
-                role: "USER",
-              }
-            });
-            // console.log("Created new user with ID:", newUser.id);
-          } else {
-            // console.log("Found existing user:", existingUser.email, existingUser.id);
-            
-            // Link Google account to existing account
-            // This prevents "OAuthAccountNotLinked" error
-            await db.account.create({
-              data: {
-                userId: existingUser.id,
-                type: account.type,
-                provider: account.provider,
-                providerAccountId: account.providerAccountId,
-                refresh_token: account.refresh_token,
-                access_token: account.access_token,
-                expires_at: account.expires_at,
-                token_type: account.token_type,
-                scope: account.scope,
-                id_token: account.id_token,
-                session_state: account.session_state,
-              },
-            });
-          }
-          // Always allow sign in
-          return true;
-        } catch (error) {
-          console.error("Error handling Google sign-in:", error);
-          // Don't fail the sign-in if we have errors adding to DB
-          // The JWT callback will handle this case
-          return true;
-        }
-      }
-      
+      // Let the PrismaAdapter handle creating/linking users and accounts.
+      // Explicitly allow both credentials and Google providers to proceed.
+      if (account?.provider === 'credentials') return true;
+      if (account?.provider === 'google') return true;
+
       return true;
     },
     async session({ session, token }) {

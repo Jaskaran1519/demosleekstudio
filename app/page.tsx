@@ -7,14 +7,15 @@ import BendCarousel from "@/components/CircularGallery/BendCarousel";
 import Services from "@/components/Hero/Services";
 import ContactForm from "@/components/Hero/ContactForm";
 import LaunchingSoonPage from "@/components/Launchingpage";
+import MaintenanceModal from "@/components/MaintenanceModal";
 
 const Page = () => {
   return (
     <div className="w-full max-w-[2000px] mx-auto min-h-screen">
-     
-     
+      {/* Maintenance modal only on home page */}
+      <MaintenanceModal />
 
-      {/* <FadeIn>
+      <FadeIn>
       <VideoHoverGrid />
       </FadeIn>
 
@@ -41,7 +42,7 @@ const Page = () => {
 
       <FadeIn>
       <ContactForm />
-      </FadeIn> */}
+      </FadeIn>
 
     </div>
   );

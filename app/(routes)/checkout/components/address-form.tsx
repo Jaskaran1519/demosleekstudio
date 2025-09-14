@@ -39,9 +39,10 @@ interface AddressFormProps {
   onAddressCreated: (newAddress: Address) => void;
   defaultOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
+  open?: boolean; // optional controlled state from parent
 }
 
-export function AddressForm({ onAddressCreated, defaultOpen = false, onOpenChange }: AddressFormProps) {
+export function AddressForm({ onAddressCreated, defaultOpen = false, onOpenChange, open }: AddressFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -136,7 +137,11 @@ export function AddressForm({ onAddressCreated, defaultOpen = false, onOpenChang
       <Accordion 
         type="single" 
         collapsible 
-        defaultValue={defaultOpen ? "address-form" : undefined}
+        // If 'open' is provided, control the accordion; otherwise use default
+        {...(open !== undefined
+          ? { value: open ? "address-form" : undefined }
+          : { defaultValue: defaultOpen ? "address-form" : undefined }
+        )}
         onValueChange={(value) => onOpenChange?.(value === "address-form")}
         className="w-full mt-4 border rounded-lg overflow-hidden"
       >
@@ -240,7 +245,11 @@ export function AddressForm({ onAddressCreated, defaultOpen = false, onOpenChang
                     </SelectTrigger>
                     <SelectContent>
                       {COUNTRIES.map((country) => (
-                        <SelectItem key={country.value} value={country.value}>
+                        <SelectItem
+                          key={country.value}
+                          value={country.value}
+                          disabled={country.value !== 'INDIA'}
+                        >
                           {country.label}
                         </SelectItem>
                       ))}

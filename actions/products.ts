@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { slugify } from "@/lib/utils";
 import { Product } from "@/types";
 
@@ -56,6 +56,8 @@ export async function createProduct(data: any) {
     });
 
     revalidatePath("/admin/products");
+    // Invalidate cached product queries
+    revalidateTag("products");
     return product;
   } catch (error) {
     console.error("Error creating product:", error);
@@ -114,6 +116,8 @@ export async function updateProduct(id: string, data: any) {
 
     revalidatePath(`/admin/products/${id}`);
     revalidatePath(`/admin/products`);
+    // Invalidate cached product queries
+    revalidateTag("products");
     return product;
   } catch (error) {
     console.error("Error updating product:", error);
@@ -144,6 +148,7 @@ export async function toggleProductStatus(id: string) {
     });
 
     revalidatePath(`/admin/products`);
+    revalidateTag("products");
     return updatedProduct;
   } catch (error) {
     console.error("Error toggling product status:", error);
@@ -174,6 +179,7 @@ export async function toggleProductFeatured(id: string) {
     });
 
     revalidatePath(`/admin/products`);
+    revalidateTag("products");
     return updatedProduct;
   } catch (error) {
     console.error("Error toggling product featured status:", error);
@@ -182,99 +188,91 @@ export async function toggleProductFeatured(id: string) {
 }
 
 /**
- * Get a product by slug
+ * Get a product by slug (server-side cached)
+ * Uses unstable_cache with tag "products" so mutations can invalidate.
  */
-export async function getProductBySlug(slug: string) {
-  try {
-    const product = await db.product.findUnique({
-      where: {
-        slug,
-        isActive: true,
-      },
-      include: {
-        reviews: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                image: true,
-              },
-            },
-          },
-          orderBy: {
-            createdAt: "desc",
-          },
+export const getProductBySlug = unstable_cache(
+  async (slug: string) => {
+    try {
+      const product = await db.product.findUnique({
+        where: {
+          slug,
+          isActive: true,
         },
-      },
-    });
-
-    return product;
-  } catch (error) {
-    console.error("Error fetching product by slug:", error);
-    throw new Error("Failed to fetch product");
-  }
-}
+      });
+      return product;
+    } catch (error) {
+      console.error("Error fetching product by slug:", error);
+      throw new Error("Failed to fetch product");
+    }
+  },
+  ["getProductBySlug"],
+  { tags: ["products"] }
+);
 
 /**
- * Get similar products based on category and tags
+ * Get similar products based on category and tags (lightly cached)
  */
-export async function getSimilarProducts(productId: string, limit = 4) {
-  try {
-    // First, get the current product to access its category and tags
-    const currentProduct = await db.product.findUnique({
-      where: { id: productId },
-      select: {
-        category: true,
-        tags: true,
-      },
-    });
+export const getSimilarProducts = unstable_cache(
+  async (productId: string, limit = 4) => {
+    try {
+      // First, get the current product to access its category and tags
+      const currentProduct = await db.product.findUnique({
+        where: { id: productId },
+        select: {
+          category: true,
+          tags: true,
+        },
+      });
 
-    if (!currentProduct) {
-      throw new Error("Product not found");
+      if (!currentProduct) {
+        throw new Error("Product not found");
+      }
+
+      // Find products with the same category or tags
+      const similarProducts = await db.product.findMany({
+        where: {
+          id: { not: productId }, // Exclude the current product
+          isActive: true,
+          OR: [
+            { category: currentProduct.category },
+            { tags: { hasSome: currentProduct.tags } },
+          ],
+        },
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          slug: true,
+          price: true,
+          salePrice: true,
+          inventory: true,
+          noBgImage: true,
+          modelImage: true,
+          images: true,
+          category: true,
+          clothType: true,
+          tags: true,
+          sizes: true,
+          isActive: true,
+          homePageFeatured: true,
+          createdAt: true,
+          updatedAt: true,
+          wishedByIds: true,
+        },
+        orderBy: { timesSold: "desc" }, // Sort by popularity
+        take: limit,
+      });
+
+      return similarProducts;
+    } catch (error) {
+      console.error("Error fetching similar products:", error);
+      throw new Error("Failed to fetch similar products");
     }
-
-    // Find products with the same category or tags
-    const similarProducts = await db.product.findMany({
-      where: {
-        id: { not: productId }, // Exclude the current product
-        isActive: true,
-        OR: [
-          { category: currentProduct.category },
-          { tags: { hasSome: currentProduct.tags } },
-        ],
-      },
-      select: {
-        id: true,
-        name: true,
-        description: true,
-        slug: true,
-        price: true,
-        salePrice: true,
-        inventory: true,
-        noBgImage: true,
-        modelImage: true,
-        images: true,
-        category: true,
-        clothType: true,
-        tags: true,
-        sizes: true,
-        isActive: true,
-        homePageFeatured: true,
-        createdAt: true,
-        updatedAt: true,
-        wishedByIds: true,
-      },
-      orderBy: { timesSold: "desc" }, // Sort by popularity
-      take: limit,
-    });
-
-    return similarProducts;
-  } catch (error) {
-    console.error("Error fetching similar products:", error);
-    throw new Error("Failed to fetch similar products");
-  }
-}
+  },
+  ["getSimilarProducts"],
+  { tags: ["products"] }
+);
 
 /**
  * Get a product by ID (for admin)

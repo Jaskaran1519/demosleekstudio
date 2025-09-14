@@ -95,7 +95,21 @@ export const ProductForm = ({ initialData }: ProductFormProps) => {
       ? {
           ...initialData,
           price: parseFloat(String(initialData?.price || "0")),
-          additionalImages: initialData.additionalImages || [],
+          // Derive additional images from the product's images array (skip 1st two main images)
+          additionalImages: Array.isArray(initialData.images)
+            ? (initialData.images as string[])
+                .filter((img: string) => img && img !== initialData.noBgImage && img !== initialData.modelImage)
+                .slice(0, 3)
+            : [],
+          tags: Array.isArray(initialData.tags)
+            ? initialData.tags.join(", ")
+            : initialData.tags ?? "",
+          sizes: Array.isArray(initialData.sizes)
+            ? initialData.sizes.join(", ")
+            : initialData.sizes ?? "",
+          colors: Array.isArray(initialData.colors)
+            ? initialData.colors.join(", ")
+            : initialData.colors ?? "",
         }
       : {
           name: "",
@@ -124,12 +138,20 @@ export const ProductForm = ({ initialData }: ProductFormProps) => {
       const sizesArray = data.sizes ? data.sizes.split(',').map(size => size.trim()).filter(Boolean) : [];
       const colorsArray = data.colors ? data.colors.split(',').map(color => color.trim()).filter(Boolean) : [];
 
+      // Build the combined images array in the required order
+      const combinedImages = [
+        data.noBgImage || "",
+        data.modelImage || "",
+        ...(form.getValues("additionalImages") || [])
+      ].filter((img) => typeof img === 'string' && img.trim().length > 0);
+
       const productData = {
         ...data,
         tags: tagsArray,
         sizes: sizesArray,
         colors: colorsArray,
         additionalImages: form.getValues("additionalImages"),
+        images: combinedImages,
       };
 
       if (initialData) {

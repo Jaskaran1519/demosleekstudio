@@ -111,6 +111,8 @@ export default function CheckoutPage() {
   const [shippingRates, setShippingRates] = useState<Record<string, number>>({});
   const [shipping, setShipping] = useState(0);
   const [isLoadingRates, setIsLoadingRates] = useState(true);
+  // Control for AddressForm accordion open/close (fully controlled)
+  const [isAddressFormOpen, setIsAddressFormOpen] = useState<boolean>(false);
 
   const subtotal = getTotalPrice();
   const tax = subtotal * 0.05; // 5% tax
@@ -120,6 +122,13 @@ export default function CheckoutPage() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Close the new-address accordion whenever saved addresses are present
+  useEffect(() => {
+    if (addresses.length > 0) {
+      setIsAddressFormOpen(false);
+    }
+  }, [addresses.length]);
 
   useEffect(() => {
     const fetchRates = async () => {
@@ -158,6 +167,8 @@ export default function CheckoutPage() {
           const response = await fetch("/api/addresses");
           const data = await response.json();
           setAddresses(data);
+          // Open only if there are no saved addresses; otherwise keep it closed
+          setIsAddressFormOpen(data.length === 0);
           if (data.length > 0 && !selectedAddressId) {
             const defaultAddress = data.find((addr: any) => addr.isDefault) || data[0];
             if (defaultAddress) {
@@ -378,7 +389,16 @@ export default function CheckoutPage() {
                 </RadioGroup>
               ) : <p>No addresses found. Please add one.</p>}
               <div className="mt-6">
-                <AddressForm defaultOpen={addresses.length === 0} onAddressCreated={(newAddress) => { setAddresses(prev => [...prev, newAddress]); setSelectedAddressId(newAddress.id); }} />
+                <AddressForm 
+                  key={addresses.length}
+                  open={isAddressFormOpen}
+                  onOpenChange={setIsAddressFormOpen}
+                  onAddressCreated={(newAddress) => { 
+                    setAddresses(prev => [...prev, newAddress]); 
+                    setSelectedAddressId(newAddress.id); 
+                    setIsAddressFormOpen(false);
+                  }} 
+                />
               </div>
             </div>
             <div className="bg-white p-6 rounded-lg shadow-sm">

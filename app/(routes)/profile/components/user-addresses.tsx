@@ -259,14 +259,14 @@ export function UserAddresses({
                   disabled={isSubmitting}
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  <option value="">Select a country</option>
+                  <option value="" disabled>Select a country</option>
                   <option value="INDIA">India</option>
-                  <option value="USA">United States</option>
-                  <option value="CANADA">Canada</option>
-                  <option value="DUBAI">Dubai (UAE)</option>
-                  <option value="EUROPE">Europe</option>
-                  <option value="AUSTRALIA">Australia</option>
-                  <option value="NEW_ZEALAND">New Zealand</option>
+                  <option value="USA" disabled>United States</option>
+                  <option value="CANADA" disabled>Canada</option>
+                  <option value="DUBAI" disabled>Dubai (UAE)</option>
+                  <option value="EUROPE" disabled>Europe</option>
+                  <option value="AUSTRALIA" disabled>Australia</option>
+                  <option value="NEW_ZEALAND" disabled>New Zealand</option>
                 </select>
               </div>
 

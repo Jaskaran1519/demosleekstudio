@@ -5,13 +5,14 @@ import { AuthProvider } from "@/components/auth/auth-provider";
 import Navbar from "@/components/Header/Navbar";
 import { ScrollProgress } from "@/components/magicui/scroll-progress";
 import SmoothScroll from "@/lib/SmoothScroll";
-import Footer from "@/components/Others/Fotoer";
+
 import localFont from 'next/font/local';
 import ClientSplashScreen from '@/components/ClientSplashScreen'
-import { mainFont } from "./fonts";
+
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
-import LaunchingSoonPage from "@/components/Launchingpage";
+import Footer from "@/components/Others/Fotoer";
+
 
 // Load the font
 const magerFont = localFont({
@@ -45,14 +46,12 @@ export default function RootLayout({
         >
           <SmoothScroll>
           <ClientSplashScreen>
-
-          <LaunchingSoonPage/>
-              {/* <ScrollProgress className="top-0" />
-              <Navbar/> */}
-              <div className="hidden">
+              <ScrollProgress className="top-0" />
+              <Navbar/> 
+              <div className="min-h-screen">
               {children}
               </div>
-              {/* <Footer/> */}
+              <Footer/>
           </ClientSplashScreen>
           </SmoothScroll>
           <SpeedInsights/>
