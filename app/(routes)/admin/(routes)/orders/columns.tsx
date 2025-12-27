@@ -23,6 +23,8 @@ export type OrderColumn = {
   createdAt: string;
   status: OrderStatus;
   total: number;
+  shipping: number;
+  discountAmount: number | null;
   user: {
     id: string;
     name: string;

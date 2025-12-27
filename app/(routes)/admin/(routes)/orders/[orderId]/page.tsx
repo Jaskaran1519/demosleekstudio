@@ -180,21 +180,17 @@ async function OrderContent({ orderId }: { orderId: string }) {
               <span>{formatPrice(order.subtotal)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Tax</span>
-              <span>{formatPrice(order.tax)}</span>
-            </div>
-            <div className="flex justify-between">
               <span className="text-muted-foreground">Shipping</span>
               <span>
                 {order.shipping > 0 ? formatPrice(order.shipping) : "Free"}
               </span>
             </div>
-            {order.discountAmount && order.discountAmount > 0 && (
+            {order.discountAmount && order.discountAmount > 0 ? (
               <div className="flex justify-between text-green-600">
                 <span>Discount</span>
                 <span>-{formatPrice(order.discountAmount)}</span>
               </div>
-            )}
+            ) : null}
           </div>
 
           <Separator className="my-4" />

@@ -55,7 +55,7 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
       productId: product.id,
       slug: product.slug,
       name: product.name,
-      price: product.salePrice || product.price,
+      price: product.price,
       quantity,
       size: selectedSize,
       color: selectedColor,

@@ -124,7 +124,7 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
                           {new Date(order.createdAt).toLocaleDateString()}
                         </div>
                       </div>
-                      <div className="font-medium">${order.total.toFixed(2)}</div>
+                      <div className="font-medium">₹{order.total.toFixed(2)}</div>
                     </div>
                   </div>
                 ))}

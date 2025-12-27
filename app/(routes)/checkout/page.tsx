@@ -115,9 +115,8 @@ export default function CheckoutPage() {
   const [isAddressFormOpen, setIsAddressFormOpen] = useState<boolean>(false);
 
   const subtotal = getTotalPrice();
-  const tax = subtotal * 0.05; // 5% tax
   const discount = appliedCoupon?.discountAmount || 0;
-  const total = subtotal + shipping + tax - discount;
+  const total = subtotal + shipping - discount;
 
   useEffect(() => {
     setMounted(true);
@@ -241,7 +240,6 @@ export default function CheckoutPage() {
         couponCode: appliedCoupon?.code,
         discountAmount: discount,
         subtotal, 
-        tax, 
         shipping, 
         total,
       };

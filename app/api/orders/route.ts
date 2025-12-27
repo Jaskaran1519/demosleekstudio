@@ -23,7 +23,6 @@ export async function POST(req: NextRequest) {
       couponCode,
       discountAmount,
       subtotal,
-      tax,
       shipping,
       total
     } = await req.json();
@@ -156,7 +155,7 @@ export async function POST(req: NextRequest) {
         userId: session.user.id,
         total,
         subtotal,
-        tax: tax || 0,
+        tax: 0,
         shipping: shipping || 0,
         shippingAddressId: addressId,
         paymentIntent: razorpayOrder.id,

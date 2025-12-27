@@ -137,11 +137,11 @@ async function OrderContent({ orderId }: { orderId: string }) {
                 className="flex border-b pb-4 last:pb-0 last:border-0"
               >
                 <div className="flex-shrink-0 mr-4">
-                  {item.images?.[0] ? (
+                  {item.product?.images?.[0] ? (
                     <div className="h-20 w-20 relative rounded overflow-hidden">
                       <img
-                        src={item.images[0]}
-                        alt={item.name}
+                        src={item.product.images[0]}
+                        alt={item.product.name}
                         className="object-cover h-full w-full"
                       />
                     </div>
@@ -154,7 +154,9 @@ async function OrderContent({ orderId }: { orderId: string }) {
                 <div className="flex-1">
                   <div className="flex flex-col md:flex-row md:justify-between">
                     <div>
-                      <h3 className="font-medium">{item.name || "Product"}</h3>
+                      <h3 className="font-medium">
+                        {item.product?.name || "Product"}
+                      </h3>
                       <div className="text-sm text-muted-foreground mt-1">
                         {item.size && (
                           <span className="mr-3">Size: {item.size}</span>
@@ -187,21 +189,17 @@ async function OrderContent({ orderId }: { orderId: string }) {
               <span>{formatPrice(order.subtotal)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Tax</span>
-              <span>{formatPrice(order.tax)}</span>
-            </div>
-            <div className="flex justify-between">
               <span className="text-muted-foreground">Shipping</span>
               <span>
                 {order.shipping > 0 ? formatPrice(order.shipping) : "Free"}
               </span>
             </div>
-            {order.discountAmount && order.discountAmount > 0 && (
+            {order.discountAmount && order.discountAmount > 0 ? (
               <div className="flex justify-between text-green-600">
                 <span>Discount</span>
                 <span>-{formatPrice(order.discountAmount)}</span>
               </div>
-            )}
+            ) : null}
           </div>
 
           <Separator className="my-4" />

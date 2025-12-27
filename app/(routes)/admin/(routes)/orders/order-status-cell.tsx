@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { OrderStatus } from "@prisma/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -53,6 +53,11 @@ const statusConfig = {
 export function OrderStatusCell({ orderId, initialStatus }: OrderStatusCellProps) {
   const [status, setStatus] = useState<OrderStatus>(initialStatus as OrderStatus);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Sync state with prop when it changes (e.g., when filtering or refreshing)
+  useEffect(() => {
+    setStatus(initialStatus as OrderStatus);
+  }, [initialStatus]);
 
   const StatusIcon = statusConfig[status].icon;
 

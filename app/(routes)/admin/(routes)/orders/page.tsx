@@ -39,6 +39,8 @@ async function OrdersContent({ searchParams }: OrdersPageProps) {
     createdAt: order.createdAt.toISOString(),
     status: order.status,
     total: order.total,
+    shipping: order.shipping,
+    discountAmount: order.discountAmount,
     user: order.user,
     items: order.items,
   })) as OrderColumn[];
