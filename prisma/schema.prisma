@@ -253,6 +253,7 @@ model CouponUsage {
 enum Role {
   USER
   ADMIN
+  MANAGER
 }
 
 enum OrderStatus {

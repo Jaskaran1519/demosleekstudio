@@ -21,19 +21,22 @@ export const columns: ColumnDef<UserType>[] = [
   {
     accessorKey: "role",
     header: "Role",
-    cell: ({ row }) => {
-      const role = row.getValue("role") as string;
-      return (
-        <span className={`px-2 py-1 rounded-full text-sm ${
-          role === "ADMIN" 
-            ? "bg-purple-100 text-purple-800" 
-            : "bg-gray-100 text-gray-800"
-        }`}>
-          {role}
-        </span>
-      );
-    },
-  },
+          cell: ({ row }) => {
+            const role = row.getValue("role") as string;
+            let roleClassName = "";
+            if (role === "ADMIN") {
+              roleClassName = "bg-purple-100 text-purple-800";
+            } else if (role === "MANAGER") {
+              roleClassName = "bg-blue-100 text-blue-800";
+            } else {
+              roleClassName = "bg-gray-100 text-gray-800";
+            }
+            return (
+              <span className={`px-2 py-1 rounded-full text-sm ${roleClassName}`}>
+                {role}
+              </span>
+            );
+          },  },
   {
     accessorKey: "createdAt",
     header: "Joined",

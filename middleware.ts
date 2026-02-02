@@ -7,6 +7,7 @@ export default withAuth(
   async function middleware(req: NextRequest) {
     const token = await getToken({ req });
     const isAuthenticated = !!token;
+    const isManager = token?.role === "MANAGER";
     const isAdmin = token?.role === "ADMIN";
     const isAdminPanel = req.nextUrl.pathname.startsWith("/admin");
     const isAuthDebug = req.nextUrl.pathname.startsWith("/auth-debug");
@@ -16,12 +17,25 @@ export default withAuth(
       return NextResponse.next();
     }
 
-    // If navigating to admin panel but not an admin
-    if (isAdminPanel && !isAdmin) {
-      // Redirect to home page if not an admin
-      const url = req.nextUrl.clone();
-      url.pathname = '/';
-      return NextResponse.redirect(url);
+    // If navigating to admin panel
+    if (isAdminPanel) {
+      // If user is not an admin or a manager, redirect to home
+      if (!isAdmin && !isManager) {
+        const url = req.nextUrl.clone();
+        url.pathname = "/";
+        return NextResponse.redirect(url);
+      }
+
+      // If user is a manager and trying to access a route other than /admin/orders or /admin
+      if (
+        isManager &&
+        !req.nextUrl.pathname.startsWith("/admin/orders") &&
+        req.nextUrl.pathname !== "/admin"
+      ) {
+        const url = req.nextUrl.clone();
+        url.pathname = "/admin/orders";
+        return NextResponse.redirect(url);
+      }
     }
 
     return NextResponse.next();

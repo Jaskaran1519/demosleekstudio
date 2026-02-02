@@ -140,7 +140,7 @@ export default function SmallDisplayButton({scrolled, shouldBeFixed}: {scrolled:
   const [selectedLink, setSelectedLink] = useState({isActive: false, index: 0});
   const { data: session, status } = useSession();
   const router = useRouter();
-  const isAdmin = session?.user?.role === "ADMIN";
+  const isAuthorized = session?.user?.role === "ADMIN" || session?.user?.role === "MANAGER";
   const isAuthenticated = status === "authenticated";
   
   // Close menu when pressing escape key
@@ -300,7 +300,7 @@ export default function SmallDisplayButton({scrolled, shouldBeFixed}: {scrolled:
                     {isAuthenticated ? (
                       <>
                         <div className="flex flex-col gap-3 w-full">
-                          {isAdmin && (
+                          {isAuthorized && (
                             <button 
                               onClick={() => {
                                 router.push("/admin");

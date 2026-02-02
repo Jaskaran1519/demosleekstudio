@@ -48,4 +48,41 @@ export async function requireAdmin(): Promise<AuthCheckResult> {
     isAuthorized: true,
     user,
   };
-} 
+}
+
+/**
+ * Check if the current user is an admin or manager and render error message if not
+ * Use this in pages that require admin or manager access
+ */
+export async function requireAuth(): Promise<AuthCheckResult> {
+    const user = await currentUser();
+  
+    if (!user) {
+      return {
+        isAuthorized: false,
+        user: null,
+        errorMessage: {
+          message: "You need to be logged in to access this page.",
+          title: "Not Authenticated",
+          backUrl: "/auth/signin",
+          backText: "Go to Sign In"
+        }
+      };
+    }
+  
+    if (user.role !== "ADMIN" && user.role !== "MANAGER") {
+      return {
+        isAuthorized: false,
+        user,
+        errorMessage: {
+          message: "You don't have permission to access this page. Only admins or managers can view this content.",
+          title: "Access Denied"
+        }
+      };
+    }
+  
+    return {
+      isAuthorized: true,
+      user,
+    };
+}

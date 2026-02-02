@@ -122,7 +122,7 @@ export async function getAllOrders(
   try {
     const user = await currentUser();
 
-    if (!user || user.role !== "ADMIN") {
+    if (!user || (user.role !== "ADMIN" && user.role !== "MANAGER")) {
       throw new Error("Not authorized");
     }
 
@@ -197,7 +197,7 @@ export async function updateOrderStatus(orderId: string, status: string) {
   try {
     const user = await currentUser();
 
-    if (!user || user.role !== "ADMIN") {
+    if (!user || (user.role !== "ADMIN" && user.role !== "MANAGER")) {
       throw new Error("Not authorized");
     }
 

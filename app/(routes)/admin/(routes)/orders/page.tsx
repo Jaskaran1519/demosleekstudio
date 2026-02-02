@@ -1,13 +1,11 @@
 import OopsMessage from '@/components/Others/OopsMessage';
-import { requireAdmin } from '@/lib/auth-utils';
+import { requireAuth } from '@/lib/auth-utils';
 import { getAllOrders } from '@/actions/orders';
-import { DataTable } from '@/components/ui/data-table';
-import { OrdersTableColumns, OrderColumn } from './columns';
-import { OrdersTableFilters } from './filters';
+import { OrderColumn } from './columns';
 import { Container } from '@/components/ui/container';
-import { Heading } from '@/components/ui/heading';
 import { Suspense } from 'react';
 import { OrdersTableSkeleton } from '@/components/dashboard/skeletons';
+import { OrderClient } from './components/client';
 
 interface OrdersPageProps {
   searchParams: Promise<{
@@ -46,24 +44,16 @@ async function OrdersContent({ searchParams }: OrdersPageProps) {
   })) as OrderColumn[];
 
   return (
-    <>
-      <div className="mb-8">
-        <OrdersTableFilters />
-      </div>
-      
-      <DataTable 
-        columns={OrdersTableColumns} 
-        data={orders} 
-        filterValue={query}
-        totalPages={totalPages}
-        currentPage={currentPage}
-      />
-    </>
+    <OrderClient
+      orders={orders}
+      totalPages={totalPages}
+      currentPage={currentPage}
+    />
   );
 }
 
 const OrdersPage = async({ searchParams }: OrdersPageProps) => {
-  const { isAuthorized, user, errorMessage } = await requireAdmin();
+  const { isAuthorized, user, errorMessage } = await requireAuth();
   
   // If not authorized, show the OopsMessage
   if (!isAuthorized) {

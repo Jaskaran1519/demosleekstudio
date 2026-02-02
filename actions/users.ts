@@ -297,7 +297,7 @@ export async function fetchUsers({
 /**
  * Update a user's role (admin only)
  */
-export async function updateUserRole(userId: string, role: "ADMIN" | "USER") {
+export async function updateUserRole(userId: string, role: "ADMIN" | "USER" | "MANAGER") {
   try {
     // Verify admin access
     const user = await currentUser();

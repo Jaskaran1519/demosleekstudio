@@ -1,8 +1,18 @@
 import UserMenu from "@/components/Header/UserMenu"
 import Link from "next/link"
 import { adminmenu } from "@/config/adminsidebar"
+import { getAuthSession } from "@/lib/auth";
  
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default async function Layout({ children }: { children: React.ReactNode }) {
+
+  const session = await getAuthSession();
+  const role = session?.user.role;
+  const isManager = role === "MANAGER";
+
+  const filteredAdminMenu = isManager
+    ? adminmenu.filter((item) => item.title === "Orders")
+    : adminmenu;
+
   return (
     <div className="w-full">
       <div className="w-full flex justify-between items-center px-5 py-3">
@@ -14,7 +24,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <div className="w-full border-b">
         <div className="w-[90%] mx-auto overflow-x-auto">
           <div className="flex gap-4 py-2 min-w-max">
-            {adminmenu.map((item) => (
+            {filteredAdminMenu.map((item) => (
               <Link
                 key={item.title}
                 href={item.url}

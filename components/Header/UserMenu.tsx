@@ -19,7 +19,7 @@ export default function UserMenu() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const isAuthenticated = status === "authenticated";
-  const isAdmin = session?.user?.role === "ADMIN";
+  const isAuthorized = session?.user?.role === "ADMIN" || session?.user?.role === "MANAGER";
 
   const handleSignOut = () => {
     signOut({ callbackUrl: "/" });
@@ -37,7 +37,7 @@ export default function UserMenu() {
           <>
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            {isAdmin && (
+            {isAuthorized && (
               <DropdownMenuItem onClick={() => router.push("/admin")}>
                 <LayoutDashboard className="mr-2 h-4 w-4" />
                 <span>Admin Dashboard</span>
