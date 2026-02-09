@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { LogOut, User, ShoppingBag, LogIn, UserPlus, LayoutDashboard, Menu, AlignLeft } from 'lucide-react';
+import { LogOut, User, ShoppingBag, LogIn, UserPlus, LayoutDashboard, Menu, AlignLeft, ChevronDown } from 'lucide-react';
 import styles from './style.module.scss';
 import Image from 'next/image';
 import { canelaFont } from '@/app/fonts';
@@ -111,15 +111,29 @@ const translate = {
   })
 };
 
-// Menu links
-const links = [
+// Menu links with optional children for dropdowns
+interface MenuLink {
+  title: string;
+  href?: string;
+  children?: { title: string; href: string }[];
+}
+
+const links: MenuLink[] = [
   {
     title: "Men",
-    href: "/men"
+    children: [
+      { title: "Coat", href: "/products?category=MEN&clothType=COAT" },
+      { title: "Blazer", href: "/products?category=MEN&clothType=BLAZER" },
+      { title: "Shirt", href: "/products?category=MEN&clothType=SHIRT" }
+    ]
   },
   {
     title: "Women",
-    href: "/women"
+    children: [
+      { title: "Lehnga", href: "/products?category=WOMEN&clothType=LEHNGA" },
+      { title: "Suit", href: "/products?category=WOMEN&clothType=SUIT" },
+      { title: "Kurti", href: "/products?category=WOMEN&clothType=KURTI" }
+    ]
   },
   {
     title: "Wishlist",
@@ -138,10 +152,16 @@ const links = [
 export default function SmallDisplayButton({scrolled, shouldBeFixed}: {scrolled: boolean, shouldBeFixed: boolean}) {
   const [isActive, setIsActive] = useState(false);
   const [selectedLink, setSelectedLink] = useState({isActive: false, index: 0});
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const { data: session, status } = useSession();
   const router = useRouter();
-  const isAuthorized = session?.user?.role === "ADMIN" || session?.user?.role === "MANAGER";
+  const isAuthorized = session?.user?.role === "ADMIN" || (session?.user as any)?.role === "MANAGER";
   const isAuthenticated = status === "authenticated";
+  
+  // Toggle dropdown - only one open at a time
+  const toggleDropdown = (title: string) => {
+    setOpenDropdown(prev => prev === title ? null : title);
+  };
   
   // Close menu when pressing escape key
   useEffect(() => {
@@ -277,9 +297,62 @@ export default function SmallDisplayButton({scrolled, shouldBeFixed}: {scrolled:
                   {/* Left side - Menu Options */}
                   <div className={styles.body}>
                     {links.map((link, index) => {
-                      const { title, href } = link;
+                      const { title, href, children } = link;
+                      
+                      // Items with children (dropdown)
+                      if (children) {
+                        const isOpen = openDropdown === title;
+                        return (
+                          <div key={`l_${index}`} className={`${canelaFont.className}`}>
+                            <div 
+                              onClick={() => toggleDropdown(title)}
+                              className="flex items-center gap-2 cursor-pointer"
+                            >
+                              <motion.p 
+                                onMouseOver={() => {setSelectedLink({isActive: true, index})}} 
+                                onMouseLeave={() => {setSelectedLink({isActive: false, index})}} 
+                                variants={responsiveBlur} 
+                                animate={selectedLink.isActive && selectedLink.index != index ? "open" : "closed"}
+                              >
+                                {getChars(title)}
+                              </motion.p>
+                              <motion.span
+                                animate={{ rotate: isOpen ? 180 : 0 }}
+                                transition={{ duration: 0.3 }}
+                                className="inline-block h-full"
+                              >
+                                <ChevronDown size={20} className="text-gray-400" />
+                              </motion.span>
+                            </div>
+                            <AnimatePresence>
+                              {isOpen && (
+                                <motion.div
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: "auto", opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
+                                  transition={{ duration: 0.3, ease: [0.76, 0, 0.24, 1] }}
+                                  className="overflow-hidden pl-4 mt-2"
+                                >
+                                  {children.map((child, childIndex) => (
+                                    <Link 
+                                      key={`child_${childIndex}`} 
+                                      href={child.href as any}
+                                      onClick={() => setIsActive(false)}
+                                      className="block py-2 text-gray-600 hover:text-black transition-colors text-lg"
+                                    >
+                                      {child.title}
+                                    </Link>
+                                  ))}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        );
+                      }
+                      
+                      // Regular link items
                       return (
-                        <Link key={`l_${index}`} href={href} className={`${canelaFont.className}`} onClick={() => setIsActive(false)}>
+                        <Link key={`l_${index}`} href={(href as any) || '#'} className={`${canelaFont.className}`} onClick={() => setIsActive(false)}>
                           <motion.p 
                             onMouseOver={() => {setSelectedLink({isActive: true, index})}} 
                             onMouseLeave={() => {setSelectedLink({isActive: false, index})}} 

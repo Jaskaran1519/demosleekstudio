@@ -2,42 +2,46 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ChevronDown } from 'lucide-react'; // Removed ChevronRight as it wasn't used
-import { MenuItem } from '@/config/mobilemenu'; // Assuming this path is correct
+import { ChevronDown } from 'lucide-react';
+import { MenuItem } from '@/config/mobilemenu';
 
 interface CustomMobileMenuProps {
   items: MenuItem[];
   onClose: () => void;
 }
 
-// Custom Accordion Item component
+// Custom Accordion Item component with controlled state
 const AccordionItem = ({
+  id,
   title,
   children,
   link,
+  isOpen,
+  onToggle,
   onClose
 }: {
+  id: string;
   title: string;
   children?: React.ReactNode;
   link?: string;
+  isOpen: boolean;
+  onToggle: () => void;
   onClose: () => void;
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
-
   if (!children) {
     // Leaf node (no children) - Top Level
     return (
-      <div className="px-5 py-4"> {/* Maintained padding */}
+      <div className="px-5 py-4">
         {link ? (
           <Link
             href={link}
-            className="block text-gray-800 text-xl uppercase" // Reduced from 2xl to xl
+            className="block text-gray-800 text-xl uppercase"
             onClick={onClose}
           >
             {title}
           </Link>
         ) : (
-          <span className="text-xl uppercase">{title}</span> // Reduced from 2xl to xl
+          <span className="text-xl uppercase">{title}</span>
         )}
       </div>
     );
@@ -47,22 +51,27 @@ const AccordionItem = ({
   return (
     <div className="border-b border-gray-100 last:border-b-0">
       <button
-        className="flex justify-between items-center w-full px-5 py-4 text-left text-xl font-normal uppercase" // Reduced from 2xl to xl
-        onClick={() => setIsOpen(!isOpen)}
+        className="flex justify-between items-center w-full px-5 py-4 text-left text-xl font-normal uppercase"
+        onClick={onToggle}
         aria-expanded={isOpen}
       >
         <span>{title}</span>
-        <span className="transition-transform duration-200" style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>
-          <ChevronDown size={20} /> {/* Reduced from 24 to 20 */}
+        <span 
+          className="transition-transform duration-300 ease-out"
+          style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+        >
+          <ChevronDown size={20} />
         </span>
       </button>
 
       <div
-        className={`overflow-hidden transition-all duration-300 ease-in-out ${
-          isOpen ? 'max-h-96' : 'max-h-0' // max-h might need adjustment if content is very long
-        }`}
+        className="overflow-hidden transition-all duration-300 ease-out"
+        style={{
+          maxHeight: isOpen ? '500px' : '0px',
+          opacity: isOpen ? 1 : 0,
+        }}
       >
-        <div className="px-5 pb-3"> {/* Maintained padding */}
+        <div className="px-5 pb-3">
           {children}
         </div>
       </div>
@@ -70,7 +79,7 @@ const AccordionItem = ({
   );
 };
 
-// Nested Accordion Item
+// Nested Accordion Item (for deeper levels if needed)
 const NestedAccordionItem = ({
   title,
   children,
@@ -85,22 +94,22 @@ const NestedAccordionItem = ({
   onClose: () => void;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const paddingLeftClass = `pl-${5 + depth * 2}`; // Base padding 5 + depth indent
+  const paddingLeftClass = `pl-${5 + depth * 2}`;
 
   if (!children) {
     // Leaf node (no children) - Nested
     return (
-      <div className={`py-3 ${paddingLeftClass}`}> {/* Maintained padding */}
+      <div className={`py-3 ${paddingLeftClass}`}>
         {link ? (
           <Link
             href={link}
-            className="block text-gray-600 hover:text-blue-600 text-lg uppercase" // Reduced from xl to lg
+            className="block text-gray-600 hover:text-blue-600 text-lg uppercase"
             onClick={onClose}
           >
             {title}
           </Link>
         ) : (
-          <span className="text-lg uppercase">{title}</span> // Reduced from xl to lg
+          <span className="text-lg uppercase">{title}</span>
         )}
       </div>
     );
@@ -110,24 +119,29 @@ const NestedAccordionItem = ({
   return (
     <div className="mt-1">
       <button
-        className={`flex justify-between items-center w-full py-3 ${paddingLeftClass} pr-2 text-left text-lg font-normal uppercase`} // Reduced from xl to lg
+        className={`flex justify-between items-center w-full py-3 ${paddingLeftClass} pr-2 text-left text-lg font-normal uppercase`}
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
       >
         <span>{title}</span>
-        <span className="transition-transform duration-200" style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>
-          <ChevronDown size={20} /> {/* Reduced from 24 to 20 */}
+        <span 
+          className="transition-transform duration-300 ease-out"
+          style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+        >
+          <ChevronDown size={20} />
         </span>
       </button>
 
       <div
-        className={`overflow-hidden transition-all duration-300 ease-in-out ${
-          isOpen ? 'max-h-96' : 'max-h-0' // max-h might need adjustment
-        }`}
+        className="overflow-hidden transition-all duration-300 ease-out"
+        style={{
+          maxHeight: isOpen ? '500px' : '0px',
+          opacity: isOpen ? 1 : 0,
+        }}
       >
-        <div className={`pl-${(depth + 1) * 2}`}> {/* Indentation for children */}
+        <div className={`pl-${(depth + 1) * 2}`}>
           {children.map((item, index) => (
-            <div key={index} className="py-2"> {/* Maintained padding */}
+            <div key={index} className="py-2">
               {item.children ? (
                 <NestedAccordionItem
                   title={item.title}
@@ -137,17 +151,17 @@ const NestedAccordionItem = ({
                   onClose={onClose}
                 />
               ) : (
-                <div className="py-2"> {/* Consistent padding */}
+                <div className="py-2">
                   {item.link ? (
                     <Link
                       href={item.link}
-                      className="block text-gray-600 hover:text-blue-600 text-lg uppercase" // Reduced from xl to lg
+                      className="block text-gray-600 hover:text-blue-600 text-lg uppercase"
                       onClick={onClose}
                     >
                       {item.title}
                     </Link>
                   ) : (
-                    <span className="text-lg uppercase">{item.title}</span> // Reduced from xl to lg
+                    <span className="text-lg uppercase">{item.title}</span>
                   )}
                 </div>
               )}
@@ -161,14 +175,25 @@ const NestedAccordionItem = ({
 
 // Main Mobile Menu Component
 export default function MobileMenu({ items, onClose }: CustomMobileMenuProps) {
+  // Track which accordion is open (only one at a time)
+  const [openItemId, setOpenItemId] = useState<string | null>(null);
+
+  const handleToggle = (itemId: string) => {
+    // If clicking the same item, close it; otherwise open the new one
+    setOpenItemId(prev => prev === itemId ? null : itemId);
+  };
+
   return (
     <div className="w-full bg-white">
-      {items.map((item, index) => (
-        <div key={index} className="bg-white">
+      {items.map((item) => (
+        <div key={item.id} className="bg-white">
           {item.children ? (
             // Top-level item with children
             <AccordionItem
+              id={item.id}
               title={item.title}
+              isOpen={openItemId === item.id}
+              onToggle={() => handleToggle(item.id)}
               onClose={onClose}
             >
               {item.children?.map((child: any, childIndex: number) => (
@@ -179,22 +204,22 @@ export default function MobileMenu({ items, onClose }: CustomMobileMenuProps) {
                       title={child.title}
                       children={child.children}
                       link={child.link}
-                      depth={1} // Start nested depth at 1
+                      depth={1}
                       onClose={onClose}
                     />
                   ) : (
                     // Second-level item without children (simple link/span)
-                    <div className="py-3 pl-5 bg-white"> {/* Maintained padding */}
+                    <div className="py-3 pl-5 bg-white">
                       {child.link ? (
                         <Link
                           href={child.link}
-                          className="block text-gray-600 cursor-pointer text-lg uppercase" // Reduced from xl to lg
+                          className="block text-gray-600 cursor-pointer text-lg uppercase"
                           onClick={onClose}
                         >
                           {child.title}
                         </Link>
                       ) : (
-                        <span className="text-lg uppercase">{child.title}</span> // Reduced from xl to lg
+                        <span className="text-lg uppercase">{child.title}</span>
                       )}
                     </div>
                   )}
@@ -204,8 +229,11 @@ export default function MobileMenu({ items, onClose }: CustomMobileMenuProps) {
           ) : (
             // Top-level item without children
             <AccordionItem
+              id={item.id}
               title={item.title}
               link={item.link}
+              isOpen={false}
+              onToggle={() => {}}
               onClose={onClose}
             />
           )}

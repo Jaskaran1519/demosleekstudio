@@ -8,27 +8,21 @@ export interface MenuItem {
   
 export const menuData: MenuItem[] = [
     {
-      id: "new-arrivals",
-      title: "New Arrivals",
-      link: "/products?sort=newest&page=1"
-    },
-    {
-      id: "premium-wear",
-      title: "Premium Wear",
-      link: "/products?sort=price-desc&page=1"
-    },
-    {
-      id: "shoes",
-      title: "Shoes",
-      link: "#"
-    },
-    {
-      id: "shop-by-category",
-      title: "Shop by Category",
+      id: "men",
+      title: "Men",
       children: [
-        { id: "men", title: "Men", link: "/men" },
-        { id: "women", title: "Women", link: "/women" },
-        { id: "children", title: "Children", link: "/kidswear" }
+        { id: "men-coat", title: "Coat", link: "/products?category=MEN&clothType=COAT" },
+        { id: "men-blazer", title: "Blazer", link: "/products?category=MEN&clothType=BLAZER" },
+        { id: "men-shirt", title: "Shirt", link: "/products?category=MEN&clothType=SHIRT" }
+      ]
+    },
+    {
+      id: "women",
+      title: "Women",
+      children: [
+        { id: "women-lehnga", title: "Lehnga", link: "/products?category=WOMEN&clothType=LEHNGA" },
+        { id: "women-suit", title: "Suit", link: "/products?category=WOMEN&clothType=SUIT" },
+        { id: "women-kurti", title: "Kurti", link: "/products?category=WOMEN&clothType=KURTI" }
       ]
     },
     {
@@ -38,12 +32,12 @@ export const menuData: MenuItem[] = [
     },
     {
       id: "about",
-      title: "About Sleek Studio",
+      title: "About",
       link: "/about"
     },
     {
       id: "contact",
-      title: "Contact",
+      title: "ContactUs",
       link: "/contact"
     }
   ];

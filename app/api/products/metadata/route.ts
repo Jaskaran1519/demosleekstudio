@@ -1,12 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Category, ClothType } from "@prisma/client";
+import { db } from "@/lib/db";
 
 export async function GET(request: NextRequest) {
   try {
-    // Return all categories and cloth types from the enums
+    // Fetch distinct categories and clothTypes from products that exist in the database
+    const [categoriesResult, clothTypesResult] = await Promise.all([
+      db.product.findMany({
+        where: { isActive: true },
+        select: { category: true },
+        distinct: ["category"],
+      }),
+      db.product.findMany({
+        where: { isActive: true },
+        select: { clothType: true },
+        distinct: ["clothType"],
+      }),
+    ]);
+
+    // Extract just the values from the results
+    const categories = categoriesResult.map((p) => p.category);
+    const clothTypes = clothTypesResult.map((p) => p.clothType);
+
     return NextResponse.json({
-      categories: Object.values(Category),
-      clothTypes: Object.values(ClothType)
+      categories,
+      clothTypes,
     });
   } catch (error) {
     console.error("Error fetching product metadata:", error);
