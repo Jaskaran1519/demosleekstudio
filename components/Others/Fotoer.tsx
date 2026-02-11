@@ -2,7 +2,7 @@
 'use client';
 import Link from 'next/link';
 import Image from 'next/image';
-import { canelaFont, magerFont } from '@/app/fonts';
+import { magerFont } from '@/app/fonts';
 import { usePathname } from 'next/navigation';
 
 export default function Footer() {
@@ -71,11 +71,29 @@ export default function Footer() {
           </nav>
         </div>
 
-        {/* Bottom Large Text */}
-        <div className={`text-center md:text-left ${canelaFont.className}`}>
-          <h2 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-[120px] 2xl:text-[180px]  text-gray-900 leading-none tracking-tight break-words">
-            Sleek Studio
-          </h2>
+        {/* Bottom Large Text - Logo Image with golden mask */}
+        <div className="text-center">
+          <div
+            style={{
+              display: 'inline-block',
+              backgroundColor: '#dab188',
+              maskImage: 'url(/logo-text.png)',
+              WebkitMaskImage: 'url(/logo-text.png)',
+              maskSize: 'contain',
+              WebkitMaskSize: 'contain',
+              maskRepeat: 'no-repeat',
+              WebkitMaskRepeat: 'no-repeat',
+              maskPosition: 'center',
+              WebkitMaskPosition: 'center',
+            }}
+          >
+            <img
+              src="/logo-text.png"
+              alt="Sleek Studio"
+              className="h-[60px] sm:h-[80px] md:h-[90px] lg:h-[110px] xl:h-[140px] 2xl:h-[200px] w-auto"
+              style={{ visibility: 'hidden' }}
+            />
+          </div>
         </div>
 
         {/* Optional: If you want to add a small credit line at the very bottom */}

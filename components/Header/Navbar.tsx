@@ -4,14 +4,12 @@ import SmallDisplayButton from './MobileMenu/SmallDisplayButton';
 import RightSideNavbar from './RightSideNavbar';
 import { NavigationMenuDemo } from './NavigationMenuDemo';
 import { usePathname } from "next/navigation";
-import Image from 'next/image';
 import Link from 'next/link';
-import { logoFont, magerFont } from '@/app/fonts';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [visible, setVisible] = useState(true);
-  const [isPast100vh, setIsPast100vh] = useState(false);
+
   const lastScrollYRef = React.useRef(0);
   
   const pathname = usePathname();
@@ -34,13 +32,7 @@ const Navbar = () => {
       } else {
         setScrolled(false);
       }
-      
-      // Check if scrolled past 100vh
-      if (currentScrollY > window.innerHeight) {
-        setIsPast100vh(true);
-      } else {
-        setIsPast100vh(false);
-      }
+
       
       // Determine visibility based on scroll direction
       if (currentScrollY > lastScrollYRef.current && currentScrollY > 100) {
@@ -83,11 +75,29 @@ const Navbar = () => {
       <div className='flex justify-center w-1/3'>
         <Link 
           href='/' 
-          className={`flex items-center ${
-            pathname === '/' && !isPast100vh ? 'md:hidden' : 'block'
-          }`}
+          className="flex items-center"
         >
-          <h1 className={`text-lg md:text-2xl font-bold ${magerFont.className}`}>SLEEK STUDIO</h1>
+          <div
+            style={{
+              display: 'inline-block',
+              backgroundColor: '#dab188',
+              maskImage: 'url(/logo-text.png)',
+              WebkitMaskImage: 'url(/logo-text.png)',
+              maskSize: 'contain',
+              WebkitMaskSize: 'contain',
+              maskRepeat: 'no-repeat',
+              WebkitMaskRepeat: 'no-repeat',
+              maskPosition: 'center',
+              WebkitMaskPosition: 'center',
+            }}
+          >
+            <img
+              src="/logo-text.png"
+              alt="Sleek Studio"
+              className="h-[22px] md:h-[28px] w-auto"
+              style={{ visibility: 'hidden' }}
+            />
+          </div>
         </Link>
       </div>
       
