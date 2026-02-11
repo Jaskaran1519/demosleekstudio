@@ -86,7 +86,7 @@ export const authOptions: NextAuthOptions = {
       }
 
       if (token.role && session.user) {
-        session.user.role = token.role as "USER" | "ADMIN";
+        session.user.role = token.role as "USER" | "ADMIN" | "MANAGER";
       } else if (session.user) {
         // Default to USER role if not found
         session.user.role = "USER";

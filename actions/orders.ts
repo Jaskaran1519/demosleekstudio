@@ -66,9 +66,9 @@ export async function getOrderById(orderId: string) {
     }
 
     // Build the query based on user role
-    const isAdmin = user.role === "ADMIN";
-    const where = isAdmin
-      ? { id: orderId } // Admin can view any order
+    const isAdminOrManager = user.role === "ADMIN" || user.role === "MANAGER";
+    const where = isAdminOrManager
+      ? { id: orderId } // Admin/Manager can view any order
       : { id: orderId, userId: user.id }; // Regular users can only view their own orders
 
     const order = await db.order.findUnique({
@@ -86,8 +86,8 @@ export async function getOrderById(orderId: string) {
             },
           },
         },
-        // Include user information for admin view
-        ...(isAdmin && {
+        // Include user information for admin/manager view
+        ...(isAdminOrManager && {
           user: {
             select: {
               id: true,
